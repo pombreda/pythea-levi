@@ -1,0 +1,21 @@
+application: pythea-levi
+version: 1
+runtime: python
+api_version: 1
+
+inbound_services:
+- channel_presence
+- warmup
+
+handlers:
+- url: /css
+  static_dir: css
+
+- url: /js
+  static_dir: js
+
+- url: /.*
+  script: main.py
+
+builtins:
+- deferred: on
