@@ -1,5 +1,6 @@
 from __future__ import with_statement
 from google.appengine.dist import use_library
+
 use_library('django', '1.2')
 import os
 import logging
