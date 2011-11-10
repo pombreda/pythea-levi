@@ -165,7 +165,7 @@ class Register(webapp.RequestHandler):
             else:
                 new_user.set_password(self.request.get('password'))
                 new_user.put()
-                session['user'] = user
+                session['user'] = new_user
         else:
             self.response.out.write(f.is_valid())
             self.response.out.write(f.as_p())
