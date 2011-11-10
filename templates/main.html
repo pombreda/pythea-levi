@@ -20,9 +20,7 @@ $(document).ready(function () {
     <div id="menu"> 
      {% block menu %}
      <ul>
-       <li><a href="/vocab">vocab</a></li>
-       <li><a href="/variants">variants</a></li>
-       <li><a href="/soundex">soundex</a></li>
+       
      </ul>
      {% endblock %} 
     </div>
@@ -32,7 +30,7 @@ $(document).ready(function () {
       <div id="content-container"> 
         <div id="content"> 
           {% block content %}
-          Hier komt de inhoud
+          Selecteer een categorie.
           {% endblock %}            
         </div>
         <div id="sidebar"> 
@@ -54,7 +52,7 @@ $(document).ready(function () {
       {% endblock %}            
     </div>
     <div id="footer">
-      Hans Then: Pythea: Jubilee
+      {{ user.firstname }} {{ user.lastname }} : Pythea
     </div>
   </body>
 </html>

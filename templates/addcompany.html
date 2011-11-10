@@ -30,20 +30,10 @@
         <div id="content"> 
           {% block content %}
 
-<form action="/register" method="post">
+<form method="post">
 <fieldset>
-<legend>Persoonlijke gegevens</legend>
-<p><label for="firstname">Voornaam</label> <input type="text" name="firstname" id="firstname" /></p>
-<p><label for="lastname">Achternaam</label> <input type="text" name="lastname" id="lastname" /></p>
-<p><label for="street">Straat</label> <input type="text" name="street" id="street" /></p>
-<p><label for="zipcode">Postcode</label> <input type="text" name="zipcode" id="zipcode" /></p>
-<p><label for="city">Stad</label> <input type="text" name="city" id="city" /></p>
-<p><label for="telephone">Telefoon</label> <input type="text" name="telephone" id="telephone" /><br /></p>
-<p><label for="mobile">Mobiel</label> <input type="text" name="mobile" id="mobile" /><br /></p>
-<p><label for="e-mail">E-mail</label> <input type="text" name="e-mail" id="e-mail" /><br /></p>
-<p><label for="password">Wachtwoord</label> <input type="password" name="password" id="password" /><br /></p>
-<p><label for="password2">(Controle)</label> <input type="password" name="password2" id="password2" /><br /></p>
-</fieldset>
+<legend>Company Data</legend>
+{{ form.as_p }}
 <p class="submit"><input type="submit" value="Submit" /></p>
 </form>
 
