@@ -1,19 +1,16 @@
 from __future__ import with_statement
 from google.appengine.dist import use_library
-
 use_library('django', '1.2')
 import os
 import logging
 import cgi
 import datetime
 import urllib
-import wsgiref.handlers
 import csv
 import pickle
 import crypt
-
-from google.appengine.api.urlfetch import fetch
-
+from StringIO import StringIO
+import urlparse 
 import re
 
 from google.appengine.ext import db
@@ -21,10 +18,11 @@ from google.appengine.ext.db import polymodel
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.urlfetch import fetch
+import wsgiref.handlers
 
 from gaesessions import get_current_session
 
-from StringIO import StringIO
 from django.utils import simplejson
 #import webapp2 as webapp
 
@@ -71,9 +69,19 @@ class ClientForm(forms.ModelForm):
         model = Client
         exclude = ['display_name', '_class', 'password']
 
+class TopCategory(db.Model):
+    label = db.StringProperty()
+    
+    def __str__(self):
+        return self.label
+
+class TopCategoryForm(forms.ModelForm):
+    class Meta:
+        model = TopCategory
+
 class Category(db.Model):
     label = db.StringProperty()
-    category = db.SelfReferenceProperty()
+    topcategory = db.ReferenceProperty(TopCategory, collection_name='categories')
 
     def __str__(self):
         return self.label
@@ -132,7 +140,8 @@ class Main(webapp.RequestHandler):
             self.redirect('/login')
             return
 
-        vars = { 'categories': categories,
+        topcategories = TopCategory.all()
+        vars = { 'topcategories': topcategories,
                  'user': user }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'main.html')
         self.response.out.write(template.render(path, vars))
@@ -170,6 +179,7 @@ class Register(webapp.RequestHandler):
                 if session.is_active():
                     session.terminate()
                 session['user'] = new_user
+                self.redirect('/')
         else:
             self.response.out.write(f.is_valid())
             self.response.out.write(f.as_p())
@@ -225,6 +235,8 @@ class Creditors(webapp.RequestHandler):
         self.response.out.write(template.render(path, vars))
 
 class AddCompany(webapp.RequestHandler):
+    icon_re = re.compile(r'<link\s+rel=".*?icon"\s+href="(.*?)"', re.M | re.I)
+    base_re = re.compile(r'<base\s+href="(.*?)"', re.M | re.I)
     def get(self):
         form = CreditorForm(self.request)
         path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
@@ -234,7 +246,22 @@ class AddCompany(webapp.RequestHandler):
     def post(self):
         form = CreditorForm(self.request)
         if form.is_valid():
-            creditor = form.save(commit=True)
+            creditor = form.save(commit=False)
+            url = creditor.website
+            homepage = fetch(url)
+            base = self.base_re.search(homepage.content)
+            base = base.group(1) if base else url
+            icon = self.icon_re.search(homepage.content)
+            icon = icon.group(1) if icon else '/favicon.ico'
+            icon_url = urlparse.urljoin(base, icon)
+            creditor.icon = icon_url
+            if not creditor.email:
+                hostname = urlparse.urlparse(url).hostname
+                if hostname.startswith('www'):
+                    hostname = '.'.join(hostname.split('.')[1:])
+                creditor.email = 'info@' + hostname
+            self.response.out.write(creditor.email)
+            #self.redirect(self.request.url)
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
             vars = { 'form': form }
@@ -251,9 +278,24 @@ class AddCategory(webapp.RequestHandler):
         form = CategoryForm(self.request)
         if form.is_valid():
             category = form.save(commit=True)
+            self.redirect(self.request.url)
+        else:
             path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
             vars = { 'form': form }
             self.response.out.write(template.render(path, vars))
+
+class AddTopCategory(webapp.RequestHandler):
+    def get(self):
+        form = TopCategoryForm(self.request)
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
+        vars = { 'form': form }
+        self.response.out.write(template.render(path, vars))
+
+    def post(self):
+        form = TopCategoryForm(self.request)
+        if form.is_valid():
+            category = form.save(commit=True)
+            self.redirect(self.request.url)
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
             vars = { 'form': form }
@@ -280,6 +322,7 @@ application = webapp.WSGIApplication([
   (r'/crediteuren/(.*)', Creditors),
   (r'/addcompany', AddCompany),
   (r'/addcategory', AddCategory),
+  (r'/addtopcategory', AddTopCategory),
   (r'/categories', ShowCategories),
   (r'/reset', ResetPassword),
   (r'/show', ShowDebts),
