@@ -12,6 +12,7 @@ import crypt
 from StringIO import StringIO
 import urlparse 
 import re
+import decimal
 
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
@@ -19,6 +20,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.urlfetch import fetch
+from google.appengine.api import mail
 import wsgiref.handlers
 
 from gaesessions import get_current_session
@@ -46,7 +48,7 @@ class User(polymodel.PolyModel):
 # FIXME: An organisation can also be a Bailiff for the real creditor.
 # We need to be able to model this as well.
 class Organisation(polymodel.PolyModel):
-    display_name = db.TextProperty()
+    display_name = db.StringProperty()
     icon = db.LinkProperty()
     # Get it from website with either favicon.ico or from the homepage's head:
     # <link rel="shortcut icon" href="(.*?)" type=".*?" /?>
@@ -62,6 +64,21 @@ class Client(User):
     address = db.PostalAddressProperty()
     phone = db.PhoneNumberProperty()
     mobile = db.PhoneNumberProperty()
+    state = db.StringProperty(default="NEW") # One of NEW, COMPLETED, APPROVED, DONE 
+    approved = db.DateProperty()
+
+    def hasDebt(self, creditor):
+        for debt in self.debts:
+            if debt.creditor.key().id() == creditor.key().id():
+                return True
+
+    def complete(self):
+        self.state = "COMPLETED"
+        self.put()
+
+    def approve(self)
+        self.state = "APPROVED"
+        self.put()
 
 class ClientForm(forms.ModelForm):
     password = forms.StringProperty()
@@ -91,47 +108,41 @@ class CategoryForm(forms.ModelForm):
         model = Category
 
 class Creditor(Organisation):
-    category = db.ReferenceProperty(Category)
+    category = db.ReferenceProperty(Category, collection_name='creditors')
 
 class CreditorForm(forms.ModelForm):
     class Meta:
         model = Creditor
         exclude = ['display_name', '_class', 'icon']
 
+class DecimalProperty(db.Property):
+    data_type = decimal.Decimal
+
+    def get_value_for_datastore(self, model_instance):
+        return str(super(DecimalProperty, self).get_value_for_datastore(model_instance))
+
+    def make_value_from_datastore(self, value):
+        if value == None: return value
+        return decimal.Decimal(value).quantize(decimal.Decimal('0.01'))
+
+    def validate(self, value):
+        value = super(DecimalProperty, self).validate(value)
+        if value is None or isinstance(value, decimal.Decimal):
+            return value
+        elif isinstance(value, basestring):
+            return decimal.Decimal(value)
+        raise db.BadValueError("Property %s must be a Decimal or string." % self.name)
+
 class Debt(db.Model):
     creditor = db.ReferenceProperty(Creditor)
+    user = db.ReferenceProperty(Client, collection_name='debts')
     date = db.DateProperty()
-    registration = db.DateProperty()
-    amount = db.IntegerProperty() # Fixme: should create a Decimal property for this
+    registration = db.DateProperty(auto_now_add=True)
+    last_changed = db.DateProperty(auto_now=True)
+    confirmation = db.DateProperty()
+    amount = DecimalProperty(default=decimal.Decimal('0.00')) 
 
-categories = { 
-    'Wonen, electriciteit, gas, ...': [
-        'Electriciteit en gas',
-        'Huurschulden',
-        'Hypotheekschulden',
-        'Water'],
-    'Gezondheid': [
-        'Dokterskosten',
-        'Ziekenhuiskosten',
-        'Verzekeringen'],
-    'GSM, telefoon, internet, TV': [
-        'GSM',
-        'Telefoon',
-        'Internet',
-        'TV'],
-    'Leningen': [
-        'Consumentenkrediet',
-        'Credit card',
-        'Autolening',
-        'Verkoop op afbetaling'],
-    'Overig': [
-        'Boetes',
-        'Belastingen',
-        'Toeslagen',
-        'Kinderopvang',
-        'Deurwaarders'],
-}
-
+topcategories = TopCategory.all()
 class Main(webapp.RequestHandler):
     def get(self):
         session = get_current_session()
@@ -140,7 +151,6 @@ class Main(webapp.RequestHandler):
             self.redirect('/login')
             return
 
-        topcategories = TopCategory.all()
         vars = { 'topcategories': topcategories,
                  'user': user }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'main.html')
@@ -214,25 +224,37 @@ class Login(webapp.RequestHandler):
             logging.info("Error, probably user not found.")
             self.response.out.write(e)
 
-class EnterDebts(webapp.RequestHandler):
+class Approve(webapp.RequestHandler):
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'main.html')
-        self.response.out.write(template.render(path, vars))
-
-class Upload(webapp.RequestHandler):
-    def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'upload.html')
-        self.response.out.write(template.render(path, vars))
-
-class Authorize(webapp.RequestHandler):
-    def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'upload.html')
+        users = Users.all()
+        users.filter('status =', 'COMPLETED')
+        vars = { 'users' : users }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'approve.html')
         self.response.out.write(template.render(path, vars))
 
 class Creditors(webapp.RequestHandler):
-    def get(self, category):
+    def get(self, id):
+        session = get_current_session()
+        user = session.get('user')
+        category = Category.get_by_id(int(id))
+        creditors = category.creditors
+        vars = { 'topcategories': topcategories,
+                 'creditors': creditors,
+                 'user': user }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
         self.response.out.write(template.render(path, vars))
+ 
+    def post(self, action):
+        session = get_current_session()
+        user = session.get('user')
+        #keys = [ db.Key.from_path('Creditor', int(id)) for id in self.request.get_all('creditor') ]
+        ids = [ int(id) for id in self.request.get_all('creditor') ]
+        creditors = Creditor.get_by_id(ids)
+        for creditor in creditors:
+            if not user.hasDebt( creditor ):
+                debt = Debt(creditor=creditor, user=user, registration=datetime.date.today())
+                debt.put()
+        self.redirect('/debts')
 
 class AddCompany(webapp.RequestHandler):
     icon_re = re.compile(r'<link\s+rel=".*?icon"\s+href="(.*?)"', re.M | re.I)
@@ -247,10 +269,16 @@ class AddCompany(webapp.RequestHandler):
         form = CreditorForm(self.request)
         if form.is_valid():
             creditor = form.save(commit=False)
+            # Maybe I should place this code inside the Creditor class itself?
             url = creditor.website
             homepage = fetch(url)
             base = self.base_re.search(homepage.content)
-            base = base.group(1) if base else url
+            if base:
+                base = base.group(1)
+            elif homepage.final_url:
+                base = homepage.final_url
+            else:
+                base = url
             icon = self.icon_re.search(homepage.content)
             icon = icon.group(1) if icon else '/favicon.ico'
             icon_url = urlparse.urljoin(base, icon)
@@ -260,8 +288,12 @@ class AddCompany(webapp.RequestHandler):
                 if hostname.startswith('www'):
                     hostname = '.'.join(hostname.split('.')[1:])
                 creditor.email = 'info@' + hostname
-            self.response.out.write(creditor.email)
-            #self.redirect(self.request.url)
+            if not creditor.display_name:
+                hostname = urlparse.urlparse(url).hostname
+                name = hostname.split('.')[-2]
+                creditor.display_name = name
+            creditor.put()
+            self.redirect(self.request.url)
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
             vars = { 'form': form }
@@ -309,7 +341,45 @@ class ShowCategories(webapp.RequestHandler):
           
 class ShowDebts(webapp.RequestHandler):
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'upload.html')
+        session = get_current_session()
+        user = session.get('user')
+        vars = { 'topcategories': topcategories,
+                 'user': user, }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'debts.html')
+        self.response.out.write(template.render(path, vars))
+
+    def post(self):
+        session = get_current_session()
+        user = session.get('user')
+        if self.request.get('submit') == 'finish':
+            self.redirect('/finished')
+            mail.send_mail(sender="No reply <hans.then@gmail.com>",
+                           to="<h.then@pythea.nl>",
+                           subject="Dossier Entered",
+                           body="Leeg")
+            # Fixme, also mark that the user has finished data entry.
+            # And make sure that the initial e-mail is sent only once.
+            return
+
+        for debt in user.debts:
+            amount = decimal.Decimal(self.request.get(str(debt.key().id())))
+            if amount and debt.amount != amount:
+                debt.amount = amount
+                debt.put()
+                logging.info('Really different, write to database.')
+            else:
+                logging.info('Not really all that different, do not write to database.')
+            if not amount:
+                debt.delete()
+        
+        self.redirect('/debts')
+
+class Finished(webapp.RequestHandler):
+    def get(self):
+        session = get_current_session()
+        user = session.get('user')
+        vars = { 'user': user }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'finished.html')
         self.response.out.write(template.render(path, vars))
 
 application = webapp.WSGIApplication([
@@ -317,9 +387,10 @@ application = webapp.WSGIApplication([
   (r'/register', Register),
   (r'/login', Login),
   (r'/enter', EnterDebts),
-  (r'/upload', Upload),
   (r'/authorize', Authorize),
   (r'/crediteuren/(.*)', Creditors),
+  (r'/debts', ShowDebts),
+  (r'/finished', Finished),
   (r'/addcompany', AddCompany),
   (r'/addcategory', AddCategory),
   (r'/addtopcategory', AddTopCategory),
