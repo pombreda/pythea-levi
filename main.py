@@ -12,196 +12,235 @@ import crypt
 from StringIO import StringIO
 import urlparse 
 import re
-import decimal
 
-from google.appengine.ext import db
-from google.appengine.ext.db import polymodel
+#from google.appengine.ext.db import polymodel
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.urlfetch import fetch
 from google.appengine.api import mail
+from google.appengine.ext import db
 import wsgiref.handlers
 
 from gaesessions import get_current_session
 
 from django.utils import simplejson
-#import webapp2 as webapp
 
-from google.appengine.ext.db import djangoforms as forms
+import models
+import forms
 
-class User(polymodel.PolyModel):
-    userid = db.StringProperty()
-    email = db.EmailProperty()
-    display_name = db.TextProperty()
-    password = db.ByteStringProperty()
-    
-    def set_password(self, password):
-        self.password = crypt.crypt(password, os.urandom(2))
+class BaseHandler(webapp.RequestHandler):
+    def get_user(self):
+        try:
+            return get_current_session()['user']
+        except KeyError:
+            return None
 
-    def authenticate(self, password):
-        return crypt.crypt(password, self.password) == self.password
+    user = property(get_user)
 
-# FIXME: Organisation also needs to be scoped to 
-# a zipcode. E.g. woonbron delfshaven has a different mail address
-# than woonbron ijsselmonde.
-# FIXME: An organisation can also be a Bailiff for the real creditor.
-# We need to be able to model this as well.
-class Organisation(polymodel.PolyModel):
-    display_name = db.StringProperty()
-    icon = db.LinkProperty()
-    # Get it from website with either favicon.ico or from the homepage's head:
-    # <link rel="shortcut icon" href="(.*?)" type=".*?" /?>
-    website = db.LinkProperty()
-    email = db.EmailProperty()
-        
-class SocialWorker(User):
-    organisation = db.ReferenceProperty(Organisation)
-
-class Client(User):
-    firstname = db.StringProperty()
-    lastname = db.StringProperty()
-    address = db.PostalAddressProperty()
-    phone = db.PhoneNumberProperty()
-    mobile = db.PhoneNumberProperty()
-    state = db.StringProperty(default="NEW") # One of NEW, COMPLETED, APPROVED, DONE 
-    approved = db.DateProperty()
-
-    def hasDebt(self, creditor):
-        for debt in self.debts:
-            if debt.creditor.key().id() == creditor.key().id():
-                return True
-
-    def complete(self):
-        self.state = "COMPLETED"
-        self.put()
-
-    def approve(self)
-        self.state = "APPROVED"
-        self.put()
-
-class ClientForm(forms.ModelForm):
-    password = forms.StringProperty()
-    class Meta:
-        model = Client
-        exclude = ['display_name', '_class', 'password']
-
-class TopCategory(db.Model):
-    label = db.StringProperty()
-    
-    def __str__(self):
-        return self.label
-
-class TopCategoryForm(forms.ModelForm):
-    class Meta:
-        model = TopCategory
-
-class Category(db.Model):
-    label = db.StringProperty()
-    topcategory = db.ReferenceProperty(TopCategory, collection_name='categories')
-
-    def __str__(self):
-        return self.label
-
-class CategoryForm(forms.ModelForm):
-    class Meta:
-        model = Category
-
-class Creditor(Organisation):
-    category = db.ReferenceProperty(Category, collection_name='creditors')
-
-class CreditorForm(forms.ModelForm):
-    class Meta:
-        model = Creditor
-        exclude = ['display_name', '_class', 'icon']
-
-class DecimalProperty(db.Property):
-    data_type = decimal.Decimal
-
-    def get_value_for_datastore(self, model_instance):
-        return str(super(DecimalProperty, self).get_value_for_datastore(model_instance))
-
-    def make_value_from_datastore(self, value):
-        if value == None: return value
-        return decimal.Decimal(value).quantize(decimal.Decimal('0.01'))
-
-    def validate(self, value):
-        value = super(DecimalProperty, self).validate(value)
-        if value is None or isinstance(value, decimal.Decimal):
-            return value
-        elif isinstance(value, basestring):
-            return decimal.Decimal(value)
-        raise db.BadValueError("Property %s must be a Decimal or string." % self.name)
-
-class Debt(db.Model):
-    creditor = db.ReferenceProperty(Creditor)
-    user = db.ReferenceProperty(Client, collection_name='debts')
-    date = db.DateProperty()
-    registration = db.DateProperty(auto_now_add=True)
-    last_changed = db.DateProperty(auto_now=True)
-    confirmation = db.DateProperty()
-    amount = DecimalProperty(default=decimal.Decimal('0.00')) 
-
-topcategories = TopCategory.all()
-class Main(webapp.RequestHandler):
+class Main(BaseHandler):
     def get(self):
-        session = get_current_session()
-        user = session.get('user')
+        user = self.user
         if not user:
             self.redirect('/login')
             return
 
-        vars = { 'topcategories': topcategories,
+        vars = { 
                  'user': user }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'main.html')
         self.response.out.write(template.render(path, vars))
 
-class Register(webapp.RequestHandler):
+
+class RegisterClient(BaseHandler):
     def get(self):
-        f = ClientForm(self.request)
-        self.response.out.write('<form method="post">')
-        self.response.out.write(f.as_p())
-        self.response.out.write('<p>Password: <input type="password" name="password" id="password"></p>')
-        self.response.out.write('<p>Password (controle): <input type="password" name="password2" id="password2"></p>')
-        self.response.out.write('<input type="submit">')
-        self.response.out.write('</form>')
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'register.html')
-        #self.response.out.write(template.render(path, vars))
+        form = forms.ClientForm()
+        form.title = 'Registreer'
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+        vars = { 'forms': [form] , 'title': 'Registreer'}
+        self.response.out.write(template.render(path, vars))
 
     def post(self):
         # Read form variables and put the new user in the database
-        f = ClientForm(self.request)
-        if f.is_valid():
-            #self.response.out.write(dir(f))
-            new_user = f.save(commit=False)
-            new_user._key_name = self.request.get('userid')
-            # TODO: check
-            # TODO: How can I add errors to a form?
-            password1 = self.request.get('password')
-            password2 = self.request.get('password2')
-            if password1 != password2:
-                print "Error: passwords do not match"
-                print "Redisplay the form"
-            else:
-                new_user.set_password(self.request.get('password'))
-                new_user.put()
-                session = get_current_session()
-                if session.is_active():
-                    session.terminate()
-                session['user'] = new_user
-                self.redirect('/')
+        form = forms.ClientForm(self.request.POST)
+        if form.is_valid():
+            new_user = form.save(commit=False)
+            new_user.set_password(form.cleaned_data['password1'])
+            new_user.put()
+            session = get_current_session()
+            if session.is_active():
+                session.terminate()
+            session['user'] = new_user
+            self.redirect('/client/contact')
         else:
-            self.response.out.write(f.is_valid())
-            self.response.out.write(f.as_p())
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+            vars = { 'forms': [form], 'title': 'Registreer'}
+            self.response.out.write(template.render(path, vars))
 
-class ResetPassword(webapp.RequestHandler):
+
+class RegisterSocialWork(BaseHandler):
+    def get(self):
+        form1 = forms.SocialWorkForm(prefix='f1')
+        form2 = forms.SocialWorkerForm(prefix='f2')
+        form1.title = 'Organisatie'
+        form2.title = 'Contactpersoon'
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+        vars = { 'forms': [form1, form2] , 'title': 'Registreer Hulpverleningsorganisatie'}
+        self.response.out.write(template.render(path, vars))
+
+    def post(self):
+        # Read form variables and put the new user in the database
+        logging.info(self.request.arguments())
+        photo = self.request.get('f2-photo')
+        form1 = forms.SocialWorkForm(self.request.POST, prefix='f1')
+        form2 = forms.SocialWorkerForm(self.request.POST, prefix='f2')
+        form1.title = 'Organisatie'
+        form2.title = 'Contactpersoon'
+        if form1.is_valid():
+            organisation = form1.save(commit=False)
+            organisation.put()
+            the_user = form2.save(commit=False)
+            the_user.set_password(form2.cleaned_data['password1'])
+            the_user.organisation = organisation
+            # Quick fix for Blobs not working in djangoforms
+            the_user.photo = db.Blob(photo)
+            the_user.put()
+            session = get_current_session()
+            if session.is_active():
+                session.terminate()
+            session['user'] = the_user
+            self.redirect('/organisation/employees')
+        else:
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+            vars = { 'forms': [form1, form2] , 'title': 'Registreer Hulpverleningsorganisatie'}
+            self.response.out.write(template.render(path, vars))
+
+
+class ListEmployees(BaseHandler):
+    def get(self):
+        user = self.user
+        organisation = user.organisation
+#        employees = [ employee for employee in organisation.employees if employee.key != user.key ]
+        employees = organisation.employees
+
+        vars = { 'user': user, 'organisation': organisation, 'employees': employees }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'listemployees.html')
+        self.response.out.write(template.render(path, vars))
+
+    def post(self):
+        action = self.request.get('action')
+        if action == 'Create':
+            self.redirect('/organisation/employees/new')
+        elif action == 'Delete':
+            logging.exception('FIXME: employee/deletion not implemented')
+            self.redirect('/organisation/employees')
+        else:
+            raise Exception('Invalid action %s' % action)
+
+
+class Photo(BaseHandler):
+    def get(self, key):
+        employee = models.SocialWorker.get(key)
+        if (employee and employee.photo):
+            self.response.headers['Content-Type'] = 'image/jpeg'
+            self.response.out.write(employee.photo)
+        else:
+            # TODO:
+            self.redirect('/static/noimage.jpg')
+
+class AddEmployee(BaseHandler):
+    def get(self, key=None):
+        user = self.user
+        organisation = user.organisation
+#        if key:
+#            employee = models.SocialWorker.get(key)
+#            form = forms.SocialWorkerForm(instance=employee)	
+#        else:
+        form = forms.SocialWorkerForm()
+        vars = { 'forms': [form] }
+
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+        self.response.out.write(template.render(path, vars))
+
+    def post(self, key=None):
+        # Read form variables and put the new user in the database
+        user = self.user
+        organisation = user.organisation
+        if key:
+            instance = models.SocialWorker.get(key)
+            form = forms.SocialWorkerForm(self.request.POST, instance=instance)
+        else:
+            form = forms.SocialWorkerForm(self.request.POST)
+            
+        photo = self.request.get('photo')
+        if form.is_valid():
+            employee = form.save(commit=False)
+            # FIXME: this password code can happen in the form class
+            employee.set_password(form.cleaned_data['password1']) 
+            employee.organisation = organisation
+            try:
+                employee.photo = db.Blob(photo)
+            except TypeError, e:
+                pass #Ignore when no photo is set.
+
+            employee.put()
+            self.redirect('/organisation/employees')
+        else:
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+            vars = { 'forms': [form], 'title': 'Registreer'}
+            self.response.out.write(template.render(path, vars))
+
+
+class SelectZipcodes(BaseHandler):
+    """TODO:"""
+    def get(self):
+        session = get_current_session()
+        user = session.get('user')
+        vars = { 'user': user }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'selectzipcodes.html')
+        self.response.out.write(template.render(path, vars))
+
+    def post(self):
+        pass
+        
+
+class AddContact(BaseHandler):
+    def get(self):
+        session = get_current_session()
+        user = session.get('user')
+        zipcode = user.address
+        insts = []
+        for i in models.SocialWork.all():
+            if i.accepts(zipcode):
+                insts.append(i)
+        vars = { 'user': user,
+                 'organisations': insts, 
+                 'title': 'Met wie heeft u gesproken?' }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcontact.html')
+        self.response.out.write(template.render(path, vars))
+                
+    def post(self):
+        key = self.request.get('selected')
+        session = get_current_session()
+        user = session.get('user')
+        contact = models.SocialWorker.get(key)
+        user.contact = contact
+        user.put()
+
+
+class Todo(BaseHandler):
+    def get(self):
+        self.response.out.write("TODO: URL is valid, but not implemented")
+
+
+class ResetPassword(BaseHandler):
     def get(self):
         # TODO: generate a new password:
         #   Communicate this via SMS, e-mail or account manager.
         path = os.path.join(os.path.dirname(__file__), 'templates', 'index.html')
         self.response.out.write(template.render(path, vars))
 
-class Login(webapp.RequestHandler):
+
+class Login(BaseHandler):
     def get(self):
         path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
         self.response.out.write(template.render(path, vars))
@@ -214,59 +253,86 @@ class Login(webapp.RequestHandler):
         if session.is_active():
             session.terminate()
         try:
-            user = User.get_by_key_name(userid)
+            user = models.User.get_by_key_name(userid)
             if not user.authenticate(passwd):
                 self.response.out.write('Invalid password')
             else:
                 self.response.out.write('Password okay, you are now logged in')
+                self.response.out.write('<p><a href="/debts">Klik hier om verder te gaan</a>')
                 session['user'] = user
         except Exception, e:
             logging.info("Error, probably user not found.")
             self.response.out.write(e)
 
-class Approve(webapp.RequestHandler):
+
+class ListApprovals(BaseHandler):
     def get(self):
-        users = Users.all()
-        users.filter('status =', 'COMPLETED')
-        vars = { 'users' : users }
+        clients = models.Client.all()
+        clients.filter('state =', 'COMPLETED')
+        vars = { 'clients' : clients }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'listapprove.html')
+        self.response.out.write(template.render(path, vars))
+
+
+class Approve(BaseHandler):
+    def get(self, client):
+        client = models.Client.get_by_key_name(client)
+        vars = { 'client' : client }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'approve.html')
         self.response.out.write(template.render(path, vars))
 
-class Creditors(webapp.RequestHandler):
-    def get(self, id):
+    def post(self, client):
+        client = models.Client.get_by_key_name(client)
+        for debt in client.debts:
+            # send mail to the creditor (or the Bailiff for this creditor)
+            pass
+        vars = { 'client' : client }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'approve.html')
+        self.response.out.write(template.render(path, vars))
+
+
+class SelectCreditors(BaseHandler):
+    def get(self):
         session = get_current_session()
         user = session.get('user')
-        category = Category.get_by_id(int(id))
-        creditors = category.creditors
-        vars = { 'topcategories': topcategories,
+        #category = models.Category.get_by_id(int(id))
+        creditors = list(models.Creditor.all())
+        creditors.reverse()
+        for creditor in creditors:
+            creditor.selected = user.hasCreditor(creditor)
+        vars = { 
                  'creditors': creditors,
                  'user': user }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
         self.response.out.write(template.render(path, vars))
  
-    def post(self, action):
+    def post(self):
+        # FIXME: does not uncheck creditors that have been "unselected"
         session = get_current_session()
         user = session.get('user')
         #keys = [ db.Key.from_path('Creditor', int(id)) for id in self.request.get_all('creditor') ]
-        ids = [ int(id) for id in self.request.get_all('creditor') ]
-        creditors = Creditor.get_by_id(ids)
+        selected_ids = [ int(id) for id in self.request.get_all('selected') ]
+        visible_ids = [ int(id) for id in self.request.get_all('visible') ]
+        creditors = models.Creditor.get_by_id(visible_ids)
         for creditor in creditors:
-            if not user.hasDebt( creditor ):
-                debt = Debt(creditor=creditor, user=user, registration=datetime.date.today())
-                debt.put()
-        self.redirect('/debts')
+            if creditor.key().id() in selected_ids:
+                user.addCreditor(creditor)
+            else:
+                user.removeCreditor(creditor)
+        self.redirect('/client/creditors')
 
-class AddCompany(webapp.RequestHandler):
+
+class AddCompany(BaseHandler):
     icon_re = re.compile(r'<link\s+rel=".*?icon"\s+href="(.*?)"', re.M | re.I)
     base_re = re.compile(r'<base\s+href="(.*?)"', re.M | re.I)
     def get(self):
-        form = CreditorForm(self.request)
+        form = forms.CreditorForm(self.request.POST)
         path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
         vars = { 'form': form }
         self.response.out.write(template.render(path, vars))
 
     def post(self):
-        form = CreditorForm(self.request)
+        form = forms.CreditorForm(self.request.POST)
         if form.is_valid():
             creditor = form.save(commit=False)
             # Maybe I should place this code inside the Creditor class itself?
@@ -299,15 +365,16 @@ class AddCompany(webapp.RequestHandler):
             vars = { 'form': form }
             self.response.out.write(template.render(path, vars))
 
-class AddCategory(webapp.RequestHandler):
+
+class AddCategory(BaseHandler):
     def get(self):
-        form = CategoryForm(self.request)
+        form = forms.CategoryForm(self.request)
         path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
         vars = { 'form': form }
         self.response.out.write(template.render(path, vars))
 
     def post(self):
-        form = CategoryForm(self.request)
+        form = forms.CategoryForm(self.request)
         if form.is_valid():
             category = form.save(commit=True)
             self.redirect(self.request.url)
@@ -316,15 +383,16 @@ class AddCategory(webapp.RequestHandler):
             vars = { 'form': form }
             self.response.out.write(template.render(path, vars))
 
-class AddTopCategory(webapp.RequestHandler):
+
+class AddTopCategory(BaseHandler):
     def get(self):
-        form = TopCategoryForm(self.request)
+#        form = forms.TopCategoryForm(self.request)
         path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
         vars = { 'form': form }
         self.response.out.write(template.render(path, vars))
 
     def post(self):
-        form = TopCategoryForm(self.request)
+#        form = forms.TopCategoryForm(self.request)
         if form.is_valid():
             category = form.save(commit=True)
             self.redirect(self.request.url)
@@ -333,48 +401,51 @@ class AddTopCategory(webapp.RequestHandler):
             vars = { 'form': form }
             self.response.out.write(template.render(path, vars))
 
-class ShowCategories(webapp.RequestHandler):
+
+class ShowCategories(BaseHandler):
     def get(self):
          categories = Category.all()
          for category in categories:
              self.response.out.write(category.label + '<br>')
+
           
-class ShowDebts(webapp.RequestHandler):
+class EnterCreditors(BaseHandler):
     def get(self):
         session = get_current_session()
         user = session.get('user')
-        vars = { 'topcategories': topcategories,
+        vars = { 
                  'user': user, }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'debts.html')
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'clientcreditors.html')
         self.response.out.write(template.render(path, vars))
 
     def post(self):
         session = get_current_session()
         user = session.get('user')
+        for creditor in user.creditors:
+            amount = decimal.Decimal(self.request.get(str(creditor.key().id())))
+            if creditor.estimated_amount != amount:
+                creditor_estimated.amount = amount
+                creditor.put()
+                logging.info('Really different, write to database.')
+            else:
+                logging.info('Not really all that different, do not write to database.')
+        
         if self.request.get('submit') == 'finish':
+            user.complete()
             self.redirect('/finished')
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
                            to="<h.then@pythea.nl>",
                            subject="Dossier Entered",
-                           body="Leeg")
+                           body="Dossier is toegevoegd voor %s %s" % (user.firstname, user.lastname))
+
             # Fixme, also mark that the user has finished data entry.
             # And make sure that the initial e-mail is sent only once.
             return
-
-        for debt in user.debts:
-            amount = decimal.Decimal(self.request.get(str(debt.key().id())))
-            if amount and debt.amount != amount:
-                debt.amount = amount
-                debt.put()
-                logging.info('Really different, write to database.')
-            else:
-                logging.info('Not really all that different, do not write to database.')
-            if not amount:
-                debt.delete()
         
         self.redirect('/debts')
 
-class Finished(webapp.RequestHandler):
+
+class Finished(BaseHandler):
     def get(self):
         session = get_current_session()
         user = session.get('user')
@@ -384,19 +455,26 @@ class Finished(webapp.RequestHandler):
 
 application = webapp.WSGIApplication([
   (r'/', Main),
-  (r'/register', Register),
+  (r'/client/new', RegisterClient),
+  (r'/client/contact', AddContact),
+  (r'/client/creditors', SelectCreditors),
+  (r'/client/debts', Todo),
+  (r'/organisation/new', RegisterSocialWork),
+  (r'/organisation/employees', ListEmployees),
+  (r'/organisation/employees/new', AddEmployee),
+  (r'/organisation/employees/edit/(.*)', AddEmployee),
+  (r'/employee/photo/(.*)', Photo),
+  (r'/organisation/zipcodes', SelectZipcodes),
   (r'/login', Login),
-  (r'/enter', EnterDebts),
-  (r'/authorize', Authorize),
-  (r'/crediteuren/(.*)', Creditors),
-  (r'/debts', ShowDebts),
+  (r'/worker/approve', ListApprovals),
+  (r'/worker/approve/(.*)', Approve),
+  (r'/crediteuren/(.*)', SelectCreditors),
   (r'/finished', Finished),
-  (r'/addcompany', AddCompany),
-  (r'/addcategory', AddCategory),
-  (r'/addtopcategory', AddTopCategory),
-  (r'/categories', ShowCategories),
+  (r'/company/new', AddCompany),
+  (r'/category/new', AddCategory),
+#  (r'/addemployees', AddEmployees),
+  (r'/category/list', ShowCategories),
   (r'/reset', ResetPassword),
-  (r'/show', ShowDebts),
 ], debug=True)
 
 def main():

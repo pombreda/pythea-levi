@@ -40,7 +40,7 @@ $(document).ready(function () {
           <a class="topcategory"> {{ topcategory.label }} 
               <div>
               {% for sub in topcategory.categories %}
-              <a class="subcategory" href="/crediteuren/{{sub.key.id_or_name}}"> {{ sub.label }} </a><input type="checkbox" value="sub"><br>
+              <a class="subcategory" href="/crediteuren/{{sub.key.id_or_name}}"> {{ sub.label }} </a><br>
               {% endfor %}
               </div>
           </a>

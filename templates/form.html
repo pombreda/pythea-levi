@@ -17,9 +17,7 @@
     <div id="menu"> 
      {% block menu %}
      <ul>
-       <li><a href="/vocab">vocab</a></li>
-       <li><a href="/variants">variants</a></li>
-       <li><a href="/soundex">soundex</a></li>
+       <li><a href="/"> {{user.firstname}} {{user.lastname }}</a></li>
      </ul>
      {% endblock %} 
     </div>
@@ -30,10 +28,14 @@
         <div id="content"> 
           {% block content %}
 
-<form method="post">
-<fieldset>
-<legend>Data</legend>
-{{ form.as_p }}
+<form method="post" enctype="multipart/form-data">
+
+<table>
+{% for form in forms %}
+    <tr><td colspan=2>{{form.title}}</td></tr>
+    {{ form.as_table }}
+{% endfor %}
+</table>
 <p class="submit"><input type="submit" value="Submit" /></p>
 </form>
 
