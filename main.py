@@ -20,6 +20,8 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.urlfetch import fetch
 from google.appengine.api import mail
 from google.appengine.ext import db
+from google.appengine.api import images
+
 import wsgiref.handlers
 
 from gaesessions import get_current_session
@@ -51,7 +53,7 @@ class Main(BaseHandler):
         self.response.out.write(template.render(path, vars))
 
 
-class RegisterClient(BaseHandler):
+class ClientNew(BaseHandler):
     def get(self):
         form = forms.ClientForm()
         form.title = 'Registreer'
@@ -76,8 +78,93 @@ class RegisterClient(BaseHandler):
             vars = { 'forms': [form], 'title': 'Registreer'}
             self.response.out.write(template.render(path, vars))
 
+class ClientContact(BaseHandler):
+    def get(self):
+        user = self.user
+        zipcode = user.zipcode
+        orgs = [ i for i in models.SocialWork.all() if i.accepts(zipcode)]
+        vars = { 'user': user,
+                 'organisations': orgs, 
+                 'title': 'Met wie heeft u gesproken?' }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcontact.html')
+        self.response.out.write(template.render(path, vars))
+                
+    def post(self):
+        key = self.request.get('selected')
+        user = self.user
+        contact = models.SocialWorker.get(key)
+        user.contact = contact
+        user.put()
+        self.redirect('/client/creditors')
 
-class RegisterSocialWork(BaseHandler):
+
+class ClientSelectCreditors(BaseHandler):
+    def get(self):
+        user = self.user
+        creditors = list(models.Creditor.all())
+        creditors.reverse()
+        for creditor in creditors:
+            creditor.selected = user.hasCreditor(creditor)
+        vars = { 
+                 'creditors': creditors,
+                 'user': user }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
+        self.response.out.write(template.render(path, vars))
+ 
+    def post(self):
+        # FIXME: does not uncheck creditors that have been "unselected"
+        user = self.user
+        #keys = [ db.Key.from_path('Creditor', int(id)) for id in self.request.get_all('creditor') ]
+        selected_ids = [ int(id) for id in self.request.get_all('selected') ]
+        visible_ids = [ int(id) for id in self.request.get_all('visible') ]
+        creditors = models.Creditor.get_by_id(visible_ids)
+        for creditor in creditors:
+            if creditor.key().id() in selected_ids:
+                user.addCreditor(creditor)
+            else:
+                user.removeCreditor(creditor)
+        action = self.request.get('action')
+        if action == 'opslaan':
+            self.redirect('/client/creditors')
+        else:
+            self.redirect('/client/validate')
+
+class ClientValidate(BaseHandler):
+    def get(self):
+        user = self.user
+        vars = { 
+                 'user': user }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'clientvalidate.html')
+        self.response.out.write(template.render(path, vars))
+
+    def post(self):
+        action = self.request.get('action')
+        if action == 'correct':
+            user = self.user
+            user.complete()
+            mail.send_mail(sender="No reply <hans.then@gmail.com>",
+                           to="<h.then@pythea.nl>",
+                           subject="Dossier Entered",
+                           body="Dossier is toegevoegd voor %s %s" % (user.first_name, user.last_name))
+
+            # Fixme, also mark that the user has finished data entry.
+            # And make sure that the initial e-mail is sent only once.
+        
+            self.redirect('/client/submitted')
+        else:
+            self.redirect('/client/creditors')
+       
+
+class ClientSubmitted(BaseHandler):
+    def get(self):
+        session = get_current_session()
+        user = session.get('user')
+        vars = { 'user': user }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'finished.html')
+        self.response.out.write(template.render(path, vars))
+
+
+class OrganisationNew(BaseHandler):
     def get(self):
         form1 = forms.SocialWorkForm(prefix='f1')
         form2 = forms.SocialWorkerForm(prefix='f2')
@@ -101,8 +188,20 @@ class RegisterSocialWork(BaseHandler):
             the_user = form2.save(commit=False)
             the_user.set_password(form2.cleaned_data['password1'])
             the_user.organisation = organisation
-            # Quick fix for Blobs not working in djangoforms
-            the_user.photo = db.Blob(photo)
+            # FIXME: we should have an intermediate step to
+            # retrieve the crop data for the image.
+            # Size should be approximately 80x80 pixels
+                 
+            if photo:
+                # Resize the image
+                image = images.Image(image_data=photo)
+                image.crop( 0.0 / image.width,
+                            0.0 / image.height,
+                           80.0 / image.width,
+                           80.0 / image.width )
+                photo = image.execute_transforms(image.format)
+                the_user.photo = db.Blob(photo)
+
             the_user.put()
             session = get_current_session()
             if session.is_active():
@@ -115,7 +214,7 @@ class RegisterSocialWork(BaseHandler):
             self.response.out.write(template.render(path, vars))
 
 
-class ListEmployees(BaseHandler):
+class OrganisationEmployeesList(BaseHandler):
     def get(self):
         user = self.user
         organisation = user.organisation
@@ -145,17 +244,17 @@ class Photo(BaseHandler):
             self.response.out.write(employee.photo)
         else:
             # TODO:
-            self.redirect('/static/noimage.jpg')
+            self.redirect('/images/nopassphoto.gif')
 
-class AddEmployee(BaseHandler):
+class OrganisationEditEmployee(BaseHandler):
     def get(self, key=None):
         user = self.user
         organisation = user.organisation
-#        if key:
-#            employee = models.SocialWorker.get(key)
-#            form = forms.SocialWorkerForm(instance=employee)	
-#        else:
-        form = forms.SocialWorkerForm()
+        if key:
+            employee = models.SocialWorker.get(key)
+            form = forms.SocialWorkerForm(instance=employee)	
+        else:
+            form = forms.SocialWorkerForm()
         vars = { 'forms': [form] }
 
         path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
@@ -178,19 +277,26 @@ class AddEmployee(BaseHandler):
             employee.set_password(form.cleaned_data['password1']) 
             employee.organisation = organisation
             try:
+                image = images.Image(image_data=photo)
                 employee.photo = db.Blob(photo)
             except TypeError, e:
                 pass #Ignore when no photo is set.
 
             employee.put()
             self.redirect('/organisation/employees')
+            """
+            if image.height != 80 and image.width != 80:
+                self.redirect('/organisation/employees/resize/%s' % employee.key())
+            else:
+                self.redirect('/organisation/employees')
+            """
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             vars = { 'forms': [form], 'title': 'Registreer'}
             self.response.out.write(template.render(path, vars))
 
 
-class SelectZipcodes(BaseHandler):
+class OrganisationZipcodes(BaseHandler):
     """TODO:"""
     def get(self):
         session = get_current_session()
@@ -202,30 +308,6 @@ class SelectZipcodes(BaseHandler):
     def post(self):
         pass
         
-
-class AddContact(BaseHandler):
-    def get(self):
-        session = get_current_session()
-        user = session.get('user')
-        zipcode = user.address
-        insts = []
-        for i in models.SocialWork.all():
-            if i.accepts(zipcode):
-                insts.append(i)
-        vars = { 'user': user,
-                 'organisations': insts, 
-                 'title': 'Met wie heeft u gesproken?' }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcontact.html')
-        self.response.out.write(template.render(path, vars))
-                
-    def post(self):
-        key = self.request.get('selected')
-        session = get_current_session()
-        user = session.get('user')
-        contact = models.SocialWorker.get(key)
-        user.contact = contact
-        user.put()
-
 
 class Todo(BaseHandler):
     def get(self):
@@ -248,7 +330,6 @@ class Login(BaseHandler):
     def post(self):
         userid = self.request.get('userid')
         passwd = self.request.get('password')
-        self.response.out.write(userid)
         session = get_current_session()
         if session.is_active():
             session.terminate()
@@ -265,7 +346,7 @@ class Login(BaseHandler):
             self.response.out.write(e)
 
 
-class ListApprovals(BaseHandler):
+class EmployeeApprovals(BaseHandler):
     def get(self):
         clients = models.Client.all()
         clients.filter('state =', 'COMPLETED')
@@ -274,7 +355,7 @@ class ListApprovals(BaseHandler):
         self.response.out.write(template.render(path, vars))
 
 
-class Approve(BaseHandler):
+class EmployeeApprove(BaseHandler):
     def get(self, client):
         client = models.Client.get_by_key_name(client)
         vars = { 'client' : client }
@@ -291,44 +372,17 @@ class Approve(BaseHandler):
         self.response.out.write(template.render(path, vars))
 
 
-class SelectCreditors(BaseHandler):
-    def get(self):
-        session = get_current_session()
-        user = session.get('user')
-        #category = models.Category.get_by_id(int(id))
-        creditors = list(models.Creditor.all())
-        creditors.reverse()
-        for creditor in creditors:
-            creditor.selected = user.hasCreditor(creditor)
-        vars = { 
-                 'creditors': creditors,
-                 'user': user }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
-        self.response.out.write(template.render(path, vars))
- 
-    def post(self):
-        # FIXME: does not uncheck creditors that have been "unselected"
-        session = get_current_session()
-        user = session.get('user')
-        #keys = [ db.Key.from_path('Creditor', int(id)) for id in self.request.get_all('creditor') ]
-        selected_ids = [ int(id) for id in self.request.get_all('selected') ]
-        visible_ids = [ int(id) for id in self.request.get_all('visible') ]
-        creditors = models.Creditor.get_by_id(visible_ids)
-        for creditor in creditors:
-            if creditor.key().id() in selected_ids:
-                user.addCreditor(creditor)
-            else:
-                user.removeCreditor(creditor)
-        self.redirect('/client/creditors')
-
 
 class AddCompany(BaseHandler):
     icon_re = re.compile(r'<link\s+rel=".*?icon"\s+href="(.*?)"', re.M | re.I)
     base_re = re.compile(r'<base\s+href="(.*?)"', re.M | re.I)
+    keywords_re = re.compile(r'<meta\s+name="keywords"\s+content=["\'](.*?)["\']')
     def get(self):
         form = forms.CreditorForm(self.request.POST)
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
-        vars = { 'form': form }
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
+        #vars = { 'form': form }
+        vars = { 'forms': [form] }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         self.response.out.write(template.render(path, vars))
 
     def post(self):
@@ -342,12 +396,19 @@ class AddCompany(BaseHandler):
             if base:
                 base = base.group(1)
             elif homepage.final_url:
-                base = homepage.final_url
+                if homepage.final_url.startswith('/'):
+                    base = url + homepage.final_url
+                else:
+                    base = homepage.final_url
             else:
                 base = url
             icon = self.icon_re.search(homepage.content)
             icon = icon.group(1) if icon else '/favicon.ico'
             icon_url = urlparse.urljoin(base, icon)
+            keywords = self.keywords_re.search(homepage.content)
+            keywords = keywords.group(1) if keywords else ""
+            keywords = keywords.split(',')
+            creditor.tags = keywords
             creditor.icon = icon_url
             if not creditor.email:
                 hostname = urlparse.urlparse(url).hostname
@@ -361,16 +422,19 @@ class AddCompany(BaseHandler):
             creditor.put()
             self.redirect(self.request.url)
         else:
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
-            vars = { 'form': form }
+            # path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
+            # vars = { 'form': form }
+            # self.response.out.write(template.render(path, vars))
+            vars = { 'forms': [form] }
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             self.response.out.write(template.render(path, vars))
 
 
 class AddCategory(BaseHandler):
     def get(self):
         form = forms.CategoryForm(self.request)
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
-        vars = { 'form': form }
+        vars = { 'forms': [form] }
+        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         self.response.out.write(template.render(path, vars))
 
     def post(self):
@@ -379,27 +443,12 @@ class AddCategory(BaseHandler):
             category = form.save(commit=True)
             self.redirect(self.request.url)
         else:
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
-            vars = { 'form': form }
+            vars = { 'forms': [form] }
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             self.response.out.write(template.render(path, vars))
-
-
-class AddTopCategory(BaseHandler):
-    def get(self):
-#        form = forms.TopCategoryForm(self.request)
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
-        vars = { 'form': form }
-        self.response.out.write(template.render(path, vars))
-
-    def post(self):
-#        form = forms.TopCategoryForm(self.request)
-        if form.is_valid():
-            category = form.save(commit=True)
-            self.redirect(self.request.url)
-        else:
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
-            vars = { 'form': form }
-            self.response.out.write(template.render(path, vars))
+            # path = os.path.join(os.path.dirname(__file__), 'templates', 'addcategory.html')
+            # vars = { 'form': form }
+            # self.response.out.write(template.render(path, vars))
 
 
 class ShowCategories(BaseHandler):
@@ -430,46 +479,27 @@ class EnterCreditors(BaseHandler):
             else:
                 logging.info('Not really all that different, do not write to database.')
         
-        if self.request.get('submit') == 'finish':
-            user.complete()
-            self.redirect('/finished')
-            mail.send_mail(sender="No reply <hans.then@gmail.com>",
-                           to="<h.then@pythea.nl>",
-                           subject="Dossier Entered",
-                           body="Dossier is toegevoegd voor %s %s" % (user.firstname, user.lastname))
-
-            # Fixme, also mark that the user has finished data entry.
-            # And make sure that the initial e-mail is sent only once.
-            return
-        
         self.redirect('/debts')
 
 
-class Finished(BaseHandler):
-    def get(self):
-        session = get_current_session()
-        user = session.get('user')
-        vars = { 'user': user }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'finished.html')
-        self.response.out.write(template.render(path, vars))
-
 application = webapp.WSGIApplication([
   (r'/', Main),
-  (r'/client/new', RegisterClient),
-  (r'/client/contact', AddContact),
-  (r'/client/creditors', SelectCreditors),
-  (r'/client/debts', Todo),
-  (r'/organisation/new', RegisterSocialWork),
-  (r'/organisation/employees', ListEmployees),
-  (r'/organisation/employees/new', AddEmployee),
-  (r'/organisation/employees/edit/(.*)', AddEmployee),
-  (r'/employee/photo/(.*)', Photo),
-  (r'/organisation/zipcodes', SelectZipcodes),
   (r'/login', Login),
-  (r'/worker/approve', ListApprovals),
-  (r'/worker/approve/(.*)', Approve),
-  (r'/crediteuren/(.*)', SelectCreditors),
-  (r'/finished', Finished),
+  (r'/client/new', ClientNew),
+  (r'/client/contact', ClientContact),
+  (r'/client/creditors', ClientSelectCreditors),
+  (r'/client/validate', ClientValidate),
+  (r'/client/submitted', ClientSubmitted),
+  (r'/client/debts', Todo),
+  (r'/organisation/new', OrganisationNew),
+  (r'/organisation/employees', OrganisationEmployeesList),
+  (r'/organisation/employees/new', OrganisationEditEmployee),
+  (r'/organisation/employees/edit/(.*)', OrganisationEditEmployee),
+  (r'/organisation/zipcodes', OrganisationZipcodes),
+  (r'/employee/photo/(.*)', Photo),
+  (r'/employee/approvals', EmployeeApprovals),
+  (r'/employee/approve/(.*)', EmployeeApprove),
+#  (r'/finished', Finished),
   (r'/company/new', AddCompany),
   (r'/category/new', AddCategory),
 #  (r'/addemployees', AddEmployees),

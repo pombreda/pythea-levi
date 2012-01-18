@@ -3,30 +3,8 @@
   <head>
     <title>Jubilee</title> 
     <link rel="stylesheet" type="text/css" href="/css/snn.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-    <script src="/js/jquery.form.js" type="text/javascript"></script> 
-    <script src="/js/jquery.address-1.4.min.js" type="text/javascript"></script>
-    <script src="/js/jquery.collapser.js" type="text/javascript"></script>
-    <script type="text/javascript">
-$(document).ready(function () {
-    jQuery('#categories').accordion();
-});
-
-    </script>
-
   </head> 
   <body id="body">
-    <div id="menu"> 
-     {% block menu %}
-     <ul>
-        <li>
-        <a href="/debts">{{ user.firstname }} {{ user.lastname }}</a>
-        </li>
-     </ul>
-     {% endblock %} 
-    </div>
-
     <div id="main"> 
       {% block main %}
       <div id="content-container"> 
@@ -40,33 +18,20 @@ $(document).ready(function () {
                              {% if company.selected %} checked {% endif %}> &nbsp;
                       <input type="hidden" name="visible" 
                              value="{{company.key.id}}">
-                      <img src="{{company.icon}}"> {{ company.display_name }} 
+                      <img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }} 
                  </li>
             {% endfor %}
             </ul>
-            <input type="submit">
+            <input type="submit" name="action" value="opslaan">
+            <input type="submit" name="action" value="klaar">
             </form>
-        </div>
-        <div id="sidebar"> 
-          {% block sidebar %}
-          <div id="categories">
-          {% for topcategory in topcategories %}
-          <a class="topcategory"> {{ topcategory.label }} 
-              <div>
-              {% for sub in topcategory.categories %}
-              <a class="subcategory" href="/crediteuren/{{sub.key.id_or_name}}"> {{ sub.label }} </a><br>
-              {% endfor %}
-              </div>
-          </a>
-          {% endfor %}          
-          </div>
-          {% endblock %}            
+            </form>
         </div>
       </div>
       {% endblock %}            
     </div>
     <div id="footer">
-      {{ user.firstname }} {{ user.lastname }} : Pythea
+      {{ user.firstname }} : {{ user.lastname }} : Pythea
     </div>
   </body>
 </html>
