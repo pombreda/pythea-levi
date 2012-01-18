@@ -1,0 +1,26 @@
+Use cases:
+1. Registreer Hulpverlener
+    --> Invulscherm			DONE
+    --> Selecteer stad/postcodes	TODO
+    --> Voeg medewerkers toe 		DONE (except delete)
+        -- CRUD				
+2. Registreer Client
+    --> Invulscherm			DONE
+    --> Met wie heeft u gesproken	DONE
+    --> Selecteer schuldeisers		DONE
+        --> Voeg nieuwe schuldeiser toe
+    --> Verstuur			DONE
+    --> Toon dossier
+3. Periodieke controle
+    --> Toon overzicht dossiers
+    --> Selecteer dossier
+	--> Verstuur dossier naar schuldeisers
+	--> Verstuur herinnering naar schuldeisers
+	--> Voeg commentaar toe
+	--> Sluit dossier
+    --> Toon afgesloten dossiers
+	--> Bekijk dossier
+        --> Reactiveer dossier
+4. Management Informatie
+    --> Toon billing (aantallen dossiers etc)
+
