@@ -21,6 +21,7 @@ from google.appengine.api.urlfetch import fetch
 from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.api import images
+from google.appengine.api import taskqueue
 
 import wsgiref.handlers
 
@@ -372,7 +373,6 @@ class EmployeeApprove(BaseHandler):
         self.response.out.write(template.render(path, vars))
 
 
-
 class AddCompany(BaseHandler):
     icon_re = re.compile(r'<link\s+rel=".*?icon"\s+href="(.*?)"', re.M | re.I)
     base_re = re.compile(r'<base\s+href="(.*?)"', re.M | re.I)
@@ -422,9 +422,6 @@ class AddCompany(BaseHandler):
             creditor.put()
             self.redirect(self.request.url)
         else:
-            # path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
-            # vars = { 'form': form }
-            # self.response.out.write(template.render(path, vars))
             vars = { 'forms': [form] }
             path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             self.response.out.write(template.render(path, vars))
@@ -481,9 +478,31 @@ class EnterCreditors(BaseHandler):
         
         self.redirect('/debts')
 
+class Initialize(BaseHandler):
+    def get(self):
+        taskqueue.add(url='/task/init')
+
+class TaskInitialize(BaseHandler):
+    def post(self):
+        with open('schuldeisers.txt') as file:
+            for line in file:
+                website, display_name = line.strip().split(None,1)
+                logging.info('%s,%s' % (website, display_name))
+                website = 'http://' + website
+                creditor = models.Creditor(website=website, 
+                                           display_name=display_name)
+                creditor.expand()
+                try:
+                    creditor.put()
+                except e:
+                    logging.info( "Failed to put %s %s" % (display_name, e) )
+                    print e
+ 
 
 application = webapp.WSGIApplication([
   (r'/', Main),
+  (r'/init', Initialize),
+  (r'/task/init', TaskInitialize),
   (r'/login', Login),
   (r'/client/new', ClientNew),
   (r'/client/contact', ClientContact),

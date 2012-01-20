@@ -40,7 +40,6 @@ www.lavg.nl			LAVG deurwaarders
 www.tele2.nl			Tele 2
 www.sizz.nl			SIZZ(telefoonabonnmenten)
 www.ben.nl			Ben(telefonie)
-PGB				?
 www.famed.nl			Fa-med (Medisch incassobureau)
 www.rotterdam.nl		Sociale Dienst
 www.rotterdam.nl		dienst gemeentelijke belastingen : OZB/ Reinigingsrecht.

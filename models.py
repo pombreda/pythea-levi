@@ -10,6 +10,10 @@ from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
 import wsgiref.handlers
 
+from google.appengine.api.urlfetch import fetch
+import re
+import urlparse
+
 class DecimalProperty(db.Property):
     data_type = decimal.Decimal
 
@@ -129,10 +133,44 @@ class Category(db.Model):
     def __str__(self):
         return self.label
 
+icon_re = re.compile(r'<link\s+rel=".*?icon"\s+href="(.*?)"', re.M | re.I)
+base_re = re.compile(r'<base\s+href="(.*?)"', re.M | re.I)
+keywords_re = re.compile(r'<meta\s+name="keywords"\s+content=["\'](.*?)["\']')
 
 class Creditor(Organisation):
     tags = db.StringListProperty()
 
+    def expand(self):
+        url = self.website
+        homepage = fetch(url)
+        base = base_re.search(homepage.content)
+        if base:
+            base = base.group(1)
+        elif homepage.final_url:
+            if homepage.final_url.startswith('/'):
+                base = url + homepage.final_url
+            else:
+                base = homepage.final_url
+        else:
+            base = url
+        icon = icon_re.search(homepage.content)
+        icon = icon.group(1) if icon else '/favicon.ico'
+        icon_url = urlparse.urljoin(base, icon)
+        keywords = keywords_re.search(homepage.content)
+        keywords = keywords.group(1) if keywords else ""
+        keywords = keywords.decode('utf-8')
+        keywords = keywords.split(',')
+        self.tags = keywords
+        self.icon = icon_url
+        if not self.email:
+            hostname = urlparse.urlparse(url).hostname
+            if hostname.startswith('www'):
+                hostname = '.'.join(hostname.split('.')[1:])
+            self.email = 'info@' + hostname
+        if not self.display_name:
+            hostname = urlparse.urlparse(url).hostname
+            name = hostname.split('.')[-2]
+            self.display_name = name
 
 class CreditorLink(db.Model):
     creditor = db.ReferenceProperty(Creditor)
