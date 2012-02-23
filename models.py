@@ -14,6 +14,7 @@ from google.appengine.api.urlfetch import fetch
 import re
 import urlparse
 
+
 class DecimalProperty(db.Property):
     data_type = decimal.Decimal
 
@@ -32,6 +33,7 @@ class DecimalProperty(db.Property):
         elif isinstance(value, basestring):
             return decimal.Decimal(value)
         raise db.BadValueError("Property %s must be a Decimal or string." % self.name)
+
 
 class User(polymodel.PolyModel):
     username = db.StringProperty()
@@ -53,15 +55,22 @@ class User(polymodel.PolyModel):
     def authenticate(self, password):
         return crypt.crypt(password, self.password) == self.password
 
+    def start_page(self):
+        return None
+
     
 # FIXME: Organisation also needs to be scoped to 
 # a zipcode. E.g. woonbron delfshaven has a different mail address
 # than woonbron ijsselmonde.
+lowermask = '0000AA'
+uppermask = '9999ZZ'
+
 class Organisation(polymodel.PolyModel):
     display_name = db.StringProperty()
     icon = db.LinkProperty()
     website = db.LinkProperty()
     email = db.EmailProperty()
+ 
 
 class SocialWork(Organisation):
     address = db.StringProperty()
@@ -70,18 +79,32 @@ class SocialWork(Organisation):
     zipcodes = db.StringListProperty()
     
     def accepts(self, zipcode):
-        return True
+        if True:
+            return True
+        for zipcode in self.zipcodes:
+            range = zipcode.split('-')
+            lower = range[0]
+            upper = lower if len(range) < 2 else range[1]
+            lower = lower + lowermask[len(lower):]
+            higher = higher + highermask[len(higher):]
+            if lower <= zipcode <= higher:
+                return True
+        return False
+                
 
 class SocialWorker(User):
     organisation = db.ReferenceProperty(SocialWork, collection_name="employees")
     sysadmin = db.BooleanProperty()
     photo = db.BlobProperty()
 
-    def set_sysadmin(worker, flag):
+    def set_sysadmin(self, worker, flag):
         if not self.sysadmin:
             raise Unauthorized
         else:
             worker.sysadmin = flag
+
+    def start_page(self):
+        return 'employee/approvals'
 
 class Client(User):
     address = db.StringProperty()
@@ -94,6 +117,10 @@ class Client(User):
     approval_date = db.DateProperty()
     archive_date = db.DateProperty() # ==> when the client is finished with entering his case file
     contact = db.ReferenceProperty(SocialWorker, collection_name="clients")
+
+
+    def start_page(self):
+        return 'client/creditors'
 
     def hasCreditor(self, creditor):
         for link in self.creditors:
@@ -109,7 +136,6 @@ class Client(User):
         for link in self.creditors:
             if link.creditor.key().id() == creditor.key().id():
                 link.delete()
-
 
     def complete(self):
         self.state = "COMPLETED"
@@ -194,7 +220,7 @@ class Debt(db.Model):
 
 class Annotation(db.Model):
     subject = db.ReferenceProperty(db.Model, collection_name='annotation')
-    tag = db.CategoryProperty()
+    ag = db.CategoryProperty()
     entry_date = db.DateProperty(auto_now_add=True)
     date = db.DateProperty()
     text = db.TextProperty()

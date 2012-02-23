@@ -30,10 +30,8 @@ class ClientForm(df.ModelForm):
         phone = data.get('phone')
         mobile = data.get('mobile')
         if phone and not mobile:
-            logging.exception("No mobile phone, check for mobile number")
             m = self.phone_p.match(phone)
             if m and m.group(2).startswith('6'):
-                logging.exception("Bingo")
                 data['mobile'] = phone
         if mobile:
             m = self.phone_p.match(mobile)
@@ -75,4 +73,11 @@ class CreditorForm(df.ModelForm):
     class Meta:
         model = models.Creditor
         exclude = ['display_name', '_class', 'icon', 'tags']
+
+class DebtForm(df.ModelForm):
+    description = forms.CharField()
+    #creditor_or_collector = forms.CharField()
+    class Meta:
+        model = models.Debt
+        fields = ['original_date', 'dossier_number', 'amount', 'payment_amount']
 
