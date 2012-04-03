@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      {% block main %}
+      <div id="content-container"> 
+        <div id="content"> 
+            <form method="post">
+            {{ creditor.creditor.display_name }}
+            <input type="hidden" name="creditor" value="{{creditor.key.id}}">
+            <table>
+             <tr><th>Omschrijving</th><th>Schuldeiser</th><th>Datum</th><th>Dossiernummer</th><th>Openstaand bedrag</th><th>Afbetaling</th>
+             </tr>
+            {% for debt in creditor.debts %}
+	         <tr>
+                      <td>{{debt.description}}</td>
+                      <td>{{debt.creditor_or_collector}}</td> 
+                      <td>{{debt.original_date}}</td>
+                      <td>{{debt.dossier_number}}</td>
+                      <td>{{debt.amount}}</td>
+                      <td>{{debt.payment_amount}}</td>
+             </tr>
+            {% endfor %}
+              <tr>
+                <td colspan="7">
+                   {% if form.non_field_errors %}
+                      {{ form.non_field_errors }}<br>
+                   {% endif %}
+                   {% for field in form.fields %}
+                      {% if field.errors %} {{ field.errors }} <br> {% endif %}
+                   {% endfor %}
+                <td>
+              </tr>
+              <tr>
+                <td>{{form.description}}</td>
+                <td><a href="/client/debts/creditor/select">{{debt.creditor_or_collector}}Klik me</a></td>
+                <td>{{form.original_date}}</td>
+                <td>{{form.dossier_number}}</td>
+                <td>{{form.amount}}</td>
+                <td>{{form.payment_amount}}</td>
+                <td><input type="submit"></td>
+             </tr>
+            </table>
+            </form>
+        </div>
+      </div>
+      {% endblock %}            
+      <a href="/client/debts/list">Terug naar het overzicht</a>
+    </div>
+  </body>
+</html>

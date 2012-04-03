@@ -104,7 +104,7 @@ class SocialWorker(User):
             worker.sysadmin = flag
 
     def start_page(self):
-        return 'employee/approvals'
+        return '/employee/approvals'
 
 class Client(User):
     address = db.StringProperty()
@@ -120,7 +120,14 @@ class Client(User):
 
 
     def start_page(self):
-        return 'client/creditors'
+        if self.state == 'APPROVED':
+            return '/client/debts/list'
+        elif self.state == 'COMPLETED':
+            return '/client/creditors'
+        elif self.state == 'FINISHED':
+            return '/client/finished'
+        else:
+            return '/client/creditors'
 
     def hasCreditor(self, creditor):
         for link in self.creditors:

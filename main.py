@@ -492,9 +492,12 @@ class EmployeeApprovals(BaseHandler):
 
 class EmployeeWaiting(BaseHandler):
     def get(self):
+        state = self.request.get('state')
+        if not state: state = 'APPROVED'
         clients = models.Client.all()
-        clients.filter('state =', 'APPROVED')
-        vars = { 'clients' : clients }
+        clients.filter('state =', state)
+        vars = { 'state': state,
+                 'clients' : clients }
 
         path = os.path.join(os.path.dirname(__file__), 'templates', 'employeeapprovals.html')
         self.response.out.write(template.render(path, vars))
@@ -521,16 +524,27 @@ class EmployeeApprove(BaseHandler):
 
 
 class EmployeeBecome(BaseHandler):
-    def get(self):
-        clients = models.Client.all()
-        vars = { 'clients' : clients }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'employeebecomeclients.html')
-        self.response.out.write(template.render(path, vars))
-        
-    def post(self, client):
-        client = models.Client.get_by_key_name(client)
-        session['user'] = client
-        self.redirect('/client/creditors')
+    def get(self, client = None):
+        if not client:
+            clients = models.User.all()
+            vars = { 'clients' : clients }
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'employeebecomeclients.html')
+            self.response.out.write(template.render(path, vars))
+        else:
+            client = urllib.unquote(client)
+            logging.debug(client)
+            user = models.User.get_by_key_name(client)
+            if not user:
+                self.redirect(self.request.url)
+            else:
+                logging.debug(user)
+                start_page = user.start_page()
+                logging.debug(start_page)
+                session = get_current_session()
+                if session.is_active():
+                    session.terminate()
+                session['user'] = user
+                self.redirect(start_page)
 
 class AddCompany(BaseHandler):
     def get(self):
@@ -686,10 +700,10 @@ application = webapp.WSGIApplication([
   (r'/employee/photo/(.*)', Photo),
 
 # Several employee use cases
-  (r'/employee/approvals', EmployeeApprovals),
+  (r'/employee/approvals', EmployeeWaiting),
   (r'/employee/waiting', EmployeeWaiting),
   (r'/employee/approve/(.*)', EmployeeApprove),
-  (r'/employee/become/(.*)', EmployeeBecome),
+  (r'/employee/become/client/(.*)', EmployeeBecome),
   (r'/employee/become', EmployeeBecome),
 #  (r'/finished', Finished),
   (r'/company/new', AddCompany),

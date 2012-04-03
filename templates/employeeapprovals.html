@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      {% block main %}
+      <div id="content-container"> 
+        <form>
+            <select name="state">
+                <option value="APPROVED" {% if state == "APPROVED" %} selected {% endif %} >Wacht op antwoord</option>
+                <option value="COMPLETED" {% if state == "COMPLETED" %} selected {% endif %} >Ter controle</option>
+                <option value="NEW" {% if state == "NEW" %} selected {% endif %} >Incompleet</option>
+                <option value="FINISHED" {% if state == "FINISHED" %} selected {% endif %} >Afgesloten</option>
+            </select>
+            <input type="submit">
+        </form>
+        <div id="content"> 
+          {% block content %}
+          <ul>
+             {% for client in clients %}
+             <li>
+                 <a href="/employee/approve/{{client.key.name}}"> {{ client.first_name }} {{ client.last_name }} </a>
+             </li>
+             {% endfor %}
+          </ul>
+          {% endblock %}            
+        </div>
+        <div id="sidebar"> 
+          {% block sidebar %}
+          {% endblock %}            
+        </div>
+      </div>
+      {% endblock %}            
+    </div>
+  </body>
+</html>
