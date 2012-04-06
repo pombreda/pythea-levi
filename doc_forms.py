@@ -27,6 +27,8 @@ from django import forms as df
 for item in inspect.getmembers(forms, inspect.isclass):
     print item[0], dir(item[1])
     print item[1].base_fields
+    if item[0] == 'CategoryForm':
+        print item[1].base_fields['label'].__dict__
     #print dir(item[1].Meta)
     if item[0] == 'DebtForm':
         print dir(item[1].base_fields['creditor'])
