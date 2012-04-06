@@ -79,5 +79,5 @@ class DebtForm(df.ModelForm):
     #creditor_or_collector = forms.CharField()
     class Meta:
         model = models.Debt
-        fields = ['original_date', 'dossier_number', 'amount', 'payment_amount']
+        #fields = ['original_date', 'dossier_number', 'amount', 'payment_amount']
 
