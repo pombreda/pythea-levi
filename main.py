@@ -25,52 +25,142 @@ from google.appengine.api import images
 from google.appengine.api import taskqueue
 
 import wsgiref.handlers
+import webob
+from collections import defaultdict
 
 from gaesessions import get_current_session
 
-from django.utils import simplejson
+import simplejson as json
 
 import models
 import forms
+import docs
+import yaml
+
+import inspect
+import django
 
 class BaseHandler(webapp.RequestHandler):
     def get_user(self):
         try:
-            return get_current_session()['user']
+            return self.session['user']
         except KeyError:
+            return None
+
+    def get_session(self):
+        try:
+            return get_current_session()
+        except Exception:
             return None
 
     def dump(self):
         self.response.out.write('<table>')
         for key in self.request.arguments():
-            self.response.out.write('<tr><td>%s</td><td>%s</td></tr>' % (key, self.request.get(key)))
+            self.response.out.write('<tr><td>%s</td><td>%s</td></tr>' % (key, self.request.get_all(key)))
         self.response.out.write('</table>')
 
     user = property(get_user)
+    session = property(get_session)
 
+    def render(self, vars, templ=None):
+        #self.response.out.write('Session ' + str(self.session))
+        if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.out.write(json.dumps(self.flatten(vars)))
+        else:
+            path = os.path.join(os.path.dirname(__file__), 'templates', templ)
+            self.response.out.write(template.render(path, vars))
+            self.response.out.write(json.dumps(self.flatten(vars)))
+
+    def flatten(self, value):
+        try:
+            if isinstance(value, db.Model):
+                return value.__dict__['_entity']
+            elif isinstance(value, django.forms.fields.Field):
+                return self.flatten_field(value)
+            elif isinstance(value, django.forms.widgets.Input):
+                return self.flatten_widget(value)
+            elif isinstance(value, list):
+                return [ self.flatten(var) for var in value ] 
+            elif isinstance(value, dict):
+                return self.flatten_dict(value)
+            elif isinstance(value, webob.multidict.UnicodeMultiDict):
+                return self.flatten_mdict(value)
+            elif forms == inspect.getmodule(value):
+                return self.flatten_form(value)
+            else:
+                return value
+        except Exception, e:
+            print e, type(e)
+            return str(value)
+
+    def flatten_form(self, form):
+        d = defaultdict(dict)
+        for name, field in form.fields.items():
+            for attr in ['min_length', 'max_length', 'initial', 'required', 'label', 'help_text', 'show_hidden_initial']:
+                if attr in field.__dict__:
+                    d[name][attr] = field.__dict__[attr]
+                d[name]['input_type'] = field.widget.input_type
+                d[name]['is_hidden'] = field.widget.is_hidden
+            if name in form.data and field.widget.input_type != 'password':
+                d[name]['value'] = form.data[name]
+            if name in form.errors:
+                d[name]['value'] = form.errors[name]
+        r = {'fields': d } 
+        if '__all__' in form.errors:
+            r['errors'] = form.errors['__all__']
+        return r
+
+    def flatten_widget(self, widget):
+        d = {}
+        #for attr in ['min_length', 'max_length', 'initial', 'required', 'label', 'help_text', 'error_messages', 'show_hidden_initial']:
+        #    d[attr] = field.__dict__[attr]
+        #return d
+        return dir(widget)
+ 
+    def flatten_mdict(self, vars):
+        d = defaultdict(list)
+        for key, value in vars.items():
+            d[key].append(self.flatten(value))
+        return d
+
+    def flatten_dict(self, vars):
+        d = {}
+        for key, value in vars.items():
+            d[key] = self.flatten(value)
+        return d
 
 class Main(BaseHandler):
     def get(self):
+        """Show the default screen. This is now the login screen"""
         user = self.user
         if not user:
             self.redirect('/login')
             return
+        self.session['JSON'] = False
 
         vars = { 
                  'user': user }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'main.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'main.html')
 
-
+class Screens(BaseHandler):
+    def get(self):
+        """A utility screen to display all screens inside the application"""
+        doc = docs.Document(application, self)
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write( json.dumps(doc.docs) )
+        #self.response.out.write( application._url_mapping )
+ 
 class ClientNew(BaseHandler):
     def get(self):
+        """Show the form to add a new client"""
         form = forms.ClientForm()
         form.title = 'Registreer'
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         vars = { 'forms': [form] , 'title': 'Registreer'}
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'form.html')
 
     def post(self):
+        """Enter the new client"""
         # Read form variables and put the new user in the database
         form = forms.ClientForm(self.request.POST)
         if form.is_valid():
@@ -83,13 +173,13 @@ class ClientNew(BaseHandler):
             session['user'] = new_user
             self.redirect('/client/contact')
         else:
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             vars = { 'forms': [form], 'title': 'Registreer'}
-            self.response.out.write(template.render(path, vars))
+            self.render(vars, 'form.html')
 
 
 class ClientContact(BaseHandler):
     def get(self):
+        """Show a list of possible contact persons"""
         user = self.user
         zipcode = user.zipcode
         orgs = [ i for i in models.SocialWork.all() if i.accepts(zipcode)]
@@ -97,9 +187,10 @@ class ClientContact(BaseHandler):
                  'organisations': orgs, 
                  'title': 'Met wie heeft u gesproken?' }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'addcontact.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'addcontact.html')
                 
     def post(self):
+        """Add the selected contact person to the database"""
         key = self.request.get('selected')
         user = self.user
         contact = models.SocialWorker.get(key)
@@ -110,6 +201,10 @@ class ClientContact(BaseHandler):
 
 class ClientSelectCreditors(BaseHandler):
     def get(self):
+        """Show a list of available creditors
+ 
+        FIXME: we should change this, to show the available creditors per category.
+        """
         user = self.user
         creditors = list(models.Creditor.all())
         creditors.reverse()
@@ -118,10 +213,12 @@ class ClientSelectCreditors(BaseHandler):
         vars = { 
                  'creditors': creditors,
                  'user': user }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'crediteuren.html')
  
     def post(self):
+        """Add the selected creditors to the database"""
         user = self.user
         selected_ids = [ int(id) for id in self.request.get_all('selected') ]
         visible_ids = [ int(id) for id in self.request.get_all('visible') ]
@@ -140,29 +237,41 @@ class ClientSelectCreditors(BaseHandler):
 
 class ClientCreditorsNew(BaseHandler):
     def get(self):
+        """Add a new creditor that is specific to this client
+ 
+        FIXME:
+        The new creditor will have status provisional, until it is validated by the SocialWorker"""
         user = self.user
         form = forms.CreditorForm(self.request.POST)
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
         #vars = { 'form': form }
         vars = { 'forms': [form] }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'form.html')
 
     def post(self):
+        """Add the creditor to the database"""
         form = forms.CreditorForm(self.request.POST)
         if form.is_valid():
             creditor = form.save(commit=False)
             creditor.expand()
             creditor.put()
+            self.redirect('todo.html')
+        else:
+            vars = { 'forms': [form] }
+            self.render(vars, 'form.html')
 
 
 class ClientValidate(BaseHandler):
     def get(self):
+        """Validate a new client"""
         user = self.user
         vars = { 
                  'user': user }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'clientvalidate.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientvalidate.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'clientvalidate.html')
 
     def post(self):
         action = self.request.get('action')
@@ -188,24 +297,27 @@ class ClientSubmitted(BaseHandler):
         message = 'De gegevens worden naar uw maatschappelijk werker gestuurd voor controle.'
         vars = { 'user': user,
                  'message': message }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'message.html')
 
 
 class ClientDebts(BaseHandler):
     def get(self):
         user = self.get_user()
         vars = { 'user': user }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebts.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebts.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'clientdebts.html')
 
     def post(self):
         user = self.get_user()
         message = 'U bent klaar'
         vars = { 'user': user,
                  'message': message }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'message.html')
  
 
 
@@ -217,8 +329,9 @@ class ClientDebtsAdd(BaseHandler):
         vars = { 'user': user,
                  'creditor': creditor,
                  'form': form }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'clientdebtsadd.html')
 
     def post(self, creditor):
         user = self.get_user()
@@ -240,8 +353,9 @@ class ClientDebtsAdd(BaseHandler):
             vars = { 'user': user,
                      'creditor': creditor,
                      'form': form }
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
-            self.response.out.write(template.render(path, vars))
+            self.render(vars, 'clientdebtsadd.html')
+            #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
+            #self.response.out.write(template.render(path, vars))
 
 
 class ClientDebtsSelectCreditor(BaseHandler):
@@ -252,8 +366,9 @@ class ClientDebtsSelectCreditor(BaseHandler):
       
         vars = { 'user': user,
                  'creditors': creditors }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsselectcreditor.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'clientdebtsselectcreditor.html')
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsselectcreditor.html')
+        #self.response.out.write(template.render(path, vars))
         
 
 class OrganisationNew(BaseHandler):
@@ -262,9 +377,8 @@ class OrganisationNew(BaseHandler):
         form2 = forms.SocialWorkerForm(prefix='f2')
         form1.title = 'Organisatie'
         form2.title = 'Contactpersoon'
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         vars = { 'forms': [form1, form2] , 'title': 'Registreer Hulpverleningsorganisatie'}
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'form.html')
 
     def post(self):
         # Read form variables and put the new user in the database
@@ -295,9 +409,10 @@ class OrganisationNew(BaseHandler):
             session['user'] = the_user
             self.redirect('/organisation/employees')
         else:
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
+            #path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             vars = { 'forms': [form1, form2] , 'title': 'Registreer Hulpverleningsorganisatie'}
-            self.response.out.write(template.render(path, vars))
+            #self.response.out.write(template.render(path, vars))
+            self.render(vars, 'form.html')
 
 
 class OrganisationEmployeesList(BaseHandler):
@@ -324,6 +439,7 @@ class OrganisationEmployeesList(BaseHandler):
 
 class Photo(BaseHandler):
     def get(self, key):
+        """Return the photo for employee with KEY"""
         employee = models.SocialWorker.get(key)
         if (employee and employee.photo):
             self.response.headers['Content-Type'] = 'image/jpeg'
@@ -334,6 +450,7 @@ class Photo(BaseHandler):
 
 
 class OrganisationEditEmployee(BaseHandler):
+    """Create or edit an existing employee"""
     def get(self, key=None):
         user = self.user
         organisation = user.organisation
@@ -458,8 +575,9 @@ class ResetPassword(BaseHandler):
 
 class Login(BaseHandler):
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
-        self.response.out.write(template.render(path, vars))
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render({}, 'login.html')
   
     def post(self):
         userid = self.request.get('userid')
@@ -473,9 +591,8 @@ class Login(BaseHandler):
                 session['user'] = user
                 self.redirect(user.start_page())
             else:
-                path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
                 vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
-                self.response.out.write(template.render(path, vars))
+                self.render(vars, 'login.html')
         except Exception, e:
             logging.info("Error, probably user not found.")
             self.response.out.write(e)
@@ -548,12 +665,14 @@ class EmployeeBecome(BaseHandler):
 
 class AddCompany(BaseHandler):
     def get(self):
-        form = forms.CreditorForm(self.request.POST)
+	"""Show a form to enter a new creditor"""
+	form = forms.CreditorForm(self.request.POST)
         vars = { 'forms': [form] }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         self.response.out.write(template.render(path, vars))
 
     def post(self):
+        """Add the new creditor"""
         form = forms.CreditorForm(self.request.POST)
         if form.is_valid():
             creditor = form.save(commit=False)
@@ -568,12 +687,14 @@ class AddCompany(BaseHandler):
 
 class AddCategory(BaseHandler):
     def get(self):
+        """Show a list of existing categories"""
         form = forms.CategoryForm(self.request)
         vars = { 'forms': [form] }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         self.response.out.write(template.render(path, vars))
 
     def post(self):
+        """Add a new category"""
         form = forms.CategoryForm(self.request)
         if form.is_valid():
             category = form.save(commit=True)
@@ -595,7 +716,9 @@ class ShowCategories(BaseHandler):
 
           
 class EnterCreditors(BaseHandler):
+    """Does not appear to be in use"""
     def get(self):
+        """Show a list of possible creditors"""
         session = get_current_session()
         user = session.get('user')
         vars = { 
@@ -604,6 +727,7 @@ class EnterCreditors(BaseHandler):
         self.response.out.write(template.render(path, vars))
 
     def post(self):
+        """Write the selected creditors to the database"""
         session = get_current_session()
         user = session.get('user')
         for creditor in user.creditors:
@@ -624,11 +748,17 @@ class Initialize(BaseHandler):
 
 
 class Test(BaseHandler):
+    """I use this to test new code"""
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'test.html')
-        self.response.out.write(template.render(path, vars))
+        """Show the test response"""
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'test.html')
+        #self.response.out.write(template.render(path, vars))
+        self.response.headers['Content-Type'] = 'text/plain'
+        #self.response.out.write(self.request.accept)
+        self.dump()
 
     def post(self):
+        """Testing the code to resize a passphoto"""
         #self.response.headers['Content-Type'] = 'image/jpeg'
         self.response.headers['Content-Type'] = 'text/plain'
         x1 = float(self.request.get('x'))
@@ -650,6 +780,28 @@ class Test(BaseHandler):
 
 class TaskInitialize(BaseHandler):
     def post(self):
+        """Background task to initialize the database with a list of clients and creditors"""
+        try:
+            client = models.Client(username='clientXX', first_name='client', 
+                                   last_name='XX', email='hans.then@gmail.com', 
+                                   address='Rochussenstraat 347a', zipcode='3023 HE',
+                                   city='Rotterdam', mobile='+31634751204')
+            client.set_password('XX')
+            client.put()
+        except:
+            logging.info('Error creating client')
+        
+        try:
+            contact = models.SocialWorker(username='medewerkerXX', first_name='mw', 
+                                          last_name='XX', email='hans.then@gmail.com')
+            contact.set_password('XX')
+            organisation = models.Organisation(display_name='SMDD', website='www.smdd.nl',
+                                               email='info@smdd.nl', address='Havenstraat 80',
+                                               zipcode='2300', city='Rotterdam')
+            organisation.put()
+        except:
+            logging.info('Error creating organisation')
+
         with open('schuldeisers.txt') as file:
             for line in file:
                 website, display_name = line.strip().split(None,1)
@@ -663,10 +815,10 @@ class TaskInitialize(BaseHandler):
                     website = 'http://' + website
                     creditor = models.Creditor(website=website, 
                                                display_name=display_name)
-                    creditor.expand()
                     try:
+                        creditor.expand()
                         creditor.put()
-                    except e:
+                    except Exception, e:
                         logging.info( "Failed to put %s %s" % (display_name, e) )
                         print e
  
@@ -676,6 +828,7 @@ application = webapp.WSGIApplication([
   (r'/init', Initialize),
   (r'/task/init', TaskInitialize),
   (r'/login', Login),
+  (r'/screens', Screens),
 
 # The register client use case
   (r'/client/new', ClientNew),
