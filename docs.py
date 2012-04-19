@@ -34,9 +34,10 @@ reqparms_multiple=re.compile(r'self.request.(?:.*?.)?get_all\(\'(.*?)\'\)')
 forms=re.compile(r'forms\.(\w+)\(')
 
 def get_args(args):
-    args2 = args.args[1:]
-    if args.defaults:
-        for index, default in enumerate(args.defaults):
+    args, varargs, keywords, defaults = args
+    args2 = args[1:]
+    if defaults:
+        for index, default in enumerate(defaults):
             args2[-index-1] = args2[-index-1] + '=' + str(default)
     return args2
 
