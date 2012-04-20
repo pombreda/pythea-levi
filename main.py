@@ -40,6 +40,20 @@ import yaml
 import inspect
 import django
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        try:
+            if isinstance(obj, unicode):
+                return obj.encode('utf-8', 'replace')
+            elif isinstance(obj, models.decimal.Decimal):
+                return str(obj)
+            elif isinstance(obj, datetime.datetime):
+                return str(obj)
+            else:
+                return json.JSONEncoder.default(self, obj)
+        except Exception, e:
+            return '--Could not encode object %s of type %s, because of %s--' % (str(obj), type(obj), e)
+
 class BaseHandler(webapp.RequestHandler):
     def get_user(self):
         try:
@@ -66,16 +80,18 @@ class BaseHandler(webapp.RequestHandler):
         #self.response.out.write('Session ' + str(self.session))
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
-            self.response.out.write(json.dumps(self.flatten(vars)))
+            self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             self.response.out.write(template.render(path, vars))
-            self.response.out.write(json.dumps(self.flatten(vars)))
+            self.response.out.write('<br>Template: %s<br>' % templ)
+            js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
+            self.response.out.write(js)
 
     def flatten(self, value):
         try:
             if isinstance(value, db.Model):
-                return value.__dict__['_entity']
+                return self.flatten_model(value)
             elif isinstance(value, django.forms.fields.Field):
                 return self.flatten_field(value)
             elif isinstance(value, django.forms.widgets.Input):
@@ -91,8 +107,7 @@ class BaseHandler(webapp.RequestHandler):
             else:
                 return value
         except Exception, e:
-            print e, type(e)
-            return str(value)
+            return "error, could not flatten value %s, %s" % (value, e)
 
     def flatten_form(self, form):
         d = defaultdict(dict)
@@ -100,7 +115,10 @@ class BaseHandler(webapp.RequestHandler):
             for attr in ['min_length', 'max_length', 'initial', 'required', 'label', 'help_text', 'show_hidden_initial']:
                 if attr in field.__dict__:
                     d[name][attr] = field.__dict__[attr]
-                d[name]['input_type'] = field.widget.input_type
+                if hasattr(field.widget, 'input_type'):
+                    d[name]['input_type'] = field.widget.input_type
+                elif hasattr(field.widget, 'choices'):
+                    d[name]['input_type'] = 'select'
                 d[name]['is_hidden'] = field.widget.is_hidden
             if name in form.data and field.widget.input_type != 'password':
                 d[name]['value'] = form.data[name]
@@ -130,6 +148,12 @@ class BaseHandler(webapp.RequestHandler):
             d[key] = self.flatten(value)
         return d
 
+    def flatten_model(self, model):
+        d = {}
+        for key, value in model.__dict__['_entity'].items():
+            d[key] = self.flatten(value)
+        return d
+
 class Main(BaseHandler):
     def get(self):
         """Show the default screen. This is now the login screen"""
@@ -147,8 +171,7 @@ class Screens(BaseHandler):
     def get(self):
         """A utility screen to display all screens inside the application"""
         doc = docs.Document(application, self)
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write( json.dumps(doc.docs) )
+        self.render( {'docs': doc.docs, 'tree': dict(doc.tree)}, 'screens.html' )
         #self.response.out.write( application._url_mapping )
  
 class ClientNew(BaseHandler):
@@ -337,7 +360,6 @@ class ClientDebtsAdd(BaseHandler):
         user = self.get_user()
         form = forms.DebtForm(self.request.POST)
         creditor = models.CreditorLink.get_by_id(int(creditor))
-        logging.error("We are here")
         if form.is_valid():
             logging.error("valid")
             new_debt = form.save(commit=False)
@@ -779,10 +801,14 @@ class Test(BaseHandler):
         #self.dump()
 
 class TaskInitialize(BaseHandler):
+    def get(self):
+        logging.info(str(self.request.url))
+        taskqueue.add(url='/task/init')
+
     def post(self):
         """Background task to initialize the database with a list of clients and creditors"""
         try:
-            client = models.Client(username='clientXX', first_name='client', 
+            client = models.Client(key_name='hans.then', username='clientXX', first_name='client', 
                                    last_name='XX', email='hans.then@gmail.com', 
                                    address='Rochussenstraat 347a', zipcode='3023 HE',
                                    city='Rotterdam', mobile='+31634751204')
@@ -792,15 +818,19 @@ class TaskInitialize(BaseHandler):
             logging.info('Error creating client')
         
         try:
-            contact = models.SocialWorker(username='medewerkerXX', first_name='mw', 
+            contact = models.SocialWorker(key_name='hans.then@gmail.com', username='medewerkerXX', first_name='mw', 
                                           last_name='XX', email='hans.then@gmail.com')
             contact.set_password('XX')
-            organisation = models.Organisation(display_name='SMDD', website='www.smdd.nl',
+            contact.put()
+            organisation = models.Organisation('SMDD', display_name='SMDD', website='http://www.smdd.nl',
                                                email='info@smdd.nl', address='Havenstraat 80',
-                                               zipcode='2300', city='Rotterdam')
+                                               zipcode='2300', city='Rotterdam', contact=contact)
             organisation.put()
-        except:
+        except Exception, e:
             logging.info('Error creating organisation')
+            logging.info(e)
+   
+        return
 
         with open('schuldeisers.txt') as file:
             for line in file:
@@ -820,23 +850,37 @@ class TaskInitialize(BaseHandler):
                         creditor.put()
                     except Exception, e:
                         logging.info( "Failed to put %s %s" % (display_name, e) )
-                        print e
+                        
  
 
 application = webapp.WSGIApplication([
+# Anonymous
   (r'/', Main),
-  (r'/init', Initialize),
-  (r'/task/init', TaskInitialize),
   (r'/login', Login),
-  (r'/screens', Screens),
+  (r'/reset', ResetPassword),
+
+# Admin functions
+  (r'/admin/init', TaskInitialize),
+  (r'/admin/screens', Screens),
+#  (r'/finished', Finished),
+  (r'/admin/company/new', AddCompany),
+  (r'/admin/category/new', AddCategory),
+#  (r'/addemployees', AddEmployees),
+  (r'/admin/category/list', ShowCategories),
+  (r'/admin/test', Test),
+  (r'/admin/become/client/(.*)', EmployeeBecome),
+  (r'/admin/become', EmployeeBecome),
+
+# Background tasks
+#  (r'/task/init', TaskInitialize),
 
 # The register client use case
-  (r'/client/new', ClientNew),
-  (r'/client/contact', ClientContact),
-  (r'/client/creditors/new', ClientCreditorsNew),
-  (r'/client/creditors', ClientSelectCreditors),
-  (r'/client/validate', ClientValidate),
-  (r'/client/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a 
+  (r'/client/register', ClientNew),
+  (r'/client/register/contact', ClientContact),
+  (r'/client/register/creditors/new', ClientCreditorsNew),
+  (r'/client/register/creditors', ClientSelectCreditors),
+  (r'/client/register/validate', ClientValidate),
+  (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a 
                                            # real GET/POST
 # The clients edit debts use case
   (r'/client/debts/list', ClientDebts),
@@ -844,27 +888,18 @@ application = webapp.WSGIApplication([
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
 
 # The register organisation use case
-  (r'/organisation/new', OrganisationNew),
+  (r'/organisation/register', OrganisationNew),
   (r'/organisation/employees', OrganisationEmployeesList),
-  (r'/organisation/employees/new', OrganisationEditEmployee),
+  (r'/organisation/register/zipcodes', OrganisationZipcodes), #FIXME:
+  (r'/organisation/employees/add', OrganisationEditEmployee),
   (r'/organisation/employees/edit/(.*)', OrganisationEditEmployee),
   (r'/organisation/employees/resize/(.*)', OrganisationEmployeeResize),
-  (r'/organisation/zipcodes', OrganisationZipcodes), #FIXME:
   (r'/employee/photo/(.*)', Photo),
 
 # Several employee use cases
-  (r'/employee/approvals', EmployeeWaiting),
-  (r'/employee/waiting', EmployeeWaiting),
-  (r'/employee/approve/(.*)', EmployeeApprove),
-  (r'/employee/become/client/(.*)', EmployeeBecome),
-  (r'/employee/become', EmployeeBecome),
-#  (r'/finished', Finished),
-  (r'/company/new', AddCompany),
-  (r'/category/new', AddCategory),
-#  (r'/addemployees', AddEmployees),
-  (r'/category/list', ShowCategories),
-  (r'/test', Test),
-  (r'/reset', ResetPassword),
+  (r'/employee/handle/approvals', EmployeeWaiting),
+  (r'/employee/handle/waiting', EmployeeWaiting),
+  (r'/employee/handle/approve/(.*)', EmployeeApprove),
 ], debug=True)
 
 def main():

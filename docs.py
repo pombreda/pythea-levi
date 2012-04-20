@@ -7,7 +7,6 @@ import yaml
 import simplejson as json
 
 from collections import defaultdict
-"""
 DIR_PATH = os.path.abspath(os.path.join('..', 'ae-python'))
 
 EXTRA_PATHS = [
@@ -26,7 +25,6 @@ EXTRA_PATHS = [
 
 sys.path = EXTRA_PATHS + sys.path
 
-"""
 
 urlparms=re.compile(r'\(.*?\)')
 reqparms=re.compile(r'self.request.(?:.*?.)?get\(\'(.*?)\'\)')
@@ -80,6 +78,7 @@ class Document():
         self.routes = routes
 
         docs = []
+        tree = defaultdict(dict)
 	for handler, paths in routes.items():
 	    this = {}
 	    this['class'] = handler.__name__
@@ -90,17 +89,49 @@ class Document():
 	    max = 0
 	    longest = 0
 	    for path in paths:
+		elems = path.split('/', 3)
+		if len(elems) < 3 and len(elems)>1:
+		    # must be anonymous
+		    user, usecase, step = 'anonymous', elems[1], None
+                    if not usecase: usecase = '/'
+                elif len(elems) == 3:
+		    user, usecase = tuple(elems[1:])
+		    step = None
+	        elif len(elems) == 4:
+		    user, usecase, step = tuple(elems[1:])
+	        if not usecase in tree[user]: 
+		    tree[user][usecase] = {}
+                if not step: step = '/'
+	        if step not in tree[user][usecase]:
+		    tree[user][usecase][step] = path
+
 		parms.append(urlparms.findall(path))
 		if len(parms[-1]) > max:
-		   max = len(parms[-1])
-		   longest = len(parms) - 1
+		    max = len(parms[-1])
+		    longest = len(parms) - 1
 
 	    methods = []
 	    for method in ['post', 'get']:
 		m = getattr(handler, method)
 		if self.module == inspect.getmodule(m): # otherwise it is inherited
 		    methods.append(document(m, paths[longest]))
+
 	    this['methods'] = methods
 	    docs.append(this)
             self.docs = docs
+#            for user in tree.values():
+#                for usecase, steps in user.items():
+#                    if len(steps) == 1 and steps[0] == '/':
+#                        user[usecase] = []
+            self.tree = tree
+                 
 
+if __name__ == '__main__':
+    import main
+    d = Document(main.application, main)
+    for key, user in d.tree.items():
+        print key
+        for k2, usecase in user.items():
+            print '\t', k2, usecase
+
+    
