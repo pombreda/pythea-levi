@@ -78,6 +78,7 @@ class BaseHandler(webapp.RequestHandler):
 
     def render(self, vars, templ=None):
         #self.response.out.write('Session ' + str(self.session))
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
             self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
@@ -674,7 +675,7 @@ class EmployeeBecome(BaseHandler):
             logging.debug(client)
             user = models.User.get_by_key_name(client)
             if not user:
-                self.redirect(self.request.url)
+                self.redirect('/employee/become')
             else:
                 logging.debug(user)
                 start_page = user.start_page()

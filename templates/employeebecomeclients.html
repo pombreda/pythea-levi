@@ -11,7 +11,7 @@
             <form method="post">
             {% for client in clients %}
 	         <li>
-                 <a href="/employee/become/client/{{client.key.name}}"> 
+                 <a href="/admin/become/client/{{client.key.name}}"> 
                          {{client.first_name}} {{client.last_name}} </a>
              </li>
             {% endfor %}

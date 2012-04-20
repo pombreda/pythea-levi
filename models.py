@@ -104,7 +104,7 @@ class SocialWorker(User):
             worker.sysadmin = flag
 
     def start_page(self):
-        return '/employee/approvals'
+        return '/employee/handle/approvals'
 
 class Client(User):
     address = db.StringProperty()
