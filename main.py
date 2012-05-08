@@ -254,9 +254,9 @@ class ClientSelectCreditors(BaseHandler):
                 user.removeCreditor(creditor)
         action = self.request.get('action')
         if action == 'opslaan':
-            self.redirect('/client/creditors')
+            self.redirect('/client/register/creditors')
         else:
-            self.redirect('/client/validate')
+            self.redirect('/client/register/validate')
 
 
 class ClientCreditorsNew(BaseHandler):
@@ -310,9 +310,9 @@ class ClientValidate(BaseHandler):
             # FIXME: also mark that the user has finished data entry.
             # And make sure that the initial e-mail is sent only once.
         
-            self.redirect('/client/submitted')
+            self.redirect('/client/register/submitted')
         else:
-            self.redirect('/client/creditors')
+            self.redirect('/client/register/creditors')
        
 
 class ClientSubmitted(BaseHandler):
@@ -350,8 +350,15 @@ class ClientDebtsAdd(BaseHandler):
         user = self.get_user()
         creditor = models.CreditorLink.get_by_id(int(creditor))
         form = forms.DebtForm()
+        selected = self.request.get('selected')
+        if selected:
+            selected = models.Creditor.get_by_id(int(selected))
+        url = urlparse.urlsplit(self.request.url)
+        url = urlparse.urlunparse((url.scheme, url.netloc, url.path, '', '', ''))
         vars = { 'user': user,
                  'creditor': creditor,
+                 'selected': selected,
+                 'come_from': url,
                  'form': form }
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
         #self.response.out.write(template.render(path, vars))
@@ -383,15 +390,22 @@ class ClientDebtsAdd(BaseHandler):
 
 class ClientDebtsSelectCreditor(BaseHandler):
     """This is used to select a 'deurwaarder' for a debt (or a creditor in case of a 'deurwaarder'"""
-    def get(self):
+    def get(self, selected=None):
         user = self.get_user()
-        creditors = models.Creditor.all()
+        come_from = self.request.get('come_from')
+        is_collector = self.request.get('is_collector') == 'True'
+        if not selected:
+            creditors = models.Creditor.all()
+            #creditors.filter('display_name =', 'Woonbron')
+            creditors = creditors.filter('is_collector !=', is_collector)
       
-        vars = { 'user': user,
-                 'creditors': creditors }
-        self.render(vars, 'clientdebtsselectcreditor.html')
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsselectcreditor.html')
-        #self.response.out.write(template.render(path, vars))
+            vars = { 'user': user,
+                     'come_from': come_from,
+                     'is_collector': is_collector,
+                     'creditors': creditors }
+            self.render(vars, 'clientdebtsselectcreditor.html')
+        else:
+            self.redirect("%s?selected=%s" % (come_from, selected))
         
 
 class OrganisationNew(BaseHandler):
@@ -654,6 +668,8 @@ class EmployeeApprove(BaseHandler):
         client = models.Client.get_by_key_name(client)
         for creditor in client.creditors:
             # send mail to the creditor (or the Bailiff for this creditor)
+            creditor.send_email()
+            creditor.put()
             pass
         client.approve()
         message = 'We zouden hier mails moeten versturen naar crediteuren, maar ik heb nog een voorbeeldbrief nodig. Hans'
@@ -663,7 +679,7 @@ class EmployeeApprove(BaseHandler):
         self.response.out.write(template.render(path, vars))
 
 
-class EmployeeBecome(BaseHandler):
+class AdminBecome(BaseHandler):
     def get(self, client = None):
         if not client:
             clients = models.User.all()
@@ -675,9 +691,8 @@ class EmployeeBecome(BaseHandler):
             logging.debug(client)
             user = models.User.get_by_key_name(client)
             if not user:
-                self.redirect('/employee/become')
+                self.redirect('/admin/become')
             else:
-                logging.debug(user)
                 start_page = user.start_page()
                 logging.debug(start_page)
                 session = get_current_session()
@@ -804,7 +819,7 @@ class Test(BaseHandler):
 class TaskInitialize(BaseHandler):
     def get(self):
         logging.info(str(self.request.url))
-        taskqueue.add(url='/task/init')
+        taskqueue.add(url='/admin/init')
 
     def post(self):
         """Background task to initialize the database with a list of clients and creditors"""
@@ -831,8 +846,6 @@ class TaskInitialize(BaseHandler):
             logging.info('Error creating organisation')
             logging.info(e)
    
-        return
-
         with open('schuldeisers.txt') as file:
             for line in file:
                 website, display_name = line.strip().split(None,1)
@@ -843,8 +856,13 @@ class TaskInitialize(BaseHandler):
                     continue
                 else:
                     logging.info('%s,%s' % (website, display_name))
+                    is_collector = False
+                    if website.startswith('>'):
+                        is_collector = True
+                        website = website[1:]
                     website = 'http://' + website
                     creditor = models.Creditor(website=website, 
+                                               is_collector=is_collector, 
                                                display_name=display_name)
                     try:
                         creditor.expand()
@@ -869,8 +887,8 @@ application = webapp.WSGIApplication([
 #  (r'/addemployees', AddEmployees),
   (r'/admin/category/list', ShowCategories),
   (r'/admin/test', Test),
-  (r'/admin/become/client/(.*)', EmployeeBecome),
-  (r'/admin/become', EmployeeBecome),
+  (r'/admin/become/client/(.*)', AdminBecome),
+  (r'/admin/become', AdminBecome),
 
 # Background tasks
 #  (r'/task/init', TaskInitialize),
@@ -887,6 +905,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/list', ClientDebts),
   (r'/client/debts/add/(.*)', ClientDebtsAdd),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
+  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
 
 # The register organisation use case
   (r'/organisation/register', OrganisationNew),
@@ -905,6 +924,11 @@ application = webapp.WSGIApplication([
 
 def main():
     run_wsgi_app(application)
+
+def handle_404(request, response, exception):
+    logging.exception(exception)
+    response.write('Oeps! Deze pagina bestaat niet!')
+    response.set_status(404)
 
 if __name__ == '__main__':
     main()

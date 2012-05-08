@@ -12,14 +12,14 @@
             {{ creditor.creditor.display_name }}
             <input type="hidden" name="creditor" value="{{creditor.key.id}}">
             <table>
-             <tr><th>Omschrijving</th><th>Schuldeiser</th><th>Datum</th><th>Dossiernummer</th><th>Openstaand bedrag</th><th>Afbetaling</th>
+             <tr><th>Deurwaarder</th><th>Datum</th><th>Dossiernummer Deurwaarder</th><th>Dossiernummer Schuldeiser</th><th>Openstaand bedrag</th><th>Afbetaling</th>
              </tr>
             {% for debt in creditor.debts %}
 	         <tr>
-                      <td>{{debt.description}}</td>
                       <td>{{debt.creditor_or_collector}}</td> 
                       <td>{{debt.original_date}}</td>
-                      <td>{{debt.dossier_number}}</td>
+                      <td>{{debt.collector_dossier_number}}</td>
+                      <td>{{debt.creditor_dossier_number}}</td>
                       <td>{{debt.amount}}</td>
                       <td>{{debt.payment_amount}}</td>
              </tr>
@@ -35,10 +35,15 @@
                 <td>
               </tr>
               <tr>
-                <td>{{form.description}}</td>
-                <td><a href="/client/debts/creditor/select">{{debt.creditor_or_collector}}Klik me</a></td>
+                {% if not selected %}
+                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{come_from}}">{{debt.creditor_or_collector}}Klik me</a></td>
+                {% else %}
+                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{come_from}}">{{selected.display_name}}</a></td>
+                {% endif %}
+                <input type="hidden" name="selected" value="{{selected.key.id}}">
                 <td>{{form.original_date}}</td>
-                <td>{{form.dossier_number}}</td>
+                <td>{{form.collector_dossier_number}}</td>
+                <td>{{form.creditor_dossier_number}}</td>
                 <td>{{form.amount}}</td>
                 <td>{{form.payment_amount}}</td>
                 <td><input type="submit"></td>

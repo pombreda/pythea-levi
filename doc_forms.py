@@ -11,7 +11,7 @@ EXTRA_PATHS = [
   os.path.join(DIR_PATH, 'lib', 'fancy_urllib'),
   os.path.join(DIR_PATH, 'lib', 'ipaddr'),
   os.path.join(DIR_PATH, 'lib', 'protorpc'),
-  os.path.join(DIR_PATH, 'lib', 'webob'),
+  os.path.join(DIR_PATH, 'lib', 'webob_0_9'),
   os.path.join(DIR_PATH, 'lib', 'webapp2'),
   os.path.join(DIR_PATH, 'lib', 'yaml', 'lib'),
   os.path.join(DIR_PATH, 'lib', 'simplejson'),
@@ -25,13 +25,13 @@ import forms
 from django import forms as df
 
 for item in inspect.getmembers(forms, inspect.isclass):
-    print item[0], dir(item[1])
-    print item[1].base_fields
+#    print item[0], dir(item[1])
+#    print item[1].base_fields
     if item[0] == 'CategoryForm':
-        print item[1].base_fields['label'].__dict__
+        print 'hello', `type(item[1].base_fields['label'])`
     #print dir(item[1].Meta)
     if item[0] == 'DebtForm':
-        print dir(item[1].base_fields['creditor'])
+        print type(item[1].base_fields['creditor'])
         print item[1].base_fields['creditor'].query
         print item[1].base_fields['creditor'].reference_class
         print dir(item[1].base_fields['creditor'].query)

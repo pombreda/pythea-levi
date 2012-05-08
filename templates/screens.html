@@ -1,0 +1,16 @@
+<ol>
+{% for k,v in tree.items %}
+  <li>{{ k }}
+  <ul>
+  {% for usecase, screens in v.items %} 
+    <li>{{ usecase }}
+    <ul>
+    {% for screen, path in screens.items %}         
+       <li><a href="{{path}}">{{screen}}</a></li>
+    {% endfor %}</ul>  
+    </li>
+  {% endfor %}
+  </ul>
+  </li>
+{% endfor %}
+</ol>

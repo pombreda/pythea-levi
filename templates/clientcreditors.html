@@ -19,6 +19,8 @@
                           <input type="text" id="{{debt.key.id}}" 
                                  value="{{debt.amount|default_if_none:'0.0'}}" name="{{debt.key.id}}"></td>
                  </tr>
+            {% empty %}
+                 No debts entered yet.
             {% endfor %}
             </table>
             <input type="submit" name="submit" value="store">

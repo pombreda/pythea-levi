@@ -123,11 +123,11 @@ class Client(User):
         if self.state == 'APPROVED':
             return '/client/debts/list'
         elif self.state == 'COMPLETED':
-            return '/client/creditors'
+            return '/client/register/creditors'
         elif self.state == 'FINISHED':
-            return '/client/finished'
+            return '/client/register/finished'
         else:
-            return '/client/creditors'
+            return '/client/register/creditors'
 
     def hasCreditor(self, creditor):
         for link in self.creditors:
@@ -172,6 +172,7 @@ keywords_re = re.compile(r'<meta\s+name="keywords"\s+content=["\'](.*?)["\']')
 
 class Creditor(Organisation):
     tags = db.StringListProperty()
+    is_collector = db.BooleanProperty(default=False)
 
     def expand(self):
         url = self.website
@@ -210,15 +211,40 @@ class CreditorLink(db.Model):
     user = db.ReferenceProperty(Client, collection_name='creditors')
     estimated_amount = DecimalProperty(default=decimal.Decimal('0.00')) 
     approved = db.BooleanProperty()
+    last_email_date = db.DateProperty()
+    complete = db.BooleanProperty()
     registration_date = db.DateProperty(auto_now_add=True)
     last_changed_date = db.DateProperty(auto_now=True)
+
+    def send_email(self):
+        logging.error("FIXME: need to actually send an email")
+        self.last_email_date = datetime.date.today()
+        self.approve()
+
+    def approve(self):
+        self.approved = True
+
+    def status(self):
+        if not self.approved:
+            return "WAITING FOR APPROVAL"
+        elif not self.last_email_date:
+            return "NO EMAIL SENT"
+        elif not self.debts:
+            return "WAITING FOR ANSWER"
+        elif not self.complete:
+            return "WAITING FOR 2ND APPROVAL"
+        elif self.complete:
+            return "COMPLETE"
+        else:
+            return "ILLEGAL STATE"
 
 
 class Debt(db.Model):
     creditor = db.ReferenceProperty(CreditorLink, collection_name='debts')
     collector = db.ReferenceProperty(Creditor)
     original_date = db.DateProperty()
-    dossier_number = db.StringProperty()
+    creditor_dossier_number = db.StringProperty()
+    collector_dossier_number = db.StringProperty()
     registration_date = db.DateProperty(auto_now_add=True)
     last_changed_date = db.DateProperty(auto_now=True)
     amount = DecimalProperty(default=decimal.Decimal('0.00')) 
