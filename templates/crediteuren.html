@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      <div id="content-container"> 
+        <div id="content"> 
+            <a href="/client/creditors/new">Voeg een nieuwe crediteur toe</a>
+            <form method="post">
+            <ul>
+            {% for company in creditors %}
+	         <li>
+                      <input type="checkbox" name="selected" 
+                             value="{{company.key.id}}"
+                             {% if company.selected %} checked {% endif %}> &nbsp;
+                      <input type="hidden" name="visible" 
+                             value="{{company.key.id}}">
+                      <img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }} 
+                 </li>
+            {% endfor %}
+            </ul>
+            <input type="submit" name="action" value="opslaan">
+            <input type="submit" name="action" value="klaar">
+            </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

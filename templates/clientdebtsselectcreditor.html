@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+    <link rel="stylesheet" type="text/css" href="/css/snn.css">
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      {% block main %}
+      {{is_collector}}
+      <div id="content-container"> 
+        <div id="content"> 
+            <ul>
+            {% for company in creditors %}
+	         <li>
+                      <img src="{{company.icon}}" width="16" height="16">
+                      <a href="/client/debts/creditor/select/{{company.key.id}}?come_from={{come_from}}">
+                          {{company.display_name}}
+                      </a>
+                 </li>
+            {% endfor %}
+            </ul>
+        </div>
+      </div>
+      {% endblock %}            
+    </div>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"> 
+	<!--[if IE ]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+	<meta name="viewport" content="width=device-width, target-densityDpi=device-dpi, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+	<meta name="robots" content="index, follow">
+	<title>Schuldendossier</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery.address-1.4.min.js"></script>
+	<script src="js/levi.js"></script>
+</head>
+<body>
+	<div class="wrapper">
+		<header>
+			<nav>
+				<p>Informatie over <strong>schuldendossier.nl</strong> voor:</p>
+				<ul>
+					<li><a href="/client/register">Cliënten</a></li><!-- link to info page -->
+					<li><a href="/organisation/register">Hulpverleners</a></li><!-- link to info page -->
+					<li><a href="#">Gemeenten</a></li><!-- link to info page -->
+					<li><a href="#">Schuldeisers</a></li><!-- link to info page -->
+				</ul>
+			</nav>
+			<form method="post" action="/login" id="login">
+				<p>Login:</p>
+				<p>
+				<label for="userid">Gebruikersnaam</label>
+				<input id="userid" name="userid" type="text">
+				</p>
+				<p>
+				<label for="password">Wachtwoord</label>
+				<input id="password" name="password" type="password">
+				</p>
+				<p>
+					<input type="submit" value="Log in">
+				</p>
+			</form>
+		</header>
+		<div class="content">
+	<ul class="tabset">
+		<li>
+			<h2>Mijn dossier</h2>
+			<div id="content"></div>
+		</li>
+	</ul>
+		</div>
+	</div>
+</body>
+</html>

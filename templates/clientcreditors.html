@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+    <link rel="stylesheet" type="text/css" href="/css/snn.css">
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      <div id="content-container"> 
+        <div id="content"> 
+            <form method="post">
+            <table>
+            {% for debt in user.debts %}
+	         <tr>
+                      <td>{{ debt.creditor.display_name }}</td>
+                      <td><img src="{{ debt.creditor.icon}}" alt=""></td>
+                      <td>{{ debt.registration }}</td>
+                      <td><label for="{{debt.key.id}}">Bedrag</label>
+                          <input type="text" id="{{debt.key.id}}" 
+                                 value="{{debt.amount|default_if_none:'0.0'}}" name="{{debt.key.id}}"></td>
+                 </tr>
+            {% empty %}
+                 No debts entered yet.
+            {% endfor %}
+            </table>
+            <input type="submit" name="submit" value="store">
+            <input type="submit" name="submit" value="finish">
+            </form>
+        </div>
+      </div>
+      {% endblock %}            
+    </div>
+  </body>
+</html>

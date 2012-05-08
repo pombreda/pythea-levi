@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      {% block main %}
+      <div id="content-container"> 
+        <div id="content"> 
+            <form method="post">
+            Klik op een schuldeiser om een schuldbewijs te verwerken.
+            <table>
+            {% for creditor in user.creditors %}
+	         <tr>
+                      <td>
+                          <a href="/client/debts/add/{{creditor.key.id}}">
+                          <img src="{{ creditor.creditor.icon}}" alt="" width="16" height="16">
+                          </a>
+                      </td>
+                      <td>
+                          <a href="/client/debts/add/{{creditor.key.id}}">
+                          {{ creditor.creditor.display_name }}
+                          </a>
+                      </td>
+                      <td>
+                          {{ creditor.status }}
+                      </td>
+                 </tr>
+            {% endfor %}
+            </table>
+            <input type="submit" name="action" value="Klaar">
+            </form>
+        </div>
+      </div>
+      {% endblock %}            
+    </div>
+  </body>
+</html>

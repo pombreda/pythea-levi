@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+    <link rel="stylesheet" type="text/css" href="css/snn.css">
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      {% block main %}
+      <div id="content-container"> 
+        <div id="content"> 
+          {% block content %}
+
+<form method="post" action="" enctype="multipart/form-data">
+
+<table>
+{% for form in forms %}
+    <tr><td colspan=2>{{form.title}}</td></tr>
+    {{ form.as_table }}
+{% endfor %}
+</table>
+<p class="submit"><input type="submit" value="Submit" /></p>
+</form>
+
+
+          {% endblock %}            
+        </div>
+      </div>
+      {% endblock %}            
+    </div>
+    <div id="footer">
+      Hans Then: Pythea: Jubilee
+    </div>
+  </body>
+</html>
