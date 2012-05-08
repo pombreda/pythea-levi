@@ -81,6 +81,7 @@ class BaseHandler(webapp.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
+            self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
@@ -159,9 +160,9 @@ class Main(BaseHandler):
     def get(self):
         """Show the default screen. This is now the login screen"""
         user = self.user
-        if not user:
-            self.redirect('/login')
-            return
+#        if not user:
+#            self.redirect('/login')
+#            return
         self.session['JSON'] = False
 
         vars = { 

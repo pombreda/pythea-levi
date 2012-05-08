@@ -7,6 +7,63 @@
 	<meta name="robots" content="index, follow">
 	<title>Schuldendossier</title>
 	<link rel="stylesheet" href="css/style.css">
+	<!-- script src="js/zepto.min.js"></script -->
+	<!-- script src="js/underscore-min.js"></script -->
+	<!-- script src="js/mustache.js"></script -->
+	<!-- script src="js/ICanHaz.min.js"></script -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery.address-1.4.min.js"></script>
+	<script src="js/snn.js"></script>
+	
+	<script id="infopage" type="text/html">
+	<div class="content-box">
+		<p>{{intro}}</p>
+	</div>
+	</script>
+	<script id="tabset" type="text/html">
+	<ul id="{{id}}" class="tabset">
+		{{#tabs}}{{> tabset.tab}}{{/tabs}}
+	</ul>
+	</script>
+	<script id="tabset.tab" type="text/html">
+	<li>
+		<h2>{{title}}</h2>
+		<div>
+			<p>{{content}}</p>
+		</div>
+	</li>
+	</script>
+	
+	<script> /*
+	var appStructure = {
+		employee: {
+			intro: "Dit is het infoscherm voor mederwerkers",
+			tabs: [
+				{title:"Aanmeldingen",content:"Lijst met nieuwe aanmeldingen"},
+				{title:"Wachtend",content:"Lijst met dossiers in behandeling"}
+			]
+		},
+		admin: {
+			intro: "Dit is het infoscherm voor admins"
+		},
+		organisation: {
+			intro: "Dit is het infoscherm voor organisaties"
+		},
+		client: {
+			intro: "Dit is het infoscherm voor clienten",
+			tabs: [
+				{title:"Mijn dossier","Dossier overzicht"}
+			]
+		}
+	}
+	
+	$(document).ready(function () {
+		return;
+		$.each(appStructure,function(key,value){
+			$("#content").append(ich.infopage(value));
+		});
+	}); */
+	</script>
 </head>
 <body>
 	<div class="wrapper">
@@ -14,7 +71,7 @@
 			<nav>
 				<p>Informatie over <strong>schuldendossier.nl</strong> voor:</p>
 				<ul>
-					<li><a href="#">Cliënten</a></li>
+					<li><a href="/test">Cliënten</a></li>
 					<li><a href="#">Hulpverleners</a></li>
 					<li><a href="#">Gemeenten</a></li>
 					<li><a href="#">Schuldeisers</a></li>
@@ -32,26 +89,7 @@
 				</p>
 			</form>
 		</header>
-		<div class="content">
-			<a href="#" class="online-help">Help</a>
-			<section class="active">
-				<h2>Schuldendossier</h2>
-				<div>
-					<p>My content</p>
-				</div>
-			</section>
-			<section>
-				<h2>Mijn gegevens</h2>
-				<div>
-					<p>My content</p>
-				</div>
-			</section>
-			<section>
-				<h2>Mijn dossier</h2>
-				<div>
-					<p>My content</p>
-				</div>
-			</section>
+		<div id="content" class="content">
 		</div>
 	</div>
 </body>

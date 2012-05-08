@@ -38,6 +38,7 @@ body {
 
 body > .wrapper {
 	width: 88.671875%; /* 980/1024*100 */
+	max-width: 980px;
 	margin: 0 auto;
 	padding: .5em 0 0 0;
 }
@@ -96,35 +97,48 @@ header > form input {
 	box-shadow: inset 3px -3px 9px 0px @color_input_shadow;
 }
 
+/* Contents ----------------------------------------------------------------- */
+.content-box {
+	margin: 0;
+	padding: .5em;
+	width: 100%;
+	
+	background-color: @color_tab;
+	border-radius: @size_tab_radius;
+	-webkit-box-shadow: 3px 0px 9px 0px @color_tab_shadow;
+	-moz-box-shadow: 3px 0px 9px 0px @color_tab_shadow;
+	box-shadow: 3px 0px 9px 0px @color_tab_shadow;
+}
+
 /* Tabs -------------------------------------------------------------------- */
 .content {
 	position: relative;
 	margin: 0;
 	padding: 0;
 	overflow: visible;
+	
 }
 
-section {
+ul.tabset {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.tabset > li {
+	margin-top: 3em;
 	position: absolute;
 	top: 0;
 	left: 0;
-	margin: 3em 0 0 0;
-	padding: .5em;
-	background-color: @color_tab;
-	border-radius: @size_tab_radius;
-	-webkit-box-shadow: 3px 0px 9px 0px @color_tab_shadow;
-	-moz-box-shadow: 3px 0px 9px 0px @color_tab_shadow;
-	box-shadow: 3px 0px 9px 0px @color_tab_shadow;
 	z-index: 1;
-	width: 100%;
 }
 
-section.active {
+.tabset > li.active {
 	background-color: @color_tab_active;
 	z-index: 2;
 }
 
-section h2 {
+.tabset > li h2 {
 	height: 2.5em;
 	display: block;
 	padding: .5em 0;
@@ -139,19 +153,19 @@ section h2 {
 	font-weight: bold;
 }
 
-section:nth-child(3) h2 {
-	left: 18.836734693878%; /* 16.836734693878%+2 */
+.tabset > li:nth-child(3) h2 {
+	left: 18.836734693878%; /* (16.836734693878)+2 */
 }
 
-section:nth-child(4) h2 {
-	left: 37.673469387756%; /* (16,836734693878*2)+2 */
+.tabset > li:nth-child(4) h2 {
+	left: 37.673469387756%; /* (16.836734693878*2)+2 */
 }
 
-section:nth-child(5) h2 {
-	left: 57%;
+.tabset > li:nth-child(5) h2 {
+	left: 52.510204081634%; /* (16.836734693878*3)+2 */
 }
 
-section > div {
+.tabset > li > div {
 	background-color: #c3e9f4;
 	border: solid 1px #e2f4f6;
 	border-radius: @size_tab_radius;
