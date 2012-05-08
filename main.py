@@ -83,13 +83,13 @@ class BaseHandler(webapp.RequestHandler):
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
             self.response.headers['Access-Control-Allow-Origin'] = '*'
-            self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
+            #self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             self.response.out.write(template.render(path, vars))
             self.response.out.write('<br>Template: %s<br>' % templ)
-            js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
-            self.response.out.write(js)
+            #js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
+            #self.response.out.write(js)
 
     def flatten(self, value):
         try:
