@@ -36,9 +36,9 @@
               </tr>
               <tr>
                 {% if not selected %}
-                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{come_from}}">{{debt.creditor_or_collector}}Klik me</a></td>
+                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.creditor.key.id}}">{{debt.creditor_or_collector}}Klik me</a></td>
                 {% else %}
-                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{come_from}}">{{selected.display_name}}</a></td>
+                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.creditor.key.id}}">{{selected.display_name}}</a></td>
                 {% endif %}
                 <input type="hidden" name="selected" value="{{selected.key.id}}">
                 <td>{{form.original_date}}</td>

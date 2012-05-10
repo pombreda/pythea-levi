@@ -357,10 +357,11 @@ class ClientDebtsAdd(BaseHandler):
             selected = models.Creditor.get_by_id(int(selected))
         url = urlparse.urlsplit(self.request.url)
         url = urlparse.urlunparse((url.scheme, url.netloc, url.path, '', '', ''))
+        url = urllib.quote(url)
+        logging.debug(url)
         vars = { 'user': user,
                  'creditor': creditor,
                  'selected': selected,
-                 'come_from': url,
                  'form': form }
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
         #self.response.out.write(template.render(path, vars))
@@ -407,7 +408,10 @@ class ClientDebtsSelectCreditor(BaseHandler):
                      'creditors': creditors }
             self.render(vars, 'clientdebtsselectcreditor.html')
         else:
-            self.redirect("%s?selected=%s" % (come_from, selected))
+            self.redirect("/client/debts/add/%s?selected=%s" % (urllib.unquote(come_from), selected))
+
+    def post(self, *args, **kwargs):
+        self.get(*args, **kwargs)
         
 
 class OrganisationNew(BaseHandler):
