@@ -3,8 +3,26 @@ function initialize() {
         event.preventDefault();
         var url = event.currentTarget.action;
         var url = event.currentTarget.attributes.action.nodeValue;
+/*
         data = $(this).serialize();
         $.address.value(url + '?' + data); 
+*/
+        data = $(this).serialize();
+        document.body.style.cursor = "wait";
+        $.ajax({
+            type: "POST",
+//            url: event.path,
+            url: url,
+            data: data,
+            success: function(html) {
+                $('#content').empty().append(html);
+                initialize();
+                document.body.style.cursor = "default";
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                document.body.style.cursor = "default";
+            }
+        });
     });
 }
 $(document).ready(function(){

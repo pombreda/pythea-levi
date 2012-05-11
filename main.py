@@ -86,8 +86,13 @@ class BaseHandler(webapp.RequestHandler):
             #self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
+            vars['self'] = self
+            vars['__FILE__'] = templ
             self.response.out.write(template.render(path, vars))
-            self.response.out.write('<br>Template: %s<br>' % templ)
+            self.response.out.write('<!--Template: %s -->\n' % templ)
+            if self.user:
+                self.response.out.write('<!--User: %s %s -->\n' % (self.user.first_name, self.user.last_name))
+                self.response.out.write('<!--Role: %s -->\n' % (self.user.class_name()))
             #js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
             #self.response.out.write(js)
 
@@ -190,6 +195,7 @@ class ClientNew(BaseHandler):
         # Read form variables and put the new user in the database
         form = forms.ClientForm(self.request.POST)
         if form.is_valid():
+            logging.error("user okay")  #FIXME: need to make sure users are not overwritten if they have an existing name
             new_user = form.save(commit=False)
             new_user.set_password(form.cleaned_data['password1'])
             new_user.put()
@@ -197,8 +203,12 @@ class ClientNew(BaseHandler):
             if session.is_active():
                 session.terminate()
             session['user'] = new_user
-            self.redirect('/client/contact')
+            self.redirect('/client/register/contact')
         else:
+            logging.error("error")
+            logging.error( form.non_field_errors() )
+            errors = [ (field.name, field.errors) for field in form ]
+            logging.error( errors )
             vars = { 'forms': [form], 'title': 'Registreer'}
             self.render(vars, 'form.html')
 
@@ -209,10 +219,13 @@ class ClientContact(BaseHandler):
         user = self.user
         zipcode = user.zipcode
         orgs = [ i for i in models.SocialWork.all() if i.accepts(zipcode)]
+ 
+        logging.error(orgs)
+        logging.error(models.SocialWork.all())
+        logging.error([i for i in models.SocialWork.all()])
         vars = { 'user': user,
                  'organisations': orgs, 
                  'title': 'Met wie heeft u gesproken?' }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'addcontact.html')
         self.render(vars, 'addcontact.html')
                 
     def post(self):
@@ -222,7 +235,7 @@ class ClientContact(BaseHandler):
         contact = models.SocialWorker.get(key)
         user.contact = contact
         user.put()
-        self.redirect('/client/creditors')
+        self.redirect('/client/register/creditors')
 
 
 class ClientSelectCreditors(BaseHandler):
@@ -295,13 +308,11 @@ class ClientValidate(BaseHandler):
         user = self.user
         vars = { 
                  'user': user }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientvalidate.html')
-        #self.response.out.write(template.render(path, vars))
         self.render(vars, 'clientvalidate.html')
 
     def post(self):
         action = self.request.get('action')
-        if action == 'correct':
+        if True: # action == 'correct': FIXME: the submit value is not transmitted using jQuery.
             user = self.user
             user.complete()
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
@@ -355,10 +366,6 @@ class ClientDebtsAdd(BaseHandler):
         selected = self.request.get('selected')
         if selected:
             selected = models.Creditor.get_by_id(int(selected))
-        url = urlparse.urlsplit(self.request.url)
-        url = urlparse.urlunparse((url.scheme, url.netloc, url.path, '', '', ''))
-        url = urllib.quote(url)
-        logging.debug(url)
         vars = { 'user': user,
                  'creditor': creditor,
                  'selected': selected,
@@ -371,20 +378,33 @@ class ClientDebtsAdd(BaseHandler):
         user = self.get_user()
         form = forms.DebtForm(self.request.POST)
         creditor = models.CreditorLink.get_by_id(int(creditor))
+        selected = self.request.get('selected')
+        if selected:
+            selected = models.Creditor.get_by_id(int(selected))
+        else:
+            selected = None
         if form.is_valid():
             logging.error("valid")
             new_debt = form.save(commit=False)
-            new_debt.creditor = creditor
+            new_debt.creditor = creditor   #FIXME: it may be that these roles should be reserver
+            new_debt.collector = selected  #FIXME: and that the creditor is selected
             new_debt.put()
-            self.redirect(self.request.url)
+            url = urlparse.urlsplit(self.request.url)
+            logging.error(url.path)
+	    self.redirect(url.path)
         else:
-            logging.error("error")
-            logging.error( form.non_field_errors() )
-            errors = [ (field.name, field.errors) for field in form ]
-            logging.error( errors )
+            # logging.error("error")
+            # logging.error( form.non_field_errors() )
+            # errors = [ (field.name, field.errors) for field in form ]
+            # logging.error( errors )
+            for field in form:
+                 logging.error( field )
+                 logging.error( dir(field) )
+                 logging.error( type(field) )
 
             vars = { 'user': user,
                      'creditor': creditor,
+                     'selected': selected,
                      'form': form }
             self.render(vars, 'clientdebtsadd.html')
             #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
@@ -646,8 +666,7 @@ class EmployeeApprovals(BaseHandler):
         clients = models.Client.all()
         clients.filter('state =', 'COMPLETED')
         vars = { 'clients' : clients }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'employeeapprovals.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'employeeapprovals.html')
 
 
 class EmployeeWaiting(BaseHandler):
@@ -659,16 +678,16 @@ class EmployeeWaiting(BaseHandler):
         vars = { 'state': state,
                  'clients' : clients }
 
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'employeeapprovals.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'employeeapprovals.html')
 
+    def post(self):
+        self.get()
 
 class EmployeeApprove(BaseHandler):
     def get(self, client):
         client = models.Client.get_by_key_name(client)
         vars = { 'client' : client }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'employeeapprove.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'employeeapprove.html')
 
     def post(self, client):
         client = models.Client.get_by_key_name(client)
@@ -681,8 +700,7 @@ class EmployeeApprove(BaseHandler):
         message = 'We zouden hier mails moeten versturen naar crediteuren, maar ik heb nog een voorbeeldbrief nodig. Hans'
         vars = { 'client' : client,
                  'message' : message }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'message.html')
 
 
 class AdminBecome(BaseHandler):
@@ -690,7 +708,7 @@ class AdminBecome(BaseHandler):
         if not client:
             clients = models.User.all()
             vars = { 'clients' : clients }
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'employeebecomeclients.html')
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'adminbecomeclients.html')
             self.response.out.write(template.render(path, vars))
         else:
             client = urllib.unquote(client)
@@ -785,21 +803,38 @@ class EnterCreditors(BaseHandler):
         
         self.redirect('/debts')
 
+class ShowCreditors(BaseHandler):
+    def get(self):
+        """Show a list of available creditors
+        """
+        creditors = list(models.Creditor.all())
+        creditors.reverse()
+        self.render({'creditors':creditors }, "admincreditors.html")
 
 class Initialize(BaseHandler):
     def get(self):
         taskqueue.add(url='/task/init')
 
+class Handle404(BaseHandler):
+    def get(self, url):
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.set_status(404, "Oops")
+        self.response.out.write("404: %s bestaat niet" % url)
+
+    def post(self, url):
+        self.get(url)
 
 class Test(BaseHandler):
     """I use this to test new code"""
     def get(self):
         """Show the test response"""
+        user = self.get_user()
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'test.html')
         #self.response.out.write(template.render(path, vars))
         self.response.headers['Content-Type'] = 'text/plain'
         #self.response.out.write(self.request.accept)
         self.dump()
+        self.response.out.write(dir(user))
 
     def post(self):
         """Testing the code to resize a passphoto"""
@@ -840,14 +875,19 @@ class TaskInitialize(BaseHandler):
             logging.info('Error creating client')
         
         try:
-            contact = models.SocialWorker(key_name='hans.then@gmail.com', username='medewerkerXX', first_name='mw', 
+            contact = models.SocialWorker(key_name='hans.then@gmail.com', username='contact XX', first_name='SMDD contact', 
                                           last_name='XX', email='hans.then@gmail.com')
             contact.set_password('XX')
-            contact.put()
-            organisation = models.Organisation('SMDD', display_name='SMDD', website='http://www.smdd.nl',
+            organisation = models.SocialWork(key_name='SMDD', display_name='SMDD', website='http://www.smdd.nl',
                                                email='info@smdd.nl', address='Havenstraat 80',
                                                zipcode='2300', city='Rotterdam', contact=contact)
             organisation.put()
+            contact.organisation = organisation
+            contact.put()
+            worker = models.SocialWorker(key_name='h.then@gpythea.nl', username='medewerker XX', first_name='SMDD MW', 
+                                          last_name='XX', email='hans.then@gmail.com', organisation=organisation)
+            worker.put()
+ 
         except Exception, e:
             logging.info('Error creating organisation')
             logging.info(e)
@@ -892,6 +932,7 @@ application = webapp.WSGIApplication([
   (r'/admin/category/new', AddCategory),
 #  (r'/addemployees', AddEmployees),
   (r'/admin/category/list', ShowCategories),
+  (r'/admin/creditor/list', ShowCreditors),
   (r'/admin/test', Test),
   (r'/admin/become/client/(.*)', AdminBecome),
   (r'/admin/become', AdminBecome),
@@ -926,6 +967,9 @@ application = webapp.WSGIApplication([
   (r'/employee/handle/approvals', EmployeeWaiting),
   (r'/employee/handle/waiting', EmployeeWaiting),
   (r'/employee/handle/approve/(.*)', EmployeeApprove),
+
+# Catch all
+  (r'/(.*)', Handle404),
 ], debug=True)
 
 def main():

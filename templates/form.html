@@ -2,16 +2,13 @@
 <html>
   <head>
     <title>Jubilee</title> 
-    <link rel="stylesheet" type="text/css" href="css/snn.css">
   </head> 
   <body id="body">
     <div id="main"> 
-      {% block main %}
       <div id="content-container"> 
         <div id="content"> 
-          {% block content %}
 
-<form method="post" action="" enctype="multipart/form-data">
+<form method="post" action="{{self.request.path}}" enctype="multipart/form-data">
 
 <table>
 {% for form in forms %}
@@ -23,13 +20,8 @@
 </form>
 
 
-          {% endblock %}            
         </div>
       </div>
-      {% endblock %}            
-    </div>
-    <div id="footer">
-      Hans Then: Pythea: Jubilee
     </div>
   </body>
 </html>
