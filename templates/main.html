@@ -12,6 +12,25 @@
 	<script src="js/levi.js"></script>
 </head>
 <body>
+	<div id="style-switches" class="style-switches">
+		<label><input type="checkbox" data-addclass-selector="header" data-addclass="alt">Header horizontal swap</label><br>
+		<script>
+			$("#style-switches input").change(function(e){
+				var $this = $(this),
+					addClassSelector = $this.attr("data-addclass-selector"),
+					addClass = $this.attr("data-addclass")
+					$addClassElement = $(addClassSelector) || null;
+				
+				if ($addClassElement) {
+					if (this.checked) {
+						$addClassElement.addClass(addClass);
+					} else if ($addClassElement.hasClass(addClass)) {
+						$addClassElement.removeClass(addClass);
+					}
+				}
+			});
+		</script>
+	</div>
 	<div class="wrapper">
 		<header>
 			<nav>
