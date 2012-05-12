@@ -104,7 +104,7 @@ class SocialWorker(User):
             worker.sysadmin = flag
 
     def start_page(self):
-        return '/employee/handle/approvals'
+        return '/employee/cases/list'
 
 class Client(User):
     address = db.StringProperty()
@@ -117,7 +117,6 @@ class Client(User):
     approval_date = db.DateProperty()
     archive_date = db.DateProperty() # ==> when the client is finished with entering his case file
     contact = db.ReferenceProperty(SocialWorker, collection_name="clients")
-
 
     def start_page(self):
         if self.state == 'APPROVED':
@@ -132,7 +131,8 @@ class Client(User):
     def hasCreditor(self, creditor):
         for link in self.creditors:
             if link.creditor.key().id() == creditor.key().id():
-                return True
+                return link
+        return False
 
     def addCreditor(self, creditor, amount=None):
         if not self.hasCreditor(creditor):
@@ -229,19 +229,63 @@ class CreditorLink(db.Model):
             return "WAITING FOR APPROVAL"
         elif not self.last_email_date:
             return "NO EMAIL SENT"
-        elif not self.debts:
+        elif not self.debts.count():
             return "WAITING FOR ANSWER"
-        elif not self.complete:
-            return "WAITING FOR 2ND APPROVAL"
         elif self.complete:
             return "COMPLETE"
         else:
             return "ILLEGAL STATE"
 
+    def status(self):
+        logging.error("I am here %s" % self.creditor.display_name)
+        if not self.approved:
+            return "WAITING FOR APPROVAL"
+        count = 0
+        for debt in self.debts:
+            logging.error("debt %d" % (count))
+            if debt.collector: 
+                logging.error("debt collected by %s" % debt.collector.display_name)
+                collector = self.user.hasCreditor(debt.collector)
+                if not collector:
+                    logging.error("\t but this collector is not linked to the customer")
+                    return "IN COLLECTION: MISMATCH: ERROR collector not found"
+                else:
+                    logging.error("\t trying to find matching debts")
+                    count2 = 0
+                    for debt2 in collector.debts:
+                        count2 = count2 + 1
+                        logging.error("\t debt2 %s" % debt2 )
+                        try: 
+                             if debt2.collected_for and debt2.collected_for.key().id() == debt.creditor.creditor.key().id():
+                                  logging.error("match")
+                                  return "IN COLLECTION: COMPLETE"
+                             else:
+                                  logging.error("no match")
+                        except Exception, e:
+                             logging.error("An error occurred matching %s", e)
+                    logging.error("We have left the loop count is now %d" % count2)
+                    if count2:
+                        return "IN COLLECTION: MISMATCH: ERROR collector has no collections for this creditor"
+                    if not count2:
+                        return "IN COLLECTION: WAITING FOR COLLECTOR"
+            else:
+                logging.error("self collected debt")
+                count = count + 1
+        else:
+            if count:
+                logging.error("only self collected debts")
+                return "COMPLETE"
+            else:
+                logging.error("no debts for this creditor")
+                return "WAITING FOR ANSWER"
+        return "ERROR: UNKNOWN STATE"
+
 
 class Debt(db.Model):
     creditor = db.ReferenceProperty(CreditorLink, collection_name='debts')
-    collector = db.ReferenceProperty(Creditor)
+    collector = db.ReferenceProperty(Creditor, collection_name="debts")
+    collected_for = db.ReferenceProperty(Creditor, collection_name="collections")
+
     original_date = db.DateProperty()
     creditor_dossier_number = db.StringProperty()
     collector_dossier_number = db.StringProperty()

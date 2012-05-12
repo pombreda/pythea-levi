@@ -78,6 +78,8 @@ class BaseHandler(webapp.RequestHandler):
     session = property(get_session)
 
     def redirect(self, uri, status=205):
+        if not 'x-text/html-fragment' in self.request.headers['Accept']: #or 'JSON' in self.session:
+            status = 302
         self.response.set_status(status)
         #webapp.RequestHandler.redirect(self, location)
         absolute_url = urlparse.urljoin(self.request.uri, uri)
@@ -344,6 +346,46 @@ class ClientSubmitted(BaseHandler):
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'message.html')
 
+class ClientRegisterPreviewLetter(BaseHandler):
+    def get(self, creditor):
+        """Voorbeeld brief aan een schuldeiser"""
+        key = creditor
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        user = creditor.user
+        creditor = creditor.creditor
+        path = os.path.join(os.path.dirname(__file__), 'brieven', 'schuldeiser-1.html')
+        vars = {}
+        vars['client'] = user
+        vars['key'] = key
+        vars['creditor'] = creditor
+        vars['today'] = 'VANDAAG'
+        vars['preview'] = True
+        self.response.out.write(template.render(path, vars))
+
+class ClientRegisterPrintLetter(BaseHandler):
+    def get(self, creditor):
+        """Verstuur een brief aan een schuldeiser"""
+        key = creditor
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        user = creditor.user
+        creditor = creditor.creditor
+        path = os.path.join(os.path.dirname(__file__), 'brieven', 'schuldeiser-1.html')
+        vars = {}
+        vars['client'] = user
+        vars['creditor'] = creditor
+        vars['today'] = 'VANDAAG'
+        vars['preview'] = False
+        html = template.render(path, vars)
+        from google.appengine.api import conversion
+        asset = conversion.Asset("text/html", html, "schuldeiser.html")
+        conversion_obj = conversion.Conversion(asset, "application/pdf")
+        result = conversion.convert(conversion_obj)
+        if not result.assets:
+            self.response.out.write("error genering pdf")
+        else:
+            self.response.headers['Content-Type'] = 'application/pdf'
+            for asset in result.assets:
+                self.response.out.write(asset.data)
 
 class ClientDebts(BaseHandler):
     def get(self):
@@ -372,13 +414,17 @@ class ClientDebtsAdd(BaseHandler):
         selected = self.request.get('selected')
         if selected:
             selected = models.Creditor.get_by_id(int(selected))
+
         vars = { 'user': user,
                  'creditor': creditor,
                  'selected': selected,
                  'form': form }
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
         #self.response.out.write(template.render(path, vars))
-        self.render(vars, 'clientdebtsadd.html')
+        if creditor.creditor.is_collector:
+            self.render(vars, 'clientdebtsadd_collector.html')
+        else:
+            self.render(vars, 'clientdebtsadd.html')
 
     def post(self, creditor):
         user = self.get_user()
@@ -390,10 +436,12 @@ class ClientDebtsAdd(BaseHandler):
         else:
             selected = None
         if form.is_valid():
-            logging.error("valid")
             new_debt = form.save(commit=False)
-            new_debt.creditor = creditor   #FIXME: it may be that these roles should be reserver
-            new_debt.collector = selected  #FIXME: and that the creditor is selected
+            new_debt.creditor = creditor 
+            if creditor.creditor.is_collector:
+                new_debt.collected_for = selected 
+            else:
+                new_debt.collector = selected 
             new_debt.put()
             url = urlparse.urlsplit(self.request.url)
             logging.error(url.path)
@@ -667,24 +715,14 @@ class Login(BaseHandler):
             self.response.out.write(e)
 
 
-class EmployeeApprovals(BaseHandler):
-    def get(self):
-        clients = models.Client.all()
-        clients.filter('state =', 'COMPLETED')
-        vars = { 'clients' : clients }
-        self.render(vars, 'employeeapprovals.html')
-
-
 class EmployeeWaiting(BaseHandler):
     def get(self):
-        state = self.request.get('state')
-        if not state: state = 'APPROVED'
         clients = models.Client.all()
-        clients.filter('state =', state)
-        vars = { 'state': state,
+        clients.filter('state !=', 'FINISHED')
+        vars = { 
                  'clients' : clients }
 
-        self.render(vars, 'employeeapprovals.html')
+        self.render(vars, 'employeecaseslist.html')
 
     def post(self):
         self.get()
@@ -839,14 +877,18 @@ class Test2(BaseHandler):
 
 class Test(BaseHandler):
     """I use this to test new code"""
-
     def get(self, args = 300):
         """Show the test response"""
-        user = self.get_user()
-        status = int(args)
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'test.html')
-        #self.response.out.write(template.render(path, vars))
-        self.redirect('/admin/test2', status)
+        from google.appengine.api import conversion
+        asset = conversion.Asset("text/plain", "hello world", "brief.txt")
+        conversion_obj = conversion.Conversion(asset, "application/pdf")
+        result = conversion.convert(conversion_obj)
+        if not result.assets:
+            self.response.out.write("error genering pdf")
+        else:
+            self.response.headers['Content-Type'] = 'application/pdf'
+            for asset in result.assets:
+                self.response.out.write(asset.data)
 
     def post(self):
         """Testing the code to resize a passphoto"""
@@ -960,6 +1002,8 @@ application = webapp.WSGIApplication([
   (r'/client/register/creditors/new', ClientCreditorsNew),
   (r'/client/register/creditors', ClientSelectCreditors),
   (r'/client/register/validate', ClientValidate),
+  (r'/client/register/previewletter/(.*)', ClientRegisterPreviewLetter),
+  (r'/client/register/printletter/(.*)', ClientRegisterPrintLetter),
   (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a 
                                            # real GET/POST
 # The clients edit debts use case
@@ -978,8 +1022,7 @@ application = webapp.WSGIApplication([
   (r'/employee/photo/(.*)', Photo),
 
 # Several employee use cases
-  (r'/employee/handle/approvals', EmployeeWaiting),
-  (r'/employee/handle/waiting', EmployeeWaiting),
+  (r'/employee/cases/list', EmployeeWaiting),
   (r'/employee/handle/approve/(.*)', EmployeeApprove),
 
 # Catch all
