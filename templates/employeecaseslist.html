@@ -1,0 +1,9 @@
+<div id="content"> 
+    <ul>
+        {% for client in clients %}
+        <li>
+             <a href="/employee/handle/approve/{{client.key.name}}"> {{ client.first_name }} {{ client.last_name }} </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

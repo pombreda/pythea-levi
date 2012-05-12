@@ -166,7 +166,7 @@ class Category(db.Model):
     def __str__(self):
         return self.label
 
-icon_re = re.compile(r'<link\s+(?:type="image/ico"\s+)?rel=".*?ico?"\s+href="(.*?)"', re.M | re.I)
+icon_re = re.compile(r'<link\s+(?:type=".*?"\s+)?rel=".*?icon?"\s+href="(.*?)"', re.M | re.I)
 base_re = re.compile(r'<base\s+href="(.*?)"', re.M | re.I)
 keywords_re = re.compile(r'<meta\s+name="keywords"\s+content=["\'](.*?)["\']')
 
