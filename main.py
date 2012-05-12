@@ -77,12 +77,18 @@ class BaseHandler(webapp.RequestHandler):
     user = property(get_user)
     session = property(get_session)
 
+    def redirect(self, uri, status=205):
+        self.response.set_status(status)
+        #webapp.RequestHandler.redirect(self, location)
+        absolute_url = urlparse.urljoin(self.request.uri, uri)
+        self.response.headers['Location'] = str(absolute_url)
+        self.response.clear()
+
     def render(self, vars, templ=None):
         #self.response.out.write('Session ' + str(self.session))
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
-            self.response.headers['Access-Control-Allow-Origin'] = '*'
             #self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
@@ -824,17 +830,23 @@ class Handle404(BaseHandler):
     def post(self, url):
         self.get(url)
 
-class Test(BaseHandler):
+class Test2(BaseHandler):
     """I use this to test new code"""
     def get(self):
         """Show the test response"""
         user = self.get_user()
+        self.response.out.write(self.request.accept)
+
+class Test(BaseHandler):
+    """I use this to test new code"""
+
+    def get(self, args = 300):
+        """Show the test response"""
+        user = self.get_user()
+        status = int(args)
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'test.html')
         #self.response.out.write(template.render(path, vars))
-        self.response.headers['Content-Type'] = 'text/plain'
-        #self.response.out.write(self.request.accept)
-        self.dump()
-        self.response.out.write(dir(user))
+        self.redirect('/admin/test2', status)
 
     def post(self):
         """Testing the code to resize a passphoto"""
@@ -934,6 +946,8 @@ application = webapp.WSGIApplication([
   (r'/admin/category/list', ShowCategories),
   (r'/admin/creditor/list', ShowCreditors),
   (r'/admin/test', Test),
+  (r'/admin/test/(.*)', Test),
+  (r'/admin/test2', Test2),
   (r'/admin/become/client/(.*)', AdminBecome),
   (r'/admin/become', AdminBecome),
 

@@ -11,10 +11,9 @@ function initialize() {
         document.body.style.cursor = "wait";
         $.ajax({
             type: "POST",
-//            url: event.path,
             url: url,
             data: data,
-            success: function(html) {
+            success: function(html, jqXHR) {
                 $('#content').empty().append(html);
                 initialize();
                 document.body.style.cursor = "default";
@@ -46,12 +45,14 @@ $(document).ready(function(){
 //            url: event.path,
             url: event.value,
             data: event.parameters,
-            success: function(html) {
+            success: function(html, textStatus, jqXHR) {
                 $('#content').empty().append(html);
                 initialize();
                 document.body.style.cursor = "default";
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                $('#content').empty().append(html);
+                initialize();
                 document.body.style.cursor = "default";
             }
         });
