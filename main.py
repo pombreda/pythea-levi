@@ -877,18 +877,12 @@ class Test2(BaseHandler):
 
 class Test(BaseHandler):
     """I use this to test new code"""
-    def get(self, args = 300):
+    def get(self, args = "http://www.ing.nl"):
         """Show the test response"""
-        from google.appengine.api import conversion
-        asset = conversion.Asset("text/plain", "hello world", "brief.txt")
-        conversion_obj = conversion.Conversion(asset, "application/pdf")
-        result = conversion.convert(conversion_obj)
-        if not result.assets:
-            self.response.out.write("error genering pdf")
-        else:
-            self.response.headers['Content-Type'] = 'application/pdf'
-            for asset in result.assets:
-                self.response.out.write(asset.data)
+        creditor = models.Creditor(website=args)
+        creditor.expand()
+        self.response.out.write(creditor.icon)
+        
 
     def post(self):
         """Testing the code to resize a passphoto"""
