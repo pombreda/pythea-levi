@@ -12,13 +12,12 @@
             {{ creditor.creditor.display_name }}
             <input type="hidden" name="creditor" value="{{creditor.key.id}}">
             <table>
-             <tr><th>Deurwaarder</th><th>Datum</th><th>Dossiernummer Deurwaarder</th><th>Dossiernummer Schuldeiser</th><th>Openstaand bedrag</th><th>Afbetaling</th>
+             <tr><th>Deurwaarder</th><th>Ontstaansdatum</th><th>Dossiernummer Schuldeiser</th><th>Openstaand bedrag</th><th>Afbetalingsregeling</th>
              </tr>
             {% for debt in creditor.debts %}
 	         <tr>
                       <td>{{debt.collector.display_name}}</td> 
                       <td>{{debt.original_date}}</td>
-                      <td>{{debt.collector_dossier_number}}</td>
                       <td>{{debt.creditor_dossier_number}}</td>
                       <td>{{debt.amount}}</td>
                       <td>{{debt.payment_amount}}</td>
@@ -42,7 +41,6 @@
                 {% endif %}
                 <input type="hidden" name="selected" value="{{selected.key.id}}">
                 <td>{{form.original_date}}</td>
-                <td>{{form.collector_dossier_number}}</td>
                 <td>{{form.creditor_dossier_number}}</td>
                 <td>{{form.amount}}</td>
                 <td>{{form.payment_amount}}</td>

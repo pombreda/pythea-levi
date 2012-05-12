@@ -1,10 +1,9 @@
 function initialize() {
     $('#content form').submit( function(event, ui) { 
         event.preventDefault();
-        var url = event.currentTarget.action;
+        /*var url = event.currentTarget.action;*/
         var url = event.currentTarget.attributes.action.nodeValue;
 /*
-        data = $(this).serialize();
         $.address.value(url + '?' + data); 
 */
         data = $(this).serialize();

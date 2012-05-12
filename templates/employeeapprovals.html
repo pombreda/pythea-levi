@@ -1,18 +1,9 @@
-      <div id="content"> 
-        <form method="POST" action="{{self.request.path}}">
-            <select name="state">
-                <option value="APPROVED" {% if state == "APPROVED" %} selected {% endif %} >Wacht op antwoord</option>
-                <option value="COMPLETED" {% if state == "COMPLETED" %} selected {% endif %} >Ter controle</option>
-                <option value="NEW" {% if state == "NEW" %} selected {% endif %} >Incompleet</option>
-                <option value="FINISHED" {% if state == "FINISHED" %} selected {% endif %} >Afgesloten</option>
-            </select>
-            <input type="submit">
-        </form>
-        <ul>
-             {% for client in clients %}
-             <li>
-                 <a href="/employee/handle/approve/{{client.key.name}}"> {{ client.first_name }} {{ client.last_name }} </a>
-             </li>
-             {% endfor %}
-        </ul>
-      </div>
+<div id="content"> 
+    <ul>
+        {% for client in clients %}
+        <li>
+             <a href="/employee/handle/approve/{{client.key.name}}"> {{ client.first_name }} {{ client.last_name }} </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
