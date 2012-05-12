@@ -8,7 +8,7 @@
       <div id="content-container"> 
         <div id="content"> 
             <a href="/client/creditors/new">Voeg een nieuwe crediteur toe</a>
-            <form method="post">
+            <form method="post" action="{{self.request.path}}">
             <ul>
             {% for company in creditors %}
 	         <li>
@@ -21,7 +21,6 @@
                  </li>
             {% endfor %}
             </ul>
-            <input type="submit" name="action" value="opslaan">
             <input type="submit" name="action" value="klaar">
             </form>
         </div>

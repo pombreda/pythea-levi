@@ -8,7 +8,7 @@
       {% block main %}
       <div id="content-container"> 
         <div id="content"> 
-            <form method="post">
+            <form method="post" action="{{self.request.path}}">
             {{ creditor.creditor.display_name }}
             <input type="hidden" name="creditor" value="{{creditor.key.id}}">
             <table>
@@ -16,7 +16,7 @@
              </tr>
             {% for debt in creditor.debts %}
 	         <tr>
-                      <td>{{debt.creditor_or_collector}}</td> 
+                      <td>{{debt.collector.display_name}}</td> 
                       <td>{{debt.original_date}}</td>
                       <td>{{debt.collector_dossier_number}}</td>
                       <td>{{debt.creditor_dossier_number}}</td>
@@ -29,16 +29,16 @@
                    {% if form.non_field_errors %}
                       {{ form.non_field_errors }}<br>
                    {% endif %}
-                   {% for field in form.fields %}
-                      {% if field.errors %} {{ field.errors }} <br> {% endif %}
+                   {% for field in form %}
+                      {{ field.errors }} 
                    {% endfor %}
                 <td>
               </tr>
               <tr>
                 {% if not selected %}
-                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{come_from}}">{{debt.creditor_or_collector}}Klik me</a></td>
+                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}">{{debt.creditor_or_collector}}Klik me</a></td>
                 {% else %}
-                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{come_from}}">{{selected.display_name}}</a></td>
+                <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}">{{selected.display_name}}</a></td>
                 {% endif %}
                 <input type="hidden" name="selected" value="{{selected.key.id}}">
                 <td>{{form.original_date}}</td>

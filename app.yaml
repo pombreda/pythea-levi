@@ -11,6 +11,9 @@ handlers:
 - url: /css
   static_dir: css
 
+- url: /info
+  static_dir: info
+
 - url: /images
   static_dir: images
 
@@ -20,9 +23,14 @@ handlers:
 - url: /html
   static_dir: html
 
+- url: /admin/.*
+  script: main.py
+  login: admin
+
 - url: /.*
   script: main.py
 
 builtins:
 - deferred: on
 - remote_api: on
+

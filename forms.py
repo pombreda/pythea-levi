@@ -75,9 +75,8 @@ class CreditorForm(df.ModelForm):
         exclude = ['display_name', '_class', 'icon', 'tags']
 
 class DebtForm(df.ModelForm):
-    description = forms.CharField()
     #creditor_or_collector = forms.CharField()
     class Meta:
         model = models.Debt
-        #fields = ['original_date', 'dossier_number', 'amount', 'payment_amount']
+        fields = ['original_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']
 

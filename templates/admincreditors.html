@@ -7,15 +7,13 @@
     <div id="main"> 
       <div id="content-container"> 
         <div id="content"> 
-            Selecteer de client.
-            <form method="post">
-            {% for client in clients %}
+            <ul>
+            {% for company in creditors %}
 	         <li>
-                 <a href="/admin/become/client/{{client.key.name}}"> 
-                         {{client.first_name}} {{client.last_name}} </a>
-             </li>
+                      <img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }} 
+                 </li>
             {% endfor %}
-            </form>
+            </ul>
         </div>
       </div>
     </div>
