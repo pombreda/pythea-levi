@@ -330,8 +330,8 @@ class ClientValidate(BaseHandler):
 
             # FIXME: also mark that the user has finished data entry.
             # And make sure that the initial e-mail is sent only once.
-        
-            self.redirect('/client/register/submitted')
+            #self.redirect('/client/register/submitted')
+            self.redirect('/client/debts/list')
         else:
             self.redirect('/client/register/creditors')
        
