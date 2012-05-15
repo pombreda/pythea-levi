@@ -7,7 +7,9 @@
 	<meta name="robots" content="index, follow">
 	<title>Schuldendossier</title>
 	<link rel="stylesheet" href="css/style.css">
-	<script src="js/jquery.min.js"></script>
+	<!-- script src="js/jquery.min.js"></script -->
+	<script src="js/jquery-1.7.2.min.js"></script>
+	<script src="js/jquery.validate.min.js"></script>
 	<script src="js/jquery.address-1.4.min.js"></script>
 	<script src="js/levi.js"></script>
 </head>
@@ -46,25 +48,38 @@
 				<p>Login:</p>
 				<p>
 				<label for="userid">Gebruikersnaam</label>
-				<input id="userid" name="userid" type="text">
+				<input id="userid" name="userid" type="text" required>
 				</p>
 				<p>
 				<label for="password">Wachtwoord</label>
-				<input id="password" name="password" type="password">
+				<input id="password" name="password" type="password" required>
 				</p>
 				<p>
 					<input type="submit" value="Log in">
 				</p>
 			</form>
 		</header>
-		<div class="content">
-	<ul class="tabset">
+		<section class="content">
+			<ul class="tabs">
+				<li class="active"><a href="">Schuldendossier</a></li>
+				<li><a href="">Mijn gegevens</a></li>
+			</ul>
+			<div class="content-wrapper">
+				<div class="content-inner" id="content">
+					My test text
+				</div>
+			</div>
+<!--	<ul class="tabset">
+		<li class="active">
+			<h2>Mijn dossier</h2>
+			<div id="content"></div>
+		</li>
 		<li>
 			<h2>Mijn dossier</h2>
 			<div id="content"></div>
 		</li>
-	</ul>
-		</div>
+	</ul> -->
+		</section>
 	</div>
 </body>
 </html>

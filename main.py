@@ -183,7 +183,7 @@ class ClientNew(BaseHandler):
         form = forms.ClientForm()
         form.title = 'Registreer'
         vars = { 'forms': [form] , 'title': 'Registreer'}
-        self.render(vars, 'form.html')
+        self.render(vars, 'clientregister.html')
 
     def post(self):
         """Enter the new client"""
@@ -632,6 +632,7 @@ class Login(BaseHandler):
             else:
                 vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
                 self.render(vars, 'login.html')
+                self.response.set_status(401)
         except Exception, e:
             logging.info("Error, probably user not found.")
             self.response.out.write(e)

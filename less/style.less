@@ -1,14 +1,16 @@
 /* Colors ------------------------------------------------------------------ */
+@color_text: #003339;
 @color_bg: #233272;
-@color_tab: #97d0e3;
-@color_tab_active: #d5f2f0;
+@color_bg_tab: #97d0e3;
+@color_bg_content: #D6F2EF;
+@color_bg_content_inner: #D1EBEA;
 @color_nav_link: #bfeef6;
-@color_input_shadow: #b9b7ba;
-@color_tab_shadow: rgba(0,0,0,.2);
-@color_tab_shadow_inner: rgba(0,0,0,.2);
+@color_shadow_input: #b9b7ba;
+@color_shadow_content: rgba(0,0,0,.2);
+@color_shadow_content_inner: rgba(0,0,0,.2);
 
 /* Sizes ------------------------------------------------------------------- */
-@size_tab_radius: 7px;
+@size_content_radius: .5em;
 
 /* General ----------------------------------------------------------------- */
 * {
@@ -92,25 +94,80 @@ header > form input {
 	border: none;
 	padding: .25em .5em;
 	width: 208px;
-	-webkit-box-shadow: inset 3px -3px 9px 0px @color_input_shadow;
-	-moz-box-shadow: inset 3px -3px 9px 0px @color_input_shadow;
-	box-shadow: inset 3px -3px 9px 0px @color_input_shadow;
+	-webkit-box-shadow: inset 3px -3px 9px 0px @color_shadow_input;
+	-moz-box-shadow: inset 3px -3px 9px 0px @color_shadow_input;
+	box-shadow: inset 3px -3px 9px 0px @color_shadow_input;
 }
 
+	/* Alternative header */
+	header.alt nav {
+		float: left;
+	}
+	header.alt form {
+		float: right;
+	}
+	header.alt form label {
+		display: inline-block;
+		width: 8em;
+		text-align: right;
+	}
+	header.alt form input[type=submit] {
+		float: right;
+	}
+
 /* Contents ----------------------------------------------------------------- */
-.content-box {
+.content {
+	color: @color_text;
+}
+.content-wrapper {
 	margin: 0;
 	padding: .5em;
 	width: 100%;
 	
-	background-color: @color_tab;
-	border-radius: @size_tab_radius;
-	-webkit-box-shadow: 3px 0px 9px 0px @color_tab_shadow;
-	-moz-box-shadow: 3px 0px 9px 0px @color_tab_shadow;
-	box-shadow: 3px 0px 9px 0px @color_tab_shadow;
+	background-color: @color_bg_content;
+	border-radius: @size_content_radius;
+	-webkit-box-shadow: 3px 0px 9px 0px @color_shadow_content;
+	-moz-box-shadow: 3px 0px 9px 0px @color_shadow_content;
+	box-shadow: 3px 0px 9px 0px @color_shadow_content;
+}
+
+.content-inner {
+	background-color: @color_bg_content_inner;
+	border: solid 1px #e2f4f6;
+	border-radius: @size_content_radius;
+	padding: 1em;
+	-webkit-box-shadow: inset 0 0 9px @color_shadow_content_inner;
+	-moz-box-shadow: inset 0 0 9px @color_shadow_content_inner;
+	box-shadow: inset 0 0 9px @color_shadow_content_inner;
+	min-height: 500px;
 }
 
 /* Tabs -------------------------------------------------------------------- */
+.tabs {
+	list-style: none;
+	padding: 0 0 0 .25em;
+	margin: 0;
+	overflow: auto;
+}
+.tabs li {
+	float: left;
+	padding: .5em 0;
+	margin: 0 .25em;
+	width: 165px;
+	text-align: center;
+	background-color: @color_bg_tab;
+	border-radius: @size_content_radius @size_content_radius 0 0;
+}
+.tabs li.active {
+	background-color: @color_bg_content;
+}
+.tabs li a {
+	font-weight: bold;
+	text-decoration: none;
+	color: @color_text;
+}
+
+/*
 .content {
 	position: relative;
 	margin: 0;
@@ -144,7 +201,7 @@ ul.tabset {
 	padding: .5em 0;
 	width: 165px;
 	text-align: center;
-	background-color: @color_tab;
+	background-color: @color_bg_content;
 	border-radius: @size_tab_radius @size_tab_radius 0 0;
 	position: absolute;
 	top: -3em;
@@ -154,15 +211,15 @@ ul.tabset {
 }
 
 .tabset > li:nth-child(3) h2 {
-	left: 18.836734693878%; /* (16.836734693878)+2 */
+	left: 18.836734693878%; /* (16.836734693878)+2 * /
 }
 
 .tabset > li:nth-child(4) h2 {
-	left: 37.673469387756%; /* (16.836734693878*2)+2 */
+	left: 37.673469387756%; /* (16.836734693878*2)+2 * /
 }
 
 .tabset > li:nth-child(5) h2 {
-	left: 52.510204081634%; /* (16.836734693878*3)+2 */
+	left: 52.510204081634%; /* (16.836734693878*3)+2 * /
 }
 
 .tabset > li > div {
@@ -175,9 +232,11 @@ ul.tabset {
 	box-shadow: inset 0 0 9px @color_tab_shadow_inner;
 	min-height: 500px;
 }
+*/
 
+/* Online help ------------------------------------------------------------- */
 .online-help {
-	background-color: @color_tab;
+	background-color: @color_bg_content;
 	color: #fff;
 	display: block;
 	border-radius: 50%;
@@ -198,22 +257,6 @@ ul.tabset {
 	position: fixed;
 	right: 2.27421875%; /* (1024-980)/4/1024*100 */
 	top: 12em;
-}
-
-/* Alternative header */
-header.alt nav {
-	float: left;
-}
-header.alt form {
-	float: right;
-}
-header.alt form label {
-	display: inline-block;
-	width: 8em;
-	text-align: right;
-}
-header.alt form input[type=submit] {
-	float: right;
 }
 
 /* Alternative look switcher */

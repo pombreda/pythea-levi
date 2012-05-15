@@ -1,59 +1,143 @@
-function initialize() {
-    $('#content form, form#login').submit( function(event, ui) { 
-        event.preventDefault();
-        var url = event.currentTarget.action;
-        var url = event.currentTarget.attributes.action.nodeValue;
-        data = $(this).serialize();
-        $.address.value(url + '?' + data); 
-    });
-    /*$(".witness" ).draggable({
-        appendTo: "body",
-        helper: "clone"
-    });
-    $("#content input").droppable({
-        activeClass: "ui-state-default",
-        hoverClass: "ui-state-hover",
-        accept: ":not(.ui-sortable-helper)",
-        drop: function( event, ui ) {
-            var index = ui.draggable[0].href.split('/').pop();
-            event.target.value=index;
-        }
-    });
+String.prototype.repeat = function( num )
+{
+	return new Array( num + 1 ).join( this );
+}
 
-    $('.variants-collapsible').hide();
-    $('.variants-collapse').collapser({
-        target: 'next',
-        effect: 'slide', 
-        changeText: 0,
-        expandClass: 'expIco',
-        collapseClass: 'collIco'
-    });
-    $(".witness-id").droppable({
-	activeClass: "ui-state-default",
-	hoverClass: "ui-state-hover",
-	accept: ":not(.ui-sortable-helper)", 
-	drop: function( event, ui ) {
-            var index1 = ui.draggable[0].href.split('/').pop();
-            var index2 = $(this).find('input').val();
-            if ($(this).hasClass('a')) {
-                index3 = $('#hidden-witness-id-b').val();
-                var compare = index1 + "/" + index3;
-            } else if ($(this).hasClass('b')) {
-                index3 = $('#hidden-witness-id-a').val();
-                var compare = index3 + "/" + index1;
-            } else {
-                var compare = index2 + "/" + index1;
-            }
-            $.address.value("compare/" + compare);
+// Enable or disable app waiting state on AJAX calls
+function appLoading(loading) {
+// @TODO: This stuff should be handled with classes
+	if (loading) {
+		$("body").css("cursor","waiting");
+	} else {
+		$("body").css("cursor","default");
+	}
+}
+
+$(document).ready(function(){
+
+// Set up automated validation for login form
+$("#login").validate();
+
+// Catch all form execution and pass it through AJAX calls
+$("form").on("submit",function(event) { 
+	event.preventDefault();
+	
+	var $this = $(this),
+		url = $this.attr("action"),
+		method = $this.attr("method") ? $this.attr("method").toLowerCase() : "get"
+		target = $this.attr("target") ? $this.attr("target").toLowerCase() : "content",
+		context = this,
+		redirected = false
+		;
+	
+	// If validation marked any errors, stop processing.
+	if ($this.find("input.error").length > 0) {
+		return;
+	}
+	
+	//data = $(this).serialize();
+	
+	if (method === "get") {
+		$.address.value(url + '?' + data);
+	} else {
+		$.address.value(url);
+	}
+	
+	$.ajax({
+		url: url,
+		type: method.toUpperCase(),
+		data: $this.serialize(),
+		context: context,
+		beforeSend: function(jqXHR, settings) {
+			appLoading(true);
+		},
+		complete: function(jqXHR, textStatus) {
+			if (!redirected) {
+				appLoading(false);
+			}
+		},
+		success: function(data, textStatus, jqXHR) {
+			
+			console.log("Successful AJAX call!");
+			console.log("Location header: ",jqXHR.getResponseHeader("Location"));
+			console.log("data: ",data);
+			console.log("textStatus: ",textStatus);
+			console.log("jqXHR: ",jqXHR);
+			console.log("-".repeat(80));
+			
+			$("#"+target).html(data);
+			appLoading(false);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			appLoading(false);
+			
+			if (typeof window.console === "object" && typeof console.error === "function") {
+				console.error("AJAX call error!");
+				console.log("Location header: ",jqXHR.getResponseHeader("Location"));
+				console.log("jqXHR: ", jqXHR);
+				console.log("textStatus: ", textStatus);
+				console.log("errorThrown: ", errorThrown);
+				console.log("-".repeat(80));
+			}
+		}
+	});
+});
+
+// Catch all links and pass them through AJAX calls
+$("a").on("click",function(event){
+	event.preventDefault();
+	
+	var $this = $(this),
+		url = $this.attr("href"),
+		target = $this.attr("target") || "content",
+		context = this,
+		redirected = false
+		;
+	
+	$.ajax({
+		url: url,
+		context: context,
+		beforeSend: function(jqXHR, settings) {
+			appLoading(true);
+		},
+		complete: function(jqXHR, textStatus) {
+			if (!redirected) {
+				appLoading(false);
+			}
+		},
+		success: function(data, textStatus, jqXHR) {
+			console.log("Successful AJAX call!",data, textStatus, jqXHR);
+			$("#"+target).html(data);
+			appLoading(false);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			appLoading(false);
+			
+			if (typeof window.console === "object" && typeof console.error === "function") {
+				console.error("AJAX call error!", jqXHR, textStatus, errorThrown);
+			}
+		}
+	});
+});
+
+});
+
+/*
+function initialize() {
+    $('form').on("submit",function(event) { 
+        event.preventDefault();
+        var $this = $(this),
+        	url = $this.attr("action"),
+        	method = $this.attr("method").toLowerCase() || "get"
+        	;
+        //data = $(this).serialize();
+        
+        if (method === "get") {
+			$.address.value(url + '?' + data);
+        } else {
+        	$.address.value(url);
         }
     });
-    $('.collapser').collapser({
-        target: 'next',
-        effect: 'slide', 
-        changeText: 0,
-        expandClass: 'expIco',
-        collapseClass: 'collIco'
-    });*/
 }
 $(document).ready(function(){
     initialize();
@@ -62,13 +146,6 @@ $(document).ready(function(){
         var url = event.currentTarget.pathname;
         $.address.value(url);
     });
-    /*$('.widget h4').collapser({
-        target: 'next',
-        effect: 'slide', 
-        changeText: 0,
-        expandClass: 'expIco',
-        collapseClass: 'collIco'
-    });*/
     $.address.change(function(event){
         if(event.path == '/') return;
         document.body.style.cursor = "wait";
@@ -91,70 +168,5 @@ $(document).ready(function(){
             }
         });
     });
-    /*$("#selection ul").droppable({
-	activeClass: "ui-state-default",
-	hoverClass: "ui-state-hover",
-	accept: ":not(.ui-sortable-helper,#selection a)", 
-	drop: function( event, ui ) {
-            var index = ui.draggable[0].href.split('/').pop();
-            //var index = ui.href.split('/').pop();
-            $.post("select", {id: index},
-                   function( data ) { 
-                       document.body.style.cursor = "default";
-                       $("#selection ul").empty().append( data );
-                       $(".witness").draggable({
-                              appendTo: "body",
-		              helper: "clone"
-	               }); 
-                   }   
-            );
-        }
-    })
-    $("#trash").droppable({
-	activeClass: "ui-state-default",
-	hoverClass: "ui-state-hover",
-	accept: "#selection a", 
-	drop: function( event, ui ) {
-            var index = ui.draggable[0].href.split('/').pop();
-            //var index = ui.href.split('/').pop();
-            $.post("unselect", {id: index},
-                   function( data ) { 
-                       document.body.style.cursor = "default";
-                       $("#selection ul").empty().append( data );
-                       $(".witness").draggable({
-                              appendTo: "body",
-		              helper: "clone"
-	               }); 
-                   }   
-            );
-        }
-    })
-    $("#selection-form").submit( function( event, ui ) {
-         event.preventDefault();
-         var list = $("#selection").find("a").map( function() {
-             return this.href.split('/').pop();
-         });
-         var tag = $('[name=tag-name]').val()
-         list = jQuery.makeArray(list);
-         $.post("tag", { 'tag': tag, 'ids[]': list} );
-             return false;
-    });
-    $("#search-form").submit( function( event, ui ) {
-        event.preventDefault();
-        var url = event.currentTarget.action;
-        var criteria = $('#search-form').find('input[name="criteria"]').val()
-        document.body.style.cursor = "wait";
-
-        $.post( url, { criteria: criteria },
-                function( data ) {
-                   document.body.style.cursor = "default";
-                   $("#search-results").empty().append( data );
-                   $(".witness" ).draggable({
-                       appendTo: "body",
-                       helper: "clone"
-                   });
-                }
-        );
-        return false;
-    });*/
 });
+*/
