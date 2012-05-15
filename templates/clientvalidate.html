@@ -1,0 +1,15 @@
+        <div id="content"> 
+            U heeft deze schuldeisers opgegeven. Is dit correct?
+            <form method="post" action="{{self.request.path}}">
+            <table>
+            {% for creditor in user.creditors %}
+	         <tr>
+                      <td><img src="{{ creditor.creditor.icon}}" alt="" width="16" height="16"></td>
+                      <td>{{ creditor.creditor.display_name }}</td>
+                 </tr>
+            {% endfor %}
+            </table>
+            <input type="submit" name="action" value="correct">
+            <input type="submit" name="action" value="go back">
+            </form>
+        </div>

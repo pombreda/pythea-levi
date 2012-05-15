@@ -1,0 +1,47 @@
+www.woonbron.nl 		Woonbron 
+www.woonstad.nl			Woonstad 
+www.havensteder.nl		Havensteder 
+www.eneco.nl			Eneco 
+www.upc.nl			UPC 
+www.wehkamp.nl			Wehkamp 
+www.kpn.nl			KPN 
+www.telfort.nl			Telfort 
+www.t-mobile.nl			T-mobile 
+www.vodafone.nl			Vodavone 
+www.achmea.nl			Zilveren Kruis Achmea 
+>www.agisweb.nl			Agis 
+>www.flanderijn.nl		Flanderijn 
+>www.vanes.nl			Van Es 
+>www.bazuin.nl			Bazuin & Partners 
+>www.ggn.nl			Maasdelta 
+>www.lindorff.nl			Lindorff
+>www.groenewegen.com		Groenewegen & Partners
+>www.blume-cs.nl			BSR incasso & Gerechtsdeurwaardes
+>www.ram-vismans.nl		R.A.M Vismans
+>www.mgdejong.com		M.G de Jong
+>www.intrum.com			Intrum Justitia
+>www.vanarkelincasso.nl		Arkel Gerechtsdeurwaarders
+www.cjib.nl			Centraal Justitieel Incasso Bureau
+www.cvz.nl			CVZ Ziektekostenverzering
+www.belastingdienst.nl		Belastingdienst 
+www.evides.nl			Evides
+www.stedin.net			Stedin
+www.schielandendekrimpenerwaard.nl	Hoogheemraadsschap
+>www.graydon.nl			Graydon incasso
+>www.wouters-incasso.nl		Wouters Gerechtsdeurwaarder & Incasso's 
+>www.das.nl			Das Incasso
+www.otto.nl			Otto 
+www.hm.com			H&M 
+www.disck.nl			DISCK kinderopvang 
+www.ib-groep.nl			Dienst Uitvoerend Onderwijs 
+>www.vestingfinance.nl		Vesting Finance - Incasso en Debiteurenbeheer 
+www.santander.nl		Comfort Card Santander 
+>www.lavg.nl			LAVG deurwaarders
+www.tele2.nl			Tele 2
+www.sizz.nl			SIZZ(telefoonabonnmenten)
+www.ben.nl			Ben(telefonie)
+>www.famed.nl			Fa-med (Medisch incassobureau)
+www.rotterdam.nl		Sociale Dienst
+www.rotterdam.nl		dienst gemeentelijke belastingen : OZB/ Reinigingsrecht.
+www.abnamro.nl			ABN AMRO 
+www.ing.nl			ING 

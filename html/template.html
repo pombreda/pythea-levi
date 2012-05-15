@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"> 
+	<!--[if IE ]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+	<meta name="viewport" content="width=device-width, target-densityDpi=device-dpi, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+	<meta name="robots" content="index, follow">
+	<title>Schuldendossier</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/zepto.min.js"></script>
+	<!-- script src="js/underscore-min.js"></script -->
+	<!-- script src="js/mustache.js"></script -->
+	<script src="js/ICanHaz.min.js"></script>
+</head>
+<body>
+	<div id="content"></div>
+	
+	<script id="tabset" type="text/html">
+	<ul class="tabset">
+		{{#tabs}}{{> tabset.tab}}{{/tabs}}
+	</ul>
+	</script>
+	<script id="tabset.tab" type="text/html">
+	<li>
+		<h2>{{title}}</h2>
+		<div>
+			<p>{{content}}</p>
+		</div>
+	</li>
+	</script>
+	
+	<script>
+	$(document).ready(function () {
+		var view = {
+			tabs: [
+				{title: "Tab 1",content: "Content of tab 1"},
+				{title: "Tab 2",content: "Content of tab 2"},
+				{title: "Tab 3",content: "Content of tab 3"}
+			]
+		}
+		$("#content").append(ich.tabset(view));
+	});
+	</script>
+</body>
+</html>

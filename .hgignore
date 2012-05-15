@@ -1,0 +1,4 @@
+syntax: glob
+scribbles/*
+*.pyc
+.DS_Store
