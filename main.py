@@ -62,6 +62,10 @@ class BaseHandler(webapp.RequestHandler):
         except KeyError:
             return None
 
+    def get_admin(self):
+        from google.appengine.api import users
+        return users.get_current_user()
+
     def get_session(self):
         try:
             return get_current_session()
@@ -75,10 +79,15 @@ class BaseHandler(webapp.RequestHandler):
         self.response.out.write('</table>')
 
     user = property(get_user)
+    admin = property(get_admin)
     session = property(get_session)
 
-    def redirect(self, uri, status=205):
-        if not 'x-text/html-fragment' in self.request.headers['Accept']: #or 'JSON' in self.session:
+    def redirect(self, uri, permanent=False):
+        if 'x-text/html-fragment' in self.request.headers['Accept']: #or 'JSON' in self.session:
+            status = 200
+        elif permanent:
+            status = 301
+        else:
             status = 302
         self.response.set_status(status)
         #webapp.RequestHandler.redirect(self, location)
@@ -95,7 +104,8 @@ class BaseHandler(webapp.RequestHandler):
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             vars['self'] = self
-            vars['__FILE__'] = templ
+            vars['FILE'] = templ
+            vars['admin'] = self.admin
             self.response.out.write(template.render(path, vars))
             self.response.out.write('<!--Template: %s -->\n' % templ)
             if self.user:
