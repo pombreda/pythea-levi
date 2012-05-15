@@ -88,8 +88,9 @@ class BaseHandler(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             self.response.out.write(template.render(path, vars))
             self.response.out.write('<br>Template: %s<br>' % templ)
-            js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
-            self.response.out.write(js)
+# JSON output is messing up things. Disable for now.
+#            js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
+#            self.response.out.write(js)
 
     def flatten(self, value):
         try:
