@@ -47,7 +47,7 @@ $("form").on("submit",function(event) {
 		url: url,
 		type: method.toUpperCase(),
 		data: $this.serialize(),
-		headers: {"Accepts":"x-text/html-fragment"},
+		headers: {"Accept":"x-text/html-fragment"},
 		context: context,
 		beforeSend: function(jqXHR, settings) {
 			appLoading(true);
@@ -58,16 +58,23 @@ $("form").on("submit",function(event) {
 			}
 		},
 		success: function(data, textStatus, jqXHR) {
+			var location = jqXHR.getResponseHeader("Location");
 			
 			console.log("Successful AJAX call!");
-			console.log("Location header: ",jqXHR.getResponseHeader("Location"));
+			console.log("Location header: ",location);
 			console.log("data: ",data);
 			console.log("textStatus: ",textStatus);
 			console.log("jqXHR: ",jqXHR);
 			console.log("-".repeat(80));
 			
-			$("#"+target).html(data);
-			appLoading(false);
+			if (location) {
+				$("#"+target).load(location,function(){
+					appLoading(false);
+				});
+			} else {
+				$("#"+target).html(data);
+				appLoading(false);
+			}
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			appLoading(false);
@@ -97,6 +104,7 @@ $("a").on("click",function(event){
 	
 	$.ajax({
 		url: url,
+		headers: {"Accept":"x-text/html-fragment"},
 		context: context,
 		beforeSend: function(jqXHR, settings) {
 			appLoading(true);
