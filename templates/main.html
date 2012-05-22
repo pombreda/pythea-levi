@@ -7,11 +7,27 @@
 	<meta name="robots" content="index, follow">
 	<title>Schuldendossier</title>
 	<link rel="stylesheet" href="css/style.css">
-	<script src="js/jquery.min.js"></script>
 	<script src="js/jquery.address-1.4.min.js"></script>
 	<script src="js/levi.js"></script>
 </head>
 <body>
+		<label><input type="checkbox" data-addclass-selector="header" data-addclass="alt">Header horizontal swap</label><br>
+		<script>
+			$("#style-switches input").change(function(e){
+				var $this = $(this),
+					addClassSelector = $this.attr("data-addclass-selector"),
+					addClass = $this.attr("data-addclass")
+					$addClassElement = $(addClassSelector) || null;
+				
+				if ($addClassElement) {
+					if (this.checked) {
+						$addClassElement.addClass(addClass);
+					} else if ($addClassElement.hasClass(addClass)) {
+						$addClassElement.removeClass(addClass);
+					}
+				}
+			});
+		</script>
 	<div class="wrapper">
 		<header>
 			<nav>
@@ -37,14 +53,27 @@
 				</p>
 			</form>
 		</header>
-		<div class="content">
-	<ul class="tabset">
+		<section class="content">
+			<ul class="tabs" id="tabs">
+				<li class="active"><a href="">Schuldendossier</a></li>
+				<li><a href="">Mijn gegevens</a></li>
+			</ul>
+			<div class="content-wrapper">
+				<div class="content-inner" id="content">
+					<img src="images/intro_flow.jpg" class="intro-flow">
+				</div>
+			</div>
+<!--	<ul class="tabset">
+		<li class="active">
+			<h2>Mijn dossier</h2>
+			<div id="content"></div>
+		</li>
 		<li>
 			<h2>Mijn dossier</h2>
 			<div id="content"></div>
 		</li>
-	</ul>
-		</div>
+	</ul> -->
+		</section>
 	</div>
 </body>
 </html>
