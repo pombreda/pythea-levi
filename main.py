@@ -91,8 +91,8 @@ class BaseHandler(webapp.RequestHandler):
             status = 302
         self.response.set_status(status)
         #webapp.RequestHandler.redirect(self, location)
-        absolute_url = urlparse.urljoin(self.request.uri, uri)
-        self.response.headers['Location'] = str(absolute_url)
+        #absolute_url = urlparse.urljoin(self.request.uri, uri)
+        self.response.headers['Location'] = str(uri)
         self.response.clear()
 
     def render(self, vars, templ=None):
