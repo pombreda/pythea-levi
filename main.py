@@ -555,7 +555,6 @@ class OrganisationNew(BaseHandler):
         else:
             #path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             vars = { 'forms': [form1, form2] , 'title': 'Registreer Hulpverleningsorganisatie'}
-            #self.response.out.write(template.render(path, vars))
             self.render(vars, 'form.html')
 
 
@@ -567,27 +566,34 @@ class OrganisationEmployeesList(BaseHandler):
         employees = organisation.employees
 
         vars = { 'user': user, 'organisation': organisation, 'employees': employees }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'listemployees.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'listemployees.html')
 
     def post(self):
         action = self.request.get('action')
         if action == 'Create':
-            self.redirect('/organisation/employees/new')
+            self.redirect('/organisation/employees/add')
         elif action == 'Delete':
-            logging.exception('FIXME: employee/deletion not implemented')
+            for key_name in self.request.get_all('selected'):
+                worker = models.SocialWorker.get_by_key_name(key_name)
+                worker.delete()
             self.redirect('/organisation/employees')
         else:
             raise Exception('Invalid action %s' % action)
 
 
 class Photo(BaseHandler):
-    def get(self, key):
+    def get(self, key, original=False):
         """Return the photo for employee with KEY"""
         employee = models.SocialWorker.get(key)
         if (employee and employee.photo):
             self.response.headers['Content-Type'] = 'image/jpeg'
-            self.response.out.write(employee.photo)
+            if original and not employee.original_photo:
+                logging.error("No original")
+
+            if original and employee.original_photo:
+                self.response.out.write(employee.original_photo)
+            else:
+                self.response.out.write(employee.photo)
         else:
             # TODO:
             self.redirect('/images/nopassphoto.gif')
@@ -606,7 +612,7 @@ class OrganisationEditEmployee(BaseHandler):
         vars = { 'forms': [form] }
 
         path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'form.html')
 
 
     def post(self, key=None):
@@ -639,16 +645,15 @@ class OrganisationEditEmployee(BaseHandler):
         else:
             path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
             vars = { 'forms': [form], 'title': 'Registreer'}
-            self.response.out.write(template.render(path, vars))
+            self.render(vars, 'form.html')
 
 class OrganisationEmployeeResize(BaseHandler):
     def get(self, key):
         worker = models.SocialWorker.get(key)
         vars = { 'worker': worker }
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'resize.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'resize.html')
 
-    def post(self):
+    def post(self, key):
         #self.response.headers['Content-Type'] = 'image/jpeg'
         self.response.headers['Content-Type'] = 'text/plain'
         x1 = float(self.request.get('x'))
@@ -658,7 +663,13 @@ class OrganisationEmployeeResize(BaseHandler):
  
         worker = models.SocialWorker.get(key)
         vars = { 'worker': worker }
-        image = images.Image(image_data=worker.photo)
+        if not worker.original_photo:
+            logging.error("No original photo, we make a clone.")
+            worker.original_photo = db.Blob(worker.photo)
+        image = images.Image(image_data=worker.original_photo)
+        logging.error("In resize")
+        logging.error(image.width)
+        logging.error(image.height)
         image.crop( x1 / image.width,
                     y1 / image.height,
                     x2 / image.width,
@@ -667,7 +678,7 @@ class OrganisationEmployeeResize(BaseHandler):
         image = image.execute_transforms(output_encoding=images.JPEG)
         worker.photo = image
         worker.put()
-        self.redirect(self.request.url)
+        self.redirect('/organisation/employees')
             
         #self.dump()
 
@@ -678,8 +689,7 @@ class OrganisationZipcodes(BaseHandler):
         user = session.get('user')
         zipcodes = ','.join(user.organisation.zipcodes)
         vars = { 'user': user , 'zipcodes': zipcodes}
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'selectzipcodes.html')
-        self.response.out.write(template.render(path, vars))
+        self.render(vars, 'selectzipcodes.html')
 
     def post(self):
         zipcodes = self.request.get('zipcodes')
@@ -1041,6 +1051,8 @@ application = webapp.WSGIApplication([
   (r'/organisation/employees/add', OrganisationEditEmployee),
   (r'/organisation/employees/edit/(.*)', OrganisationEditEmployee),
   (r'/organisation/employees/resize/(.*)', OrganisationEmployeeResize),
+  (r'/employee/photo/(.*)/(original)/(really)', Photo),
+  (r'/employee/photo/(.*)/(original)', Photo),
   (r'/employee/photo/(.*)', Photo),
 
 # Several employee use cases
