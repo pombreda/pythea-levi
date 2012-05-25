@@ -172,6 +172,8 @@ keywords_re = re.compile(r'<meta\s+name="keywords"\s+content=["\'](.*?)["\']')
 
 class Creditor(Organisation):
     tags = db.StringListProperty()
+    #categories = db.StringListProperty(choices=['A','B','C'])
+    categories = db.StringListProperty()
     is_collector = db.BooleanProperty(default=False)
 
     def expand(self):
@@ -237,9 +239,8 @@ class CreditorLink(db.Model):
             return "ILLEGAL STATE"
 
     def status(self):
-        logging.error("I am here %s" % self.creditor.display_name)
-        if not self.approved:
-            return "WAITING FOR APPROVAL"
+        #if not self.approved:
+        #    return "WAITING FOR APPROVAL"
         count = 0
         for debt in self.debts:
             logging.error("debt %d" % (count))
@@ -296,7 +297,8 @@ class Debt(db.Model):
 
 
 class Annotation(db.Model):
-    subject = db.ReferenceProperty(db.Model, collection_name='annotation')
+    subject = db.ReferenceProperty(db.Model, collection_name='annotations')
+    author = db.ReferenceProperty(User)
     ag = db.CategoryProperty()
     entry_date = db.DateProperty(auto_now_add=True)
     date = db.DateProperty()

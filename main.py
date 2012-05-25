@@ -497,6 +497,23 @@ class ClientDebtsSelectCreditor(BaseHandler):
     def post(self, *args, **kwargs):
         self.get(*args, **kwargs)
         
+class ClientDebtsCreditorActions(BaseHandler):
+    """Show details for a CreditorLink"""
+    def get(self, selected):
+        user = self.get_user()
+        creditor = models.CreditorLink.get_by_id(int(selected))
+        vars = { 'user': user,
+                 'creditor': creditor }
+        self.render(vars, 'clientdebtscreditoractions.html')
+
+    def post(self, selected):
+        logging.info("I am here")
+        user = self.get_user()
+        creditor = models.CreditorLink.get_by_id(int(selected))
+        text = self.request.get('text')
+        annotation = models.Annotation(subject=creditor, author=user, text=text)
+        annotation.put()
+        self.redirect(self.request.url)
 
 class OrganisationNew(BaseHandler):
     def get(self):
@@ -1015,6 +1032,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/add/(.*)', ClientDebtsAdd),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
+  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
 
 # The register organisation use case
   (r'/organisation/register', OrganisationNew),
