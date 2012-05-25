@@ -7,7 +7,14 @@
 	         <tr>
                       <td><input type="checkbox" name="selected" value="{{employee.key.id_or_name}}"></td>
                       <td><a href="/organisation/employees/edit/{{employee.key}}">{{ employee.first_name }} {{ employee.last_name }}</a></td> 
-                      <td><a href="/organisation/employees/resize/{{employee.key}}"><img src="/employee/photo/{{employee.key}}" width="124px" height="155px"></a></td> 
+                      <td>
+                          {% if employee.photo %} <a href="/organisation/employees/resize/{{employee.key}}">
+                            <img src="/employee/photo/{{employee.key}}" width="124px" height="155px">
+                          </a>
+                          {% else %}
+                            <img src="/employee/photo/{{employee.key}}" width="124px" height="155px">
+                          {% endif %}
+                      </td> 
                  </tr>
             {% empty %}
                  Empty
