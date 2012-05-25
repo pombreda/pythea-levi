@@ -1,4 +1,6 @@
 syntax: glob
 scribbles/*
 *.pyc
+*.orig
+templates/old_screens/*
 .DS_Store

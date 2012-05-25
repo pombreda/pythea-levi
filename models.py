@@ -96,6 +96,7 @@ class SocialWorker(User):
     organisation = db.ReferenceProperty(SocialWork, collection_name="employees")
     sysadmin = db.BooleanProperty()
     photo = db.BlobProperty()
+    original_photo = db.BlobProperty()
 
     def set_sysadmin(self, worker, flag):
         if not self.sysadmin:
@@ -172,7 +173,6 @@ keywords_re = re.compile(r'<meta\s+name="keywords"\s+content=["\'](.*?)["\']')
 
 class Creditor(Organisation):
     tags = db.StringListProperty()
-    #categories = db.StringListProperty(choices=['A','B','C'])
     categories = db.StringListProperty()
     is_collector = db.BooleanProperty(default=False)
 
