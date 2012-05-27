@@ -729,9 +729,12 @@ class ResetPassword(BaseHandler):
 
 class Login(BaseHandler):
     def get(self):
+    	session = get_current_session()
+    	user = session.get('user')
+    	vars = { 'user': user }
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
         #self.response.out.write(template.render(path, vars))
-        self.render({}, 'login.html')
+        self.render(vars, 'login.html')
   
     def post(self):
         userid = self.request.get('userid')
@@ -750,6 +753,16 @@ class Login(BaseHandler):
         except Exception, e:
             logging.info("Error, probably user not found.")
             self.response.out.write(e)
+
+
+class Session(BaseHandler):
+    def get(self):
+    	session = get_current_session()
+    	user = session.get('user')
+    	vars = { 'user': user }
+        #path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
+        #self.response.out.write(template.render(path, vars))
+        self.render(vars, 'session.html')
 
 
 class EmployeeWaiting(BaseHandler):
