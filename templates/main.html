@@ -7,11 +7,13 @@
 	<meta name="robots" content="index, follow">
 	<title>Schuldendossier</title>
 	<link rel="stylesheet" href="css/style.css">
-	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery-1.7.2.min.js"></script>
+	<script src="js/jquery.validate.min.js"></script>
 	<script src="js/jquery.address-1.4.min.js"></script>
-	<script src="js/levi.js"></script>
+	<script src="js/levi-2.js"></script>
 </head>
 <body>
+	<div id="style-switches" class="style-switches">
 		<label><input type="checkbox" data-addclass-selector="header" data-addclass="alt">Header horizontal swap</label><br>
 		<script>
 			$("#style-switches input").change(function(e){
@@ -29,6 +31,7 @@
 				}
 			});
 		</script>
+	</div>
 	<div class="wrapper">
 		<header>
 			<nav>
@@ -55,10 +58,10 @@
 			</form>
 		</header>
 		<section class="content">
-			<ul class="tabs" id="tabs">
+			<!-- ul class="tabs" id="tabs">
 				<li class="active"><a href="">Schuldendossier</a></li>
 				<li><a href="">Mijn gegevens</a></li>
-			</ul>
+			</ul -->
 			<div class="content-wrapper">
 				<div class="content-inner" id="content">
 					<img src="images/intro_flow.jpg" class="intro-flow">
@@ -75,6 +78,10 @@
 		</li>
 	</ul> -->
 		</section>
+	</div>
+	<div id="popup" class="popup">
+		<div class="overlay"></div>
+		<div class="content">my content</div>
 	</div>
 </body>
 </html>

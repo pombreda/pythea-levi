@@ -265,6 +265,32 @@ ul.tabset {
 	top: 12em;
 }
 
+/* Popup ------------------------------------------------------------------- */
+.popup {
+	display: none;
+}
+.popup.active {
+	display: block;
+}
+.popup .overlay {
+	background-color: rgba(64,64,64,.5);
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+.popup .content {
+	position: fixed;
+	width: auto;
+	top: 1em;
+	left: 50%;
+	margin: 1em auto;
+	background-color: white;
+}
+
 /* Alternative look switcher */
 .style-switches {
 	position: fixed;
