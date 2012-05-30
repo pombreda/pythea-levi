@@ -105,7 +105,6 @@ class BaseHandler(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             vars['self'] = self
             vars['FILE'] = templ
-            vars['admin'] = self.admin
             self.response.out.write(template.render(path, vars))
             self.response.out.write('<!--Template: %s -->\n' % templ)
             if self.user:
@@ -263,15 +262,16 @@ class ClientSelectCreditors(BaseHandler):
         FIXME: we should change this, to show the available creditors per category.
         """
         user = self.user
-        creditors = list(models.Creditor.all())
-        creditors.reverse()
+        category = self.request.get('category')
+        creditors = models.Creditor.all()
+        creditors.filter('categories =', category)
+        categories = models.Category.all()
         for creditor in creditors:
             creditor.selected = user.hasCreditor(creditor)
-        vars = { 
+        vars = { 'categories': categories,
+                 'category': category,
                  'creditors': creditors,
                  'user': user }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'crediteuren.html')
-        #self.response.out.write(template.render(path, vars))
         self.render(vars, 'crediteuren.html')
  
     def post(self):
@@ -903,7 +903,38 @@ class ShowCreditors(BaseHandler):
         """
         creditors = list(models.Creditor.all())
         creditors.reverse()
+
         self.render({'creditors':creditors }, "admincreditors.html")
+
+class AdminCreditorEdit(BaseHandler):
+    def get(self, creditor = None):
+	"""Show a form to enter a new creditor"""
+        if creditor:
+            creditor = models.Creditor.get_by_id(int(creditor))
+            form = forms.CreditorForm(instance=creditor)	
+        else:
+            form = forms.Form()
+        vars = { 'forms': [form] }
+        self.render(vars, 'form.html')
+
+    def post(self, creditor=None):
+        """Add the new creditor"""
+        if creditor:
+            creditor = models.Creditor.get_by_id(int(creditor))
+            form = forms.CreditorForm(self.request.POST, instance=creditor)
+            expand = True
+        else:
+            form = forms.CreditorForm(self.request.POST)
+            expand = False
+
+        if form.is_valid():
+            creditor = form.save(commit=False)
+            if expand: creditor.expand()
+            creditor.put()
+            self.redirect(self.request.url)
+        else:
+            vars = { 'forms': [form] }
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
 
 class Initialize(BaseHandler):
     def get(self):
@@ -1015,6 +1046,16 @@ class TaskInitialize(BaseHandler):
                         logging.info( "Failed to put %s %s" % (display_name, e) )
                         
  
+        with open('categories.txt') as file:
+            for line in file:
+                try:
+                    label, question = line.strip().split('|', 1)
+                    label = label.strip()
+                    question = question.strip()
+                    category = models.Category(key_name=label, label=label, question=question)
+                    category.put()
+                except Exception, e:
+                    logging.info( "Failed to put %s %s" % (label, e) )
 
 application = webapp.WSGIApplication([
 # Anonymous
@@ -1031,6 +1072,7 @@ application = webapp.WSGIApplication([
 #  (r'/addemployees', AddEmployees),
   (r'/admin/category/list', ShowCategories),
   (r'/admin/creditor/list', ShowCreditors),
+  (r'/admin/creditor/edit/(.*)', AdminCreditorEdit),
   (r'/admin/test', Test),
   (r'/admin/test/(.*)', Test),
   (r'/admin/test2', Test2),

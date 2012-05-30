@@ -107,6 +107,7 @@ $(document).ready(function(){
 				}
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
+                                $('#'+target).html(textStatus + ' ' + jqXHR.responseText);
 				appLoading(false);
 			}
 		});
@@ -151,14 +152,28 @@ $(document).ready(function(){
 	 * @param {object} The change event
 	 * @return {void}
 	 */
-    $.address.change(function(event){
-		
-    	if (event.path === "/") {
-    		return;
-    	}
-    	$("#content").load(event.value,function(){
-    		appLoading(false);
-    	});
+    $.address.change(function(event) {
+        if(event.path == '/') return;
+        document.body.style.cursor = "wait";
+        if($.isEmptyObject(event.parameters)) {
+            type = "GET";
+        } else {
+            type = "POST";
+        }
+        $.ajax({
+            type: type,
+            url: event.value,
+            data: event.parameters,
+            success: function(html, textStatus, jqXHR) {
+                loadIn('#content', html);
+                document.body.style.cursor = "default";
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#content').empty().append(textStatus + ' ' + jqXHR.responseText);
+                initialize();
+                document.body.style.cursor = "default";
+            }
+        });
     });
     
     checkLogin();

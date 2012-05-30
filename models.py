@@ -163,6 +163,10 @@ class Client(User):
 
 class Category(db.Model):
     label = db.StringProperty()
+    question = db.StringProperty()
+    new_question = db.StringProperty()
+    description = db.StringProperty()
+    long_desc = db.TextProperty()
 
     def __str__(self):
         return self.label

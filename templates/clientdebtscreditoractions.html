@@ -11,8 +11,7 @@
             <form method="post" action="{{self.request.path}}">
             {{ creditor.creditor.display_name }}
             <br>
-            <textarea name="text">
-            </textarea>
+            <textarea name="text"></textarea>
             <input type="submit">
             <table>
             {% for note in creditor.annotations %}
