@@ -10,7 +10,7 @@
             <ul>
             {% for company in creditors %}
 	         <li>
-                      <img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }} 
+                      <a href="/admin/creditor/edit/{{company.key.id}}"><img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }} </a>
                  </li>
             {% endfor %}
             </ul>

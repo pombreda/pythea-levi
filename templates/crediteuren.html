@@ -9,18 +9,29 @@
         <div id="content"> 
             <a href="/client/creditors/new">Voeg een nieuwe crediteur toe</a>
             <form method="post" action="{{self.request.path}}">
-            <ul>
-            {% for company in creditors %}
-	         <li>
+            {{category}}
+            <div id="creditors">
+              <ul>
+                {% for company in creditors %}
+	          <li>
                       <input type="checkbox" name="selected" 
                              value="{{company.key.id}}"
                              {% if company.selected %} checked {% endif %}> &nbsp;
                       <input type="hidden" name="visible" 
                              value="{{company.key.id}}">
                       <img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }} 
-                 </li>
-            {% endfor %}
-            </ul>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div id="categories">
+              <ul>
+                {% for category in categories %}
+                  <li><a href="{{self.request.path}}?category={{category.label}}">{{category.label}}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
             <input type="submit" name="action" value="klaar">
             </form>
         </div>
