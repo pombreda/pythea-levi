@@ -1024,9 +1024,16 @@ class TaskInitialize(BaseHandler):
         with open('schuldeisers.txt') as file:
             for line in file:
                 website, display_name = line.strip().split(None,1)
+                if display_name.find('[') != -1:
+                     display_name, categories = display_name.split('[',1)
+                     categories = categories.strip(']')
+                     categories = categories.split(',')
+                else:
+                     categories = []
                 q = db.Query(models.Organisation, keys_only = True)
                 q.filter('display_name =', display_name)
-                if q.fetch(1):
+                org = q.fetch(1)
+                if org:
                     logging.info('%s,%s Already done' % (website, display_name))
                     continue
                 else:
@@ -1034,11 +1041,12 @@ class TaskInitialize(BaseHandler):
                     is_collector = False
                     if website.startswith('>'):
                         is_collector = True
+                        categories.append('Deurwaarder')
                         website = website[1:]
                     website = 'http://' + website
                     creditor = models.Creditor(website=website, 
                                                is_collector=is_collector, 
-                                               display_name=display_name)
+                                               display_name=display_name, categories=categories)
                     try:
                         creditor.expand()
                         creditor.put()
