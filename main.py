@@ -258,7 +258,6 @@ class ClientContact(BaseHandler):
 class ClientSelectCreditors(BaseHandler):
     def get(self):
         """Show a list of available creditors
- 
         FIXME: we should change this, to show the available creditors per category.
         """
         user = self.user
@@ -266,8 +265,11 @@ class ClientSelectCreditors(BaseHandler):
         creditors = models.Creditor.all()
         creditors.filter('categories =', category)
         categories = models.Category.all()
+        creditors = list(creditors)
         for creditor in creditors:
             creditor.selected = user.hasCreditor(creditor)
+            logging.error("creditor %d %s" % (creditor.key().id() , creditor.selected))
+            
         vars = { 'categories': categories,
                  'category': category,
                  'creditors': creditors,
@@ -275,7 +277,7 @@ class ClientSelectCreditors(BaseHandler):
         self.render(vars, 'crediteuren.html')
  
     def post(self):
-        """Add the selected creditors to the database"""
+        """Add the selected creditors to the database OLD: """
         user = self.user
         selected_ids = [ int(id) for id in self.request.get_all('selected') ]
         visible_ids = [ int(id) for id in self.request.get_all('visible') ]
@@ -290,6 +292,24 @@ class ClientSelectCreditors(BaseHandler):
             self.redirect('/client/register/creditors')
         else:
             self.redirect('/client/register/validate')
+ 
+    def post(self):
+        action = self.request.get('klaar')
+        logging.error("action  %s" % (action))
+        if action == 'klaar':
+            self.redirect('/client/register/validate')
+            return
+
+        user = self.user
+        category = self.request.get('category')
+        creditor = int(self.request.get('creditor'))
+        checked = self.request.get('checked') == 'true'
+        cred = models.Creditor.get_by_id(creditor)
+        if checked:
+            user.addCreditor(cred)
+        else:
+            user.removeCreditor(cred)
+        self.redirect(self.request.url)
 
 
 class ClientCreditorsNew(BaseHandler):
@@ -1095,6 +1115,7 @@ application = webapp.WSGIApplication([
   (r'/client/register/contact', ClientContact),
   (r'/client/register/creditors/new', ClientCreditorsNew),
   (r'/client/register/creditors', ClientSelectCreditors),
+  (r'/client/register/creditors/select', ClientSelectCreditors),
   (r'/client/register/validate', ClientValidate),
   (r'/client/register/previewletter/(.*)', ClientRegisterPreviewLetter),
   (r'/client/register/printletter/(.*)', ClientRegisterPrintLetter),

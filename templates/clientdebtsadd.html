@@ -1,5 +1,6 @@
 <form method="post" action="{{self.request.path}}">
-{{ creditor.creditor.display_name }}
+<a href="/client/debts/list">[&lt;]</a>
+{{ creditor.creditor.display_name }} 
 <input type="hidden" name="creditor" value="{{creditor.key.id}}">
 <table>
  <tr><th>Deurwaarder</th><th>Ontstaansdatum</th><th>Dossiernummer Schuldeiser</th><th>Openstaand bedrag</th><th>Afbetalingsregeling</th>

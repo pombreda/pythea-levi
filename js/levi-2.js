@@ -155,7 +155,18 @@ $(document).ready(function(){
 			$.address.value(state.url);
 		}
 	});
-	
+        $(":checkbox.check").live("click",function(event) {
+               var checked = $(this).is(':checked');
+               var creditor = $(this).val()
+               var url = $(this).closest("form").attr("action");
+               $.post(url, { checked: checked, creditor: creditor },
+                   function( html ) {
+                       document.body.style.cursor = "default";
+                       loadIn('#content', html);
+                       document.body.style.cursor = "default";
+               });
+
+        });	
 	/**
 	 * jQuery.address change handler
 	 * 
@@ -165,17 +176,10 @@ $(document).ready(function(){
     $.address.change(function(event) {
         if(event.path == '/') return;
         document.body.style.cursor = "wait";
-/*
-        if($.isEmptyObject(event.parameters)) {
-            type = "GET";
-        } else {
-            type = "POST";
-        }
-*/
         $.ajax({
             type: "GET",
             url: event.value,
-            data: event.parameters,
+            //data: event.parameters,
             success: function(html, textStatus, jqXHR) {
                 loadIn('#content', html);
                 document.body.style.cursor = "default";
@@ -186,7 +190,6 @@ $(document).ready(function(){
             }
         });
     });
-    
     checkLogin();
 });
 
@@ -207,51 +210,3 @@ function checkLogin() {
 	});
 }
 
-// Revert to a previously saved state
-/*window.addEventListener('popstate', function(event) {
-	console.log('popstate fired!');
-	console.log(event.state);
-	//updateContent(event.state);
-});*/
-
-/*
-// Catch all links and pass them through AJAX calls
-$("a").on("click",function(event){
-	event.preventDefault();
-	
-	var $this = $(this),
-		url = $this.attr("href"),
-		target = $this.attr("target") || "content",
-		context = this,
-		redirected = false
-		;
-	
-	$.ajax({
-		url: url,
-		headers: {"Accept":"x-text/html-fragment"},
-		context: context,
-		beforeSend: function(jqXHR, settings) {
-			appLoading(true);
-		},
-		complete: function(jqXHR, textStatus) {
-			if (!redirected) {
-				appLoading(false);
-			}
-		},
-		success: function(data, textStatus, jqXHR) {
-			console.log("Successful AJAX call!",data, textStatus, jqXHR);
-			$("#"+target).html(data);
-			appLoading(false);
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			appLoading(false);
-			
-			if (typeof window.console === "object" && typeof console.error === "function") {
-				console.error("AJAX call error!", jqXHR, textStatus, errorThrown);
-			}
-		}
-	});
-});
-
-});
-*/
