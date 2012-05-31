@@ -1,3 +1,13 @@
+var template = /<!--Template:(.*)-->/
+
+function loadIn(tag, html) {
+    $(tag).empty().append(html);
+    var template_name = "";
+    match = html.match(template);
+    if( match ) { template_name = match[1] };
+//    initialize();
+}
+
 String.prototype.repeat = function( num )
 {
 	return new Array( num + 1 ).join( this );
@@ -155,13 +165,15 @@ $(document).ready(function(){
     $.address.change(function(event) {
         if(event.path == '/') return;
         document.body.style.cursor = "wait";
+/*
         if($.isEmptyObject(event.parameters)) {
             type = "GET";
         } else {
             type = "POST";
         }
+*/
         $.ajax({
-            type: type,
+            type: "GET",
             url: event.value,
             data: event.parameters,
             success: function(html, textStatus, jqXHR) {
@@ -170,7 +182,6 @@ $(document).ready(function(){
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#content').empty().append(textStatus + ' ' + jqXHR.responseText);
-                initialize();
                 document.body.style.cursor = "default";
             }
         });
