@@ -1,0 +1,12 @@
+Wonen 			| Bij wie heeft u gewoond?
+Overheid		| 
+Boetes			| Heeft u openstaande boetes?
+Banken			| Heeft u leningen of schulden bij een bank?
+Kredietkaarten		| Heeft u een kredietkaart?
+Internet		| Bij wie heeft u Internet?
+Energie			| Bij wie neemt u gas, licht en water af?
+Telefoon		| Bij wie heeft u een mobiele telefoon?
+Verzekeringen		| Bij wie heeft u verzekeringen lopen?
+Postorderbedrijven	| Heeft u rekeningen bij postorder bedrijven?
+Overig			| Heeft u nog andere schuldeisers?
+Deurwaarder		| Krijgt u brieven van deurwaarders?
