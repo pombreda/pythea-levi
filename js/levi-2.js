@@ -238,3 +238,13 @@ function loadPopup(url) {
 		appLoading(false);
 	});
 }
+
+function setAppStatus(status) {
+	if ($("#appstatus").length > 0) {
+		if (typeof status === "string" && status !== "") {
+			$("#appstatus").html(status);
+		}
+	} else {
+		$("#content").prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
+	}
+}
