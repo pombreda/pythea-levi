@@ -303,8 +303,11 @@ class Debt(db.Model):
 class Annotation(db.Model):
     subject = db.ReferenceProperty(db.Model, collection_name='annotations')
     author = db.ReferenceProperty(User)
+    admin = db.StringProperty()
     ag = db.CategoryProperty()
     entry_date = db.DateProperty(auto_now_add=True)
     date = db.DateProperty()
     text = db.TextProperty()
 
+class Screen(db.Model):
+    description = db.StringProperty()
