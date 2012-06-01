@@ -185,6 +185,11 @@ $(document).ready(function(){
     	$("#popup").removeClass("active");
     	$(".content","#popup").empty();
     });
+
+	$("a","#tabs").live("click",function(e){
+		$("li","#tabs").removeClass("active");
+		$(this).parent().addClass("active");
+	});
 });
 
 function checkLogin() {
