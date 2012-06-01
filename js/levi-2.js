@@ -52,6 +52,12 @@ $(document).ready(function(){
 	// Set up automated validation for login form
 	$("#login").validate();
 	
+	// Make sure submit button values are included in AJAX calls
+	$("input[type=submit]").live("click",function(e){
+		var $this = $(this);
+		$this.after('<input type="hidden" name="'+$this.attr("name")+'" value="'+$this.attr("value")+'">');
+	});
+	
 	// Catch all form execution and pass it through AJAX calls
 	$("form").live("submit",function(event) { 
 		event.preventDefault();
