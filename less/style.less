@@ -8,6 +8,8 @@
 @color_shadow_input: #b9b7ba;
 @color_shadow_content: rgba(0,0,0,.2);
 @color_shadow_content_inner: rgba(0,0,0,.2);
+@color_app_status: #B5373D;
+@color_bg_app_status: #F0FBFB;
 
 /* Sizes ------------------------------------------------------------------- */
 @size_content_radius: .5em;
@@ -301,10 +303,19 @@ ul.tabset {
 	right: 50%;
 }
 
+/* Application status ------------------------------------------------------ */
+.appstatus {
+	margin: 1em 1em 2em 1em;
+	color: @color_app_status;
+	padding: .5em;
+	background-color: @color_bg_app_status;
+	border-radius: .2em;
+}
+
 /* Alternative look switcher */
 .style-switches {
 	position: fixed;
 	top: 0;
 	right: 0;
 	background-color: #fff;
-}
+	}
