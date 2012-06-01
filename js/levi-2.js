@@ -101,9 +101,9 @@ $(document).ready(function(){
 					}
 					
                     if(target == 'popup') {
-                        loadPopup(state.url);
+                        loadPopup(location);
                     } else {
-					     $.address.value(location);
+					    $.address.value(location);
                     }
 				} else {
 					$("#"+target).html(data);
