@@ -99,18 +99,12 @@ $(document).ready(function(){
 						setTabs("client");
 						checkLogin();
 					}
-                                        if(target == 'popup') {
-                                            $("#popup .content").load(location,function(){
-                                                var $popup = $("#popup"),
-                                                $popupContent = $popup.find(".content");
-                                                $popup.find("a").attr("data-actions","close-popup")
-                                                $popup.addClass("active");
-                                                $popupContent.css("margin-left","-" + ($popupContent.width() / 2) + "px");
-                                                appLoading(false);
-                                            });
-                                        } else {
+					
+                    if(target == 'popup') {
+                        loadPopup(state.url);
+                    } else {
 					     $.address.value(location);
-                                        }
+                    }
 				} else {
 					$("#"+target).html(data);
 					$.address.value(location);
@@ -143,15 +137,7 @@ $(document).ready(function(){
 		}
 		
 		if (state.target === "popup") {
-			$("#popup .content").load(state.url,function(){
-				var $popup = $("#popup"),
-					$popupContent = $popup.find(".content");
-				
-				$popup.find("a").attr("data-actions","close-popup")
-				$popup.addClass("active");
-				$popupContent.css("margin-left","-" + ($popupContent.width() / 2) + "px");
-				appLoading(false);
-			});
+			loadPopup(state.url);
 		} else {
 			$.address.value(state.url);
 		}
@@ -193,6 +179,12 @@ $(document).ready(function(){
         });
     });
     checkLogin();
+    
+    $("a.close","#popup").live("click",function(e){
+    	e.preventDefault();
+    	$("#popup").removeClass("active");
+    	$(".content","#popup").empty();
+    });
 });
 
 function checkLogin() {
@@ -212,3 +204,17 @@ function checkLogin() {
 	});
 }
 
+function loadPopup(url) {
+	appLoading(true);
+	$("#popup .content").load(url,function(){
+		var $popup = $("#popup"),
+			$popupContent = $popup.find(".content"),
+			$popupCloser = $popup.find(".close");
+		
+		$popup.find("a").attr("data-actions","close-popup");
+		$popup.addClass("active");
+		$popupContent.css("margin-left","-" + ($popupContent.width() / 2) + "px");
+		$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
+		appLoading(false);
+	});
+}
