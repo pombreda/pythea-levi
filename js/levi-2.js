@@ -1,13 +1,3 @@
-var template = /<!--Template:(.*)-->/
-
-function loadIn(tag, html) {
-    $(tag).empty().append(html);
-    var template_name = "";
-    match = html.match(template);
-    if( match ) { template_name = match[1] };
-//    initialize();
-}
-
 String.prototype.repeat = function( num )
 {
 	return new Array( num + 1 ).join( this );
@@ -25,7 +15,7 @@ function setTabs(type) {
 	
 	switch(type) {
 		case "client":
-			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/register/creditors">Schuldendossier</a></li><li><a href="#">Mijn gegevens</a></li></ul>';
+			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/register/creditors">Schuldendossier</a></li><li><a href="/client/register">Mijn gegevens</a></li></ul>';
 			break;
 		case "organisation":
 			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/employee/cases/list">Dossiers</a></li></ul>';
@@ -109,7 +99,18 @@ $(document).ready(function(){
 						setTabs("client");
 						checkLogin();
 					}
-					$.address.value(location);
+                                        if(target == 'popup') {
+                                            $("#popup .content").load(location,function(){
+                                                var $popup = $("#popup"),
+                                                $popupContent = $popup.find(".content");
+                                                $popup.find("a").attr("data-actions","close-popup")
+                                                $popup.addClass("active");
+                                                $popupContent.css("margin-left","-" + ($popupContent.width() / 2) + "px");
+                                                appLoading(false);
+                                            });
+                                        } else {
+					     $.address.value(location);
+                                        }
 				} else {
 					$("#"+target).html(data);
 					$.address.value(location);
@@ -141,7 +142,7 @@ $(document).ready(function(){
 			$("#popup").removeClass("active");
 		}
 		
-		if (state.target === "_popup") {
+		if (state.target === "popup") {
 			$("#popup .content").load(state.url,function(){
 				var $popup = $("#popup"),
 					$popupContent = $popup.find(".content");
@@ -162,7 +163,7 @@ $(document).ready(function(){
                $.post(url, { checked: checked, creditor: creditor },
                    function( html ) {
                        document.body.style.cursor = "default";
-                       loadIn('#content', html);
+                       $('#content').html(html);
                        document.body.style.cursor = "default";
                });
 
@@ -180,8 +181,9 @@ $(document).ready(function(){
             type: "GET",
             url: event.value,
             //data: event.parameters,
+	    headers: {"Accept":"x-text/html-fragment"},
             success: function(html, textStatus, jqXHR) {
-                loadIn('#content', html);
+                $('#content').html(html);
                 document.body.style.cursor = "default";
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -197,7 +199,7 @@ function checkLogin() {
 	$.ajax({
 		url: "/login",
 		type: "GET",
-		headers: {"Accept":"x-text/html-fragment"},
+	//	headers: {"Accept":"x-text/html-fragment"},
 		success: function(data, textStatus, jqXHR) {
 			if (data.match("U bent ingelogd")) {
 				$("#login").replaceWith('<p id="login">' + data + "</p>");

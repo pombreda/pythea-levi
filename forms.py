@@ -9,8 +9,8 @@ import re
 import models
 
 class ClientForm(df.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
+    password1 = forms.CharField(widget=forms.PasswordInput, required=False)
+    password2 = forms.CharField(widget=forms.PasswordInput, required=False)
   
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:
@@ -19,6 +19,9 @@ class ClientForm(df.ModelForm):
         fields = ['first_name', 'last_name', 'email', 'address', 'zipcode', 'city', 'phone', 'mobile']
 
     def clean(self):
+        if self.instance:
+           logging.info("We have an instance")
+
         data = self.cleaned_data
         password1 = data.get('password1')
         password2 = data.get('password2')
@@ -26,21 +29,28 @@ class ClientForm(df.ModelForm):
         last_name = data.get('last_name')
         username = "%s.%s" % (first_name.lower(), last_name.lower())
         data['username'] = username
+        # FIXME: we should check if the username already exists in the database
         data['key_name'] = username
         phone = data.get('phone')
         mobile = data.get('mobile')
-        if phone and not mobile:
+        if phone:
             m = self.phone_p.match(phone)
-            if m and m.group(2).startswith('6'):
-                data['mobile'] = phone
+            if m:
+                data['phone'] = '+31' + m.group(2)
+            if m and m.group(2).startswith('6') and not mobile:
+                data['mobile'] = '+31' + m.group(2)
+            if not m:
+                self._errors['phone'] = self.error_class(['Geen geldig telefoonnummer'])
         if mobile:
             m = self.phone_p.match(mobile)
-            if m and not m.group(2).startswith('6'):
-                pass
-                #raise forms.ValidationError('Geen mobiel nummer %s' % mobile)
+            if not m or not m.group(2).startswith('6'):
+                self._errors['mobile'] = self.error_class(['Geen geldig mobiel nummer'])
+            elif m:
+                data['mobile'] = '+31' + m.group(2)
+        if not self.instance and not password1:
+            self._errors['password1'] = self.error_class(['Wachtwoord is verplicht'])
         if password1 != password2:
             raise forms.ValidationError('De wachtwoorden zijn niet hetzelfde')
-
         return data
 
 class SocialWorkForm(df.ModelForm):

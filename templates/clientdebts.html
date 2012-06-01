@@ -8,7 +8,7 @@
       {% block main %}
       <div id="content-container"> 
         <div id="content"> 
-            <form method="post">
+            <form method="post" action="{{self.request.url}}">
             Klik op een schuldeiser om een schuldbewijs te verwerken.
             <table>
             {% for creditor in user.creditors %}
@@ -23,8 +23,8 @@
                           {{ creditor.creditor.display_name }}
                           </a>
                       </td>
-                      <td><a href="/client/register/previewletter/{{creditor.key.id}}">[print prief] </a></td>
-                      <td><a href="/client/debts/creditor/{{creditor.key.id}}/actions">[commentaar] </a></td>
+                      <td><a target="popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a></td>
+                      <td><a target="popup" href="/client/debts/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>
                       <td>
                           {{ creditor.status }}
                       </td>

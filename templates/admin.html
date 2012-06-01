@@ -1,0 +1,22 @@
+<div id="admin">
+   <dl>
+     <dt>Template</dt><dd>{{template}}</dd>
+     <dt>Path</dt><dd>{{path}}</dd>
+     <dt>Admin</dt><dd>{{self.admin}}</dd>
+     <dt>User</dt><dd>{{self.user.username}}</dd>
+     <dt>Role</dt><dd>{{self.user.class_name}}</dd>
+   </dl>
+   <form method="post" action="{{self.request.url}}" target="popup">
+     <textarea name="text"></textarea>
+     <input type="submit">
+     <table>
+     {% for note in screen.annotations %}
+         <tr>
+           <td>{{note.user}}</td>
+           <td>{{note.entry_date}}</td>
+           <td>{{note.text}}</td>
+         </tr>
+     {% endfor %}
+     </table>
+   </form>
+</div>

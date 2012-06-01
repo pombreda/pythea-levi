@@ -90,26 +90,26 @@ class BaseHandler(webapp.RequestHandler):
         else:
             status = 302
         self.response.set_status(status)
-        #webapp.RequestHandler.redirect(self, location)
-        #absolute_url = urlparse.urljoin(self.request.uri, uri)
         self.response.headers['Location'] = str(uri)
         self.response.clear()
 
     def render(self, vars, templ=None):
-        #self.response.out.write('Session ' + str(self.session))
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
             #self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
+            screen_id = '%s@%s' % (templ, self.request.path)
+            screen = models.Screen.get_or_insert(screen_id)
+            if self.admin and 'x-text/html-fragment' in self.request.headers['Accept']:
+                path = os.path.join(os.path.dirname(__file__), 'templates', 'admin_plus.html')
+                admin_vars = {'template': templ, 'self': self}
+                self.response.out.write(template.render(path, admin_vars))
+ 
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             vars['self'] = self
             vars['FILE'] = templ
             self.response.out.write(template.render(path, vars))
-            self.response.out.write('<!--Template: %s -->\n' % templ)
-            if self.user:
-                self.response.out.write('<!--User: %s %s -->\n' % (self.user.first_name, self.user.last_name))
-                self.response.out.write('<!--Role: %s -->\n' % (self.user.class_name()))
             #js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
             #self.response.out.write(js)
 
@@ -202,7 +202,10 @@ class Screens(BaseHandler):
 class ClientNew(BaseHandler):
     def get(self):
         """Show the form to add a new client"""
-        form = forms.ClientForm()
+        if self.user:
+            form = forms.ClientForm(instance=self.user)
+        else:
+            form = forms.ClientForm()
         form.title = 'Registreer'
         vars = { 'forms': [form] , 'title': 'Registreer'}
         self.render(vars, 'form.html')
@@ -210,7 +213,12 @@ class ClientNew(BaseHandler):
     def post(self):
         """Enter the new client"""
         # Read form variables and put the new user in the database
-        form = forms.ClientForm(self.request.POST)
+        mode = "create"
+        if self.user:
+            form = forms.ClientForm(self.request.POST, instance=self.user)
+            mode = "update"
+        else:
+            form = forms.ClientForm(self.request.POST)
         if form.is_valid():
             logging.error("user okay")  #FIXME: need to make sure users are not overwritten if they have an existing name
             new_user = form.save(commit=False)
@@ -220,12 +228,11 @@ class ClientNew(BaseHandler):
             if session.is_active():
                 session.terminate()
             session['user'] = new_user
-            self.redirect('/client/register/contact')
+            if mode == "create":
+                self.redirect('/client/register/contact')
+            else:
+                self.redirect(self.request.url)
         else:
-            logging.error("error")
-            logging.error( form.non_field_errors() )
-            errors = [ (field.name, field.errors) for field in form ]
-            logging.error( errors )
             vars = { 'forms': [form], 'title': 'Registreer'}
             self.render(vars, 'form.html')
 
@@ -746,12 +753,17 @@ class ResetPassword(BaseHandler):
         user.put()
         self.response.out.write("Done")
 
+class Logout(BaseHandler):
+    def get(self):
+        if self.session.is_active():
+            self.session.terminate()
+        self.response.set_status(301)
+        self.response.headers['Location'] = "/"
+        self.response.clear()
 
 class Login(BaseHandler):
     def get(self):
-    	session = get_current_session()
-    	user = session.get('user')
-    	vars = { 'user': user }
+    	vars = { 'user': self.user }
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'login.html')
@@ -816,6 +828,23 @@ class EmployeeApprove(BaseHandler):
                  'message' : message }
         self.render(vars, 'message.html')
 
+
+class AdminCommentScreen(BaseHandler):
+    def get(self):
+        template = self.request.get('template')
+        path = self.request.get('path')
+        screen = models.Screen.get_by_key_name("%s@%s" % (template, path))
+        vars = { 'template': template, 'path': path, 'screen': screen }
+        self.render(vars, 'admin.html')
+
+    def post(self):
+        text = self.request.get('text')
+        template = self.request.get('template')
+        path = self.request.get('path')
+        screen = models.Screen.get_by_key_name("%s@%s" % (template, path))
+        annotation = models.Annotation(subject=screen, admin=self.admin.nickname(), text=text)
+        annotation.put()
+        self.redirect(self.request.url)
 
 class AdminBecome(BaseHandler):
     def get(self, client = None):
@@ -1089,6 +1118,7 @@ application = webapp.WSGIApplication([
 # Anonymous
   (r'/', Main),
   (r'/login', Login),
+  (r'/logout', Logout),
   (r'/reset', ResetPassword),
 
 # Admin functions
@@ -1105,6 +1135,7 @@ application = webapp.WSGIApplication([
   (r'/admin/test/(.*)', Test),
   (r'/admin/test2', Test2),
   (r'/admin/become/client/(.*)', AdminBecome),
+  (r'/admin/commentscreen', AdminCommentScreen),
   (r'/admin/become', AdminBecome),
 
 # Background tasks
