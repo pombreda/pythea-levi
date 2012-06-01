@@ -8,7 +8,7 @@
       {% block main %}
       <div id="content-container"> 
         <div id="content"> 
-            <form method="post" action="{{self.request.path}}" target="popup">
+            <form method="post" action="{{self.request.path}}" target="_popup">
             {{ creditor.creditor.display_name }}
             <br>
             <textarea name="text"></textarea>

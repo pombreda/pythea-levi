@@ -106,7 +106,7 @@ $(document).ready(function(){
 						checkLogin();
 					}
 					
-                    if(target == 'popup') {
+                    if(target == '_popup') {
                         loadPopup(location);
                     } else {
 					    $.address.value(location);
@@ -125,6 +125,17 @@ $(document).ready(function(){
 	});
 	
 	/**
+	 * Enable the popup close button
+	 */
+    $("#popup-close").live("click",function(e){
+    	e.preventDefault();
+		e.stopPropagation();
+    	$("#popup").removeClass("active");
+    	$(".content","#popup").empty();
+		return false;
+    });
+	
+	/**
 	 * Catch all links and pass them through AJAX calls
 	 */
 	$("a").live("click",function(event){
@@ -135,6 +146,10 @@ $(document).ready(function(){
 				title : $this.attr("data-title") || document.title,
 			};
 		
+		if ($this.attr("id") === "popup-close") {
+			return;
+		}
+		
 		event.preventDefault();
 		appLoading(true);
 		
@@ -142,7 +157,7 @@ $(document).ready(function(){
 			$("#popup").removeClass("active");
 		}
 		
-		if (state.target === "popup") {
+		if (state.target === "_popup") {
 			loadPopup(state.url);
 		} else {
 			$.address.value(state.url);
@@ -185,12 +200,6 @@ $(document).ready(function(){
         });
     });
     checkLogin();
-    
-    $("a.close","#popup").live("click",function(e){
-    	e.preventDefault();
-    	$("#popup").removeClass("active");
-    	$(".content","#popup").empty();
-    });
 
 	$("a","#tabs").live("click",function(e){
 		$("li","#tabs").removeClass("active");
