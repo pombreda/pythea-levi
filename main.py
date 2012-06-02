@@ -82,7 +82,7 @@ class BaseHandler(webapp.RequestHandler):
     admin = property(get_admin)
     session = property(get_session)
 
-    def redirect(self, uri, permanent=False):
+    def redirect(self, uri, permanent=False, message="Success"):
         if 'x-text/html-fragment' in self.request.headers['Accept']: #or 'JSON' in self.session:
             status = 200
         elif permanent:
@@ -91,17 +91,17 @@ class BaseHandler(webapp.RequestHandler):
             status = 302
         self.response.set_status(status)
         self.response.headers['Location'] = str(uri)
-        self.response.clear()
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(message)
 
     def render(self, vars, templ=None):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
             self.response.headers['Content-Type'] = 'application/json'
-            #self.response.out.write(json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False))
         else:
             screen_id = '%s@%s' % (templ, self.request.path)
             screen = models.Screen.get_or_insert(screen_id)
-            if self.admin and 'x-text/html-fragment' in self.request.headers['Accept']:
+            if self.admin and templ not in ['login.html', 'main.html']:
                 path = os.path.join(os.path.dirname(__file__), 'templates', 'admin_plus.html')
                 admin_vars = {'template': templ, 'self': self}
                 self.response.out.write(template.render(path, admin_vars))
@@ -110,94 +110,23 @@ class BaseHandler(webapp.RequestHandler):
             vars['self'] = self
             vars['FILE'] = templ
             self.response.out.write(template.render(path, vars))
-            #js = json.dumps(self.flatten(vars), cls=JSONEncoder, ensure_ascii=False)
-            #self.response.out.write(js)
-
-    def flatten(self, value):
-        try:
-            if isinstance(value, db.Model):
-                return self.flatten_model(value)
-            elif isinstance(value, django.forms.fields.Field):
-                return self.flatten_field(value)
-            elif isinstance(value, django.forms.widgets.Input):
-                return self.flatten_widget(value)
-            elif isinstance(value, list):
-                return [ self.flatten(var) for var in value ] 
-            elif isinstance(value, dict):
-                return self.flatten_dict(value)
-            elif isinstance(value, webob.multidict.UnicodeMultiDict):
-                return self.flatten_mdict(value)
-            elif forms == inspect.getmodule(value):
-                return self.flatten_form(value)
-            else:
-                return value
-        except Exception, e:
-            return "error, could not flatten value %s, %s" % (value, e)
-
-    def flatten_form(self, form):
-        d = defaultdict(dict)
-        for name, field in form.fields.items():
-            for attr in ['min_length', 'max_length', 'initial', 'required', 'label', 'help_text', 'show_hidden_initial']:
-                if attr in field.__dict__:
-                    d[name][attr] = field.__dict__[attr]
-                if hasattr(field.widget, 'input_type'):
-                    d[name]['input_type'] = field.widget.input_type
-                elif hasattr(field.widget, 'choices'):
-                    d[name]['input_type'] = 'select'
-                d[name]['is_hidden'] = field.widget.is_hidden
-            if name in form.data and field.widget.input_type != 'password':
-                d[name]['value'] = form.data[name]
-            if name in form.errors:
-                d[name]['value'] = form.errors[name]
-        r = {'fields': d } 
-        if '__all__' in form.errors:
-            r['errors'] = form.errors['__all__']
-        return r
-
-    def flatten_widget(self, widget):
-        d = {}
-        #for attr in ['min_length', 'max_length', 'initial', 'required', 'label', 'help_text', 'error_messages', 'show_hidden_initial']:
-        #    d[attr] = field.__dict__[attr]
-        #return d
-        return dir(widget)
- 
-    def flatten_mdict(self, vars):
-        d = defaultdict(list)
-        for key, value in vars.items():
-            d[key].append(self.flatten(value))
-        return d
-
-    def flatten_dict(self, vars):
-        d = {}
-        for key, value in vars.items():
-            d[key] = self.flatten(value)
-        return d
-
-    def flatten_model(self, model):
-        d = {}
-        for key, value in model.__dict__['_entity'].items():
-            d[key] = self.flatten(value)
-        return d
 
 class Main(BaseHandler):
     def get(self):
         """Show the default screen. This is now the login screen"""
         user = self.user
-#        if not user:
-#            self.redirect('/login')
-#            return
         self.session['JSON'] = False
-
         vars = { 
                  'user': user }
         self.render(vars, 'main.html')
+
 
 class Screens(BaseHandler):
     def get(self):
         """A utility screen to display all screens inside the application"""
         doc = docs.Document(application, self)
-        self.render( {'docs': doc.docs, 'tree': dict(doc.tree)}, 'screens.html' )
-        #self.response.out.write( application._url_mapping )
+        self.render( {'docs': doc.docs, 'tree': dict(doc.tree)}, 'admin.html' )
+ 
  
 class ClientNew(BaseHandler):
     def get(self):
@@ -222,7 +151,8 @@ class ClientNew(BaseHandler):
         if form.is_valid():
             logging.error("user okay")  #FIXME: need to make sure users are not overwritten if they have an existing name
             new_user = form.save(commit=False)
-            new_user.set_password(form.cleaned_data['password1'])
+            if form.cleaned_data['password1']:
+                new_user.set_password(form.cleaned_data['password1'])
             new_user.put()
             session = get_current_session()
             if session.is_active():
@@ -265,7 +195,6 @@ class ClientContact(BaseHandler):
 class ClientSelectCreditors(BaseHandler):
     def get(self):
         """Show a list of available creditors
-        FIXME: we should change this, to show the available creditors per category.
         """
         user = self.user
         category = self.request.get('category')
@@ -734,24 +663,43 @@ class Todo(BaseHandler):
 
 
 class ResetPassword(BaseHandler):
-    def get(self):
-        if not self.user or not self.user.is_superuser:
-            self.response.out.write("User: %s Not authenticated. %s" % (self.user.first_name, self.user.is_superuser))
-            return
-        else:
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'resetpasswd.html')
-            self.response.out.write(template.render(path, vars))
+    def get(self, step=None):
+        if not step:
+            template = 'resetpasswd.html'
+        elif step == 'confirm':
+            template = 'confirmreset.html'
+        self.render({}, template)
 
-    def post(self):
+    def post(self, step=None):
         # TODO: generate a new password:
         #   Communicate this via SMS, e-mail or account manager.
         userid = self.request.get('userid')
-        newpasswd = self.request.get('passwd')
+        token = self.request.get('token')
+        password1 = self.request.get('password1')
+        password2 = self.request.get('password2')
+
         user_key = db.Key.from_path("User", userid)
         user = models.User.get(user_key)
-        user.set_password(newpasswd)
-        user.put()
-        self.response.out.write("Done")
+        if not token:
+            token = user.make_token()
+            # FIXME: instead of writing this token
+            # we should either send it to an e-mail address
+            # or send it to SMS.
+            self.render({'message': 'Er is een e-mail verstuurd naar uw e-mail account met instructies hoe u uw wachtwoord kunt resetten. %s' % token},
+                         'message.html')
+        else:
+            if user.check_token(token):
+                if not password1 or password1 != password2:
+                    self.render({'message': 'U heeft geen geldig wachtwoord ingevuld'},
+                                 'message.html')
+                else:
+                    user.set_password(password1)
+                    user.put()
+                    session['user'] = user
+                    self.redirect(user.start_page())
+            else:
+                self.render({'message': 'Uw heeft een ongeldig token ingevuld'},
+                             'message.html')
 
 class Logout(BaseHandler):
     def get(self):
@@ -829,7 +777,7 @@ class EmployeeApprove(BaseHandler):
         self.render(vars, 'message.html')
 
 
-class AdminCommentScreen(BaseHandler):
+class AdminInfo(BaseHandler):
     def get(self):
         template = self.request.get('template')
         path = self.request.get('path')
@@ -1120,6 +1068,7 @@ application = webapp.WSGIApplication([
   (r'/login', Login),
   (r'/logout', Logout),
   (r'/reset', ResetPassword),
+  (r'/reset/(confirm)', ResetPassword),
 
 # Admin functions
   (r'/admin/init', TaskInitialize),
@@ -1135,7 +1084,7 @@ application = webapp.WSGIApplication([
   (r'/admin/test/(.*)', Test),
   (r'/admin/test2', Test2),
   (r'/admin/become/client/(.*)', AdminBecome),
-  (r'/admin/commentscreen', AdminCommentScreen),
+  (r'/admin/info', AdminInfo),
   (r'/admin/become', AdminBecome),
 
 # Background tasks
