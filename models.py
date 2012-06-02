@@ -13,7 +13,7 @@ import wsgiref.handlers
 from google.appengine.api.urlfetch import fetch
 import re
 import urlparse
-
+import time
 
 class DecimalProperty(db.Property):
     data_type = decimal.Decimal
@@ -34,6 +34,23 @@ class DecimalProperty(db.Property):
             return decimal.Decimal(value)
         raise db.BadValueError("Property %s must be a Decimal or string." % self.name)
 
+def encode_b36(number):
+    if not isinstance(number, (int, long)):
+        raise TypeError('number must be an integer')
+    if number < 0:
+        raise ValueError('number must be positive')
+
+    alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    base36 = ''
+    while number:
+        number, i = divmod(number, 36)
+        base36 = alphabet[i] + base36
+
+    return base36 or alphabet[0]
+
+def decode_b36(number):
+    return int(number,36)
 
 class User(polymodel.PolyModel):
     username = db.StringProperty()
@@ -53,10 +70,56 @@ class User(polymodel.PolyModel):
         self.password = crypt.crypt(password, os.urandom(2))
 
     def authenticate(self, password):
-        return crypt.crypt(password, self.password) == self.password
+        if(crypt.crypt(password, self.password) == self.password):
+            self.last_login = datetime.datetime.now()
+            self.put()
+            return True
+        else:
+            return False
 
     def start_page(self):
         return None
+
+    def make_token(self):
+        """
+        Returns a token that can be used once to do a password reset
+        for the given user.
+        """
+        return self._make_token_with_timestamp(self._now())
+
+    def check_token(self, token):
+        """Verify a password reset token"""
+        try:
+            ts_b36, hash = token.split("-")
+        except ValueError:
+            return False
+
+        try:
+            ts = decode_b36(ts_b36)
+        except ValueError:
+            return False
+
+        # Check that the timestamp/uid has not been tampered with
+        if self._make_token_with_timestamp(ts) != token:
+            return False
+
+        # Check the timestamp is not older than a day
+        if self._now() - ts > 1:
+            return False
+        return True
+
+ 
+    def _now(self):
+        return int(time.time() / 1000)
+
+    def _make_token_with_timestamp(self, timestamp):
+        import hashlib
+        ts_b36 = encode_b36(timestamp)
+        key_salt = self.password
+        login_timestamp = self.last_login.isoformat()
+        value = str(self.username) + self.password + login_timestamp + ts_b36
+        hash = hashlib.sha1(value).hexdigest()[:6].upper()
+        return '%s-%s' % (ts_b36, hash)
 
     
 # FIXME: Organisation also needs to be scoped to 
