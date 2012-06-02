@@ -65,7 +65,7 @@ class User(polymodel.PolyModel):
     
     last_login = db.DateTimeProperty()
     date_joined = db.DateTimeProperty()
-    
+   
     def set_password(self, password):
         self.password = crypt.crypt(password, os.urandom(2))
 

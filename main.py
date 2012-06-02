@@ -664,11 +664,15 @@ class Todo(BaseHandler):
 
 class ResetPassword(BaseHandler):
     def get(self, step=None):
+        token = self.request.get('token')
+        userid = self.request.get('userid')
+        vars = {'token': token, 'userid': userid}
+
         if not step:
             template = 'resetpasswd.html'
         elif step == 'confirm':
             template = 'confirmreset.html'
-        self.render({}, template)
+        self.render(vars, template)
 
     def post(self, step=None):
         # TODO: generate a new password:
@@ -685,8 +689,25 @@ class ResetPassword(BaseHandler):
             # FIXME: instead of writing this token
             # we should either send it to an e-mail address
             # or send it to SMS.
-            self.render({'message': 'Er is een e-mail verstuurd naar uw e-mail account met instructies hoe u uw wachtwoord kunt resetten. %s' % token},
-                         'message.html')
+            path = os.path.join(os.path.dirname(__file__), 'brieven', 'reset-wachtwoord.html')
+            vars = {}
+            vars['self'] = self
+            vars['userid'] = userid
+            vars['token'] = token
+            vars['message'] = 'Er is een e-mail verstuurd naar uw account met daarin een code. Met deze code kunt u uw wachtwoord opnieuw instellen.'
+            text = template.render(path, vars)
+            
+            mail.send_mail(sender="No reply <hans.then@gmail.com>",
+                           to="<h.then@pythea.nl>",
+                           subject="U heeft een nieuw wachtwoord aangevraagd op schuldendossier.nl",
+                           body=text)
+
+#            self.render({'message': 'Er is een e-mail verstuurd naar uw e-mail account met instructies hoe u uw wachtwoord kunt resetten. %s' % token},
+#                         'message.html')
+            logging.info("Resetting password: token = %s" % token)
+            del vars['token']
+            self.render(vars, 'confirmreset.html')
+
         else:
             if user.check_token(token):
                 if not password1 or password1 != password2:
@@ -695,7 +716,7 @@ class ResetPassword(BaseHandler):
                 else:
                     user.set_password(password1)
                     user.put()
-                    session['user'] = user
+                    self.session['user'] = user
                     self.redirect(user.start_page())
             else:
                 self.render({'message': 'Uw heeft een ongeldig token ingevuld'},
