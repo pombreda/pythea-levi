@@ -294,6 +294,7 @@ class CreditorLink(db.Model):
         self.approved = True
 
     def status(self):
+        """Old version: to be removed"""
         if not self.approved:
             return "WAITING FOR APPROVAL"
         elif not self.last_email_date:
@@ -306,47 +307,35 @@ class CreditorLink(db.Model):
             return "ILLEGAL STATE"
 
     def status(self):
-        #if not self.approved:
+        #FIXME: if not self.approved:
         #    return "WAITING FOR APPROVAL"
         count = 0
         for debt in self.debts:
-            logging.error("debt %d" % (count))
             if debt.collector: 
-                logging.error("debt collected by %s" % debt.collector.display_name)
                 collector = self.user.hasCreditor(debt.collector)
                 if not collector:
-                    logging.error("\t but this collector is not linked to the customer")
-                    return "IN COLLECTION: MISMATCH: ERROR collector not found"
+                    return "IN_COLLECTION", "MISMATCH"
                 else:
-                    logging.error("\t trying to find matching debts")
                     count2 = 0
                     for debt2 in collector.debts:
                         count2 = count2 + 1
-                        logging.error("\t debt2 %s" % debt2 )
                         try: 
                              if debt2.collected_for and debt2.collected_for.key().id() == debt.creditor.creditor.key().id():
-                                  logging.error("match")
-                                  return "IN COLLECTION: COMPLETE"
-                             else:
-                                  logging.error("no match")
+                                  return "IN_COLLECTION", "COMPLETE"
                         except Exception, e:
                              logging.error("An error occurred matching %s", e)
-                    logging.error("We have left the loop count is now %d" % count2)
                     if count2:
-                        return "IN COLLECTION: MISMATCH: ERROR collector has no collections for this creditor"
+                        return "IN_COLLECTION", "MISSING"
                     if not count2:
-                        return "IN COLLECTION: WAITING FOR COLLECTOR"
+                        return "IN_COLLECTION", "WAITING"
             else:
-                logging.error("self collected debt")
                 count = count + 1
         else:
             if count:
-                logging.error("only self collected debts")
-                return "COMPLETE"
+                return "COMPLETE", None 
             else:
-                logging.error("no debts for this creditor")
-                return "WAITING FOR ANSWER"
-        return "ERROR: UNKNOWN STATE"
+                return "WAITING", None
+        return "ERROR", "UNKNOWN STATE"
 
 
 class Debt(db.Model):
