@@ -1,11 +1,12 @@
         <div id="content"> 
-            U heeft deze schuldeisers opgegeven. Is dit correct?
+            U heeft deze schuldeisers opgegeven. Maak een schatting van de bedragen die u schuldig bent.
             <form method="post" action="{{self.request.path}}">
             <table>
             {% for creditor in user.creditors %}
 	         <tr>
-                      <td><img src="{{ creditor.creditor.icon}}" alt="" width="16" height="16"></td>
-                      <td>{{ creditor.creditor.display_name }}</td>
+                      <td><img src="{{creditor.creditor.icon}}" alt="" width="16" height="16"></td>
+                      <td>{{ creditor.creditor.display_name }}</td> 
+                      <td><input id="{{creditor.key.id}}" type="text"></input>
                  </tr>
             {% endfor %}
             </table>

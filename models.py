@@ -374,3 +374,4 @@ class Annotation(db.Model):
 
 class Screen(db.Model):
     description = db.StringProperty()
+    design = db.BlobProperty()

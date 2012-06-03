@@ -7,7 +7,8 @@
      <dt>Role</dt><dd>{{self.user.class_name}}</dd>
    </dl>
    <form method="post" action="{{self.request.url}}" target="_popup">
-     <textarea name="text"></textarea>
+     <textarea name="text" cols="50"></textarea><br>
+     Screendesign<input type="file" name="design">
      <input type="submit">
      <table>
      {% for note in screen.annotations %}

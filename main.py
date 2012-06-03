@@ -286,7 +286,7 @@ class ClientValidate(BaseHandler):
 
     def post(self):
         action = self.request.get('action')
-        if True: # action == 'correct': FIXME: the submit value is not transmitted using jQuery.
+        if action == 'correct': #FIXME: the submit value is not transmitted using jQuery.
             user = self.user
             user.complete()
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
@@ -808,9 +808,13 @@ class AdminInfo(BaseHandler):
 
     def post(self):
         text = self.request.get('text')
+        design = self.request.get('design')
         template = self.request.get('template')
         path = self.request.get('path')
         screen = models.Screen.get_by_key_name("%s@%s" % (template, path))
+        if design:
+            screen.design = db.Blob(design)
+            screen.put()
         annotation = models.Annotation(subject=screen, admin=self.admin.nickname(), text=text)
         annotation.put()
         self.redirect(self.request.url)
