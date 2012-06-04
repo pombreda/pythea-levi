@@ -98,6 +98,11 @@ $(document).ready(function(){
 						location = location.replace(/https?\:\/\/[^\/]+/,"");
 					}
 					
+					if (data != "") {
+						appStatus = data;
+						// @TODO: Process this AFTER redirect
+					}
+					
 					redirected = true;
 					
 					// Check where we're being redirected, and set tabs accordingly
@@ -146,8 +151,8 @@ $(document).ready(function(){
 				title : $this.attr("data-title") || document.title,
 			};
 		
-		if ($this.attr("id") === "popup-close") {
-			return;
+		if ($this.attr("id") === "popup-close" || $this.attr("target") === "_blank") {
+			return true;
 		}
 		
 		event.preventDefault();
@@ -245,6 +250,6 @@ function setAppStatus(status) {
 			$("#appstatus").html(status);
 		}
 	} else {
-		$("#content").prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
+		$("#content").parent().prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
 	}
 }
