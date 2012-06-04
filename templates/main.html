@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"> 
+	<!--[if IE ]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+	<meta name="viewport" content="width=device-width, target-densityDpi=device-dpi, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+	<meta name="robots" content="index, follow">
+	<title>Schuldendossier</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/jquery-1.7.2.min.js"></script>
+	<script src="js/jquery.validate.min.js"></script>
+	<script src="js/jquery.address-1.4.min.js"></script>
+	<script src="js/levi-2.js"></script>
+</head>
+<body>
+	<div id="style-switches" class="style-switches">
+		<label><input type="checkbox" data-addclass-selector="header" data-addclass="alt">Header horizontal swap</label><br>
+		<script>
+			$("#style-switches input").change(function(e){
+				var $this = $(this),
+					addClassSelector = $this.attr("data-addclass-selector"),
+					addClass = $this.attr("data-addclass")
+					$addClassElement = $(addClassSelector) || null;
+				
+				if ($addClassElement) {
+					if (this.checked) {
+						$addClassElement.addClass(addClass);
+					} else if ($addClassElement.hasClass(addClass)) {
+						$addClassElement.removeClass(addClass);
+					}
+				}
+			});
+		</script>
+	</div>
+	<div class="wrapper">
+		<header>
+			<nav>
+				<p>Informatie over <strong>schuldendossier.nl</strong> voor:</p>
+				<ul>
+					<li><a href="/info/clienten.html">Cliënten</a></li><!-- link to info page -->
+					<li><a href="/info/maatschappelijkwerk.html">Hulpverleners</a></li><!-- link to info page -->
+					<li><a href="/info/gemeenten.html">Gemeenten</a></li><!-- link to info page -->
+					<li><a href="#">Schuldeisers</a></li><!-- link to info page -->
+				</ul>
+			</nav>
+			<form method="post" action="/login" id="login">
+				<p>
+				<label for="userid">Gebruikersnaam</label>
+				<input id="userid" name="userid" type="text">
+				</p>
+				<p>
+				<label for="password">Wachtwoord</label>
+				<input id="password" name="password" type="password">
+				</p>
+				<p>
+					<input type="submit" value="Log in">
+				</p>
+			</form>
+		</header>
+		<section class="content">
+			<div class="content-wrapper">
+				<div class="content-inner">
+					<p id="appstatus" class="appstatus">&nbsp;</p>
+					<div id="content"></div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div id="popup" class="popup">
+		<div class="overlay"></div>
+		<div class="content">my content</div>
+		<a href="#" class="close" id="popup-close"></a>
+	</div>
+</body>
+</html>

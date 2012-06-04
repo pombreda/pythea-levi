@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      <div id="content-container"> 
+        <div id="content"> 
+
+<form method="post" action="{{self.request.path}}" enctype="multipart/form-data">
+
+<table>
+{% for form in forms %}
+    <tr><td colspan=2>{{form.title}}</td></tr>
+    {{ form.as_table }}
+{% endfor %}
+</table>
+<p class="submit"><input type="submit" value="Submit" /></p>
+</form>
+
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

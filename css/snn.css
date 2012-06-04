@@ -1,0 +1,107 @@
+#container
+{
+	margin: 0 auto;
+	width: 1150px;
+	background: #fff;
+}
+
+#header
+{
+	background: #ccc;
+	padding: 20px;
+}
+
+#header h1 { margin: 0; }
+
+#menu
+{
+	float: left;
+	width: 1150px;
+	background: #333;
+}
+
+#menu ul
+{
+	margin: 0;
+	padding: 0;
+}
+
+#menu ul li
+{
+	list-style-type: none;
+	display: inline;
+}
+
+#menu li a
+{
+	display: block;
+	float: left;
+	padding: 5px 10px;
+	color: #fff;
+	text-decoration: none;
+	border-right: 1px solid #fff;
+}
+
+#menu li a:hover { background: #383; }
+
+#content-container
+{
+	width: 1140px;
+        overflow: hidden;
+}
+
+#content
+{
+	clear: left;
+	float: left;
+	width: 790px;
+	padding: 20px 0;
+	margin: 0 0 0 30px;
+	display: inline;
+        overflow: auto;
+}
+
+#content h2 { margin: 0; }
+
+#sidebar
+{
+	float: right;
+	width: 250px;
+	padding: 10px 0;
+	margin: 0 10px 0 0;
+	display: inline;
+}
+
+#sidebar h3 { margin: 0; }
+
+#footer
+{
+	clear: both;
+	background: #ccc;
+	text-align: right;
+	padding: 20px;
+	height: 1%;
+}
+
+.ui-state-hover
+{
+        background: #C6E2FF;
+}
+
+.widget 
+{ 
+}
+
+.selected
+{
+        font-weight: bold;
+}
+
+.topcategory
+{
+        font-weight: bold;
+}
+.subcategory
+{
+        font-style: italic;
+}

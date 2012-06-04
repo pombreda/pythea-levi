@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+    <link rel="stylesheet" type="text/css" href="css/snn.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+    <script src="js/jquery.form.js" type="text/javascript"></script> 
+    <script src="js/jquery.address-1.4.min.js" type="text/javascript"></script>
+    <script src="js/jquery.collapser.js" type="text/javascript"></script>
+    <script type="text/javascript">
+$(document).ready(function () {
+    jQuery('#categories').accordion();
+});
+
+    </script>
+
+  </head> 
+  <body id="body">
+    <div id="menu"> 
+     {% block menu %}
+     <ul>
+       <li>
+           {{ user.firstname }} {{ user.lastname }}
+       </li> 
+     </ul>
+     {% endblock %} 
+    </div>
+
+    <div id="main"> 
+      {% block main %}
+      <div id="content-container"> 
+        <div id="content"> 
+          {% block content %}
+          Dit is het eerste scherm dat zichtbaar is zonder ingelogd te zijn. 
+          {% endblock %}            
+        </div>
+        <div id="sidebar"> 
+          {% block sidebar %}
+          <div id="categories">
+          {% for topcategory in topcategories %}
+          <a class="topcategory"> {{ topcategory.label }} 
+              <div>
+              {% for sub in topcategory.categories %}
+              <a class="subcategory" href="/crediteuren/{{sub.key.id_or_name}}"> {{ sub.label }} </a><input type="checkbox" value="sub"><br>
+              {% endfor %}
+              </div>
+          </a>
+          {% endfor %}          
+          </div>
+          {% endblock %}            
+        </div>
+      </div>
+      {% endblock %}            
+    </div>
+    <div id="footer">
+      {{ user.firstname }} {{ user.lastname }} : Pythea
+    </div>
+  </body>
+</html>

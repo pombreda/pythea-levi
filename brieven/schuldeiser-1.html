@@ -1,0 +1,44 @@
+{% if preview %}
+<a target="_blank" href="/client/register/printletter/{{key}}">PRINT</a><br><br>
+{% endif %}
+
+<div>
+{{creditor.display_name}}<br>
+{{creditor.address}}<br>
+{{creditor.zipcode}}<br>
+{{creditor.city}}<br>
+
+</div>
+
+<div>{{client.city}}, {{today}}</div>
+
+
+<div>
+<p>Onderwerp : Inventarisatie schulden </p>
+<p>Uw kenmerk : (kenmerk of referentie invullen) </p>
+</div>
+
+<div>
+Geachte heer, mevrouw,
+</div>
+
+<div>
+Op dit moment ben ik niet in staat aan mijn financiele verplichtingen te voldoen. Ik wil hier op zo kort mogelijke termijn verandering in aanbrengen. Hiervoor is het nodig dat ik de exacte omvang en aard van mijn schuldenpakket kan vaststellen.<br>
+Ik verzoek u om mij zo spoedig mogelijk de hoogte van uw netto vordering(en) en de maandelijkse afbetaling(en) schriftelijk door te geven. Wilt u ook aangeven als uw vordering juridisch preferent is, of als er sprake is van een onderpand?<br>
+In afwachting van de reacties van de schuldeisers verzoek ik u eventuele invorderingsmaatregelen op te schorten en mijn schuldenpakket niet verder te verzwaren met rente en/of kosten. Ook verzoek ik u een eventueel beslag op mijn loon en/of uitkering op te schorten.<br>
+Zodra ik de inventarisatie van mijn schulden heb afgerond, ontvangt u van mij een voorstel tot afbetaling van de vorderingen.<br>
+</div>
+<div>
+In afwachting van uw reactie,<br>
+
+Hoogachtend,
+</div>
+<br>
+
+<div>
+{{client.first_name}} {{client.last_name}}<br>
+{{client.address}}<br>
+{{client.zipcode}}<br>
+{{client.city}}<br>
+{{client.date_of_birth}}<br>
+</div>

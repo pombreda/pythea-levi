@@ -1,0 +1,18 @@
+<h2>Geschatte schuld</h2>
+<form method="post" action="{{self.request.path}}" class="file-setup debt-entry">
+  <table>
+  {% for creditor in user.creditors %}
+    <tr>
+      <td><img src="{{creditor.creditor.icon}}" alt="" width="16" height="16"></td>
+      <td>{{ creditor.creditor.display_name }}</td>
+      <td><input id="{{creditor.key.id}}" type="text" class="currency"></input>
+    </tr>
+  {% endfor %}
+  </table>
+<div class="submit">
+  <div>
+    <input type="submit" value="&laquo; ga terug" data-set-value="action=go back">
+    <input type="submit" value="ga verder &raquo;" data-set-value="action=correct">
+</div>
+</div>
+</form>

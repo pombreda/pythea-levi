@@ -1,0 +1,15 @@
+<div id="content"> 
+    <form method="post" action="{{self.request.path}}">
+    Dossier voor: {{ client.first_name }} {{ client.last_name }}<br>
+    <table>
+    {% for creditor in client.creditors %}
+       <tr>
+          <td><img src="{{creditor.creditor.icon}}" alt="" width="16" height="16"></td>
+          <td>{{ creditor.creditor.display_name}}</td>
+          <td><a href="/client/register/printletter/{{creditor.key.id}}">[PRINT BRIEF]</a></td>
+       </tr>
+    {% endfor %}
+    </table>
+    <input type="submit" name="submit" value="approve">
+    </form>
+</div>

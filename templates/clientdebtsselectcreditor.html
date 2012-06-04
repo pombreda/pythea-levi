@@ -1,0 +1,11 @@
+<ul>
+{% for company in creditors %}
+ <li>
+		  <img src="{{company.icon}}" width="16" height="16">
+		  <!-- a href="/client/debts/creditor/select/{{company.key.id}}?come_from={{come_from}}" -->
+		  <a href="/client/debts/add/{{come_from}}?selected={{company.key.id}}">
+			  {{company.display_name}}
+		  </a>
+	 </li>
+{% endfor %}
+</ul>
