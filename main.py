@@ -10,13 +10,13 @@ import csv
 import pickle
 import crypt
 from StringIO import StringIO
-import urlparse 
+import urlparse
 import re
 
 
 #from google.appengine.ext.db import polymodel
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template 
+from google.appengine.ext.webapp import template
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.urlfetch import fetch
@@ -105,7 +105,7 @@ class BaseHandler(webapp.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'templates', 'admin_plus.html')
                 admin_vars = {'template': templ, 'self': self}
                 self.response.out.write(template.render(path, admin_vars))
- 
+
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             vars['self'] = self
             vars['FILE'] = templ
@@ -116,7 +116,7 @@ class Main(BaseHandler):
         """Show the default screen. This is now the login screen"""
         user = self.user
         self.session['JSON'] = False
-        vars = { 
+        vars = {
                  'user': user }
         self.render(vars, 'main.html')
 
@@ -126,8 +126,8 @@ class Screens(BaseHandler):
         """A utility screen to display all screens inside the application"""
         doc = docs.Document(application, self)
         self.render( {'docs': doc.docs, 'tree': dict(doc.tree)}, 'admin.html' )
- 
- 
+
+
 class ClientNew(BaseHandler):
     def get(self):
         """Show the form to add a new client"""
@@ -173,15 +173,15 @@ class ClientContact(BaseHandler):
         user = self.user
         zipcode = user.zipcode
         orgs = [ i for i in models.SocialWork.all() if i.accepts(zipcode)]
- 
+
         logging.error(orgs)
         logging.error(models.SocialWork.all())
         logging.error([i for i in models.SocialWork.all()])
         vars = { 'user': user,
-                 'organisations': orgs, 
+                 'organisations': orgs,
                  'title': 'Met wie heeft u gesproken?' }
         self.render(vars, 'addcontact.html')
-                
+
     def post(self):
         """Add the selected contact person to the database"""
         key = self.request.get('selected')
@@ -205,13 +205,13 @@ class ClientSelectCreditors(BaseHandler):
         for creditor in creditors:
             creditor.selected = user.hasCreditor(creditor)
             logging.error("creditor %d %s" % (creditor.key().id() , creditor.selected))
-            
+
         vars = { 'categories': categories,
-                 'category': category,
+                 'currentcategory': category,
                  'creditors': creditors,
                  'user': user }
         self.render(vars, 'crediteuren.html')
- 
+
     def post(self):
         """Add the selected creditors to the database OLD: """
         user = self.user
@@ -228,7 +228,7 @@ class ClientSelectCreditors(BaseHandler):
             self.redirect('/client/register/creditors')
         else:
             self.redirect('/client/register/validate')
- 
+
     def post(self):
         action = self.request.get('klaar')
         logging.error("action  %s" % (action))
@@ -251,7 +251,7 @@ class ClientSelectCreditors(BaseHandler):
 class ClientCreditorsNew(BaseHandler):
     def get(self):
         """Add a new creditor that is specific to this client
- 
+
         FIXME:
         The new creditor will have status provisional, until it is validated by the SocialWorker"""
         user = self.user
@@ -280,7 +280,7 @@ class ClientValidate(BaseHandler):
     def get(self):
         """Validate a new client"""
         user = self.user
-        vars = { 
+        vars = {
                  'user': user }
         self.render(vars, 'clientvalidate.html')
 
@@ -300,7 +300,7 @@ class ClientValidate(BaseHandler):
             self.redirect('/client/debts/list')
         else:
             self.redirect('/client/register/creditors')
-       
+
 
 class ClientSubmitted(BaseHandler):
     def get(self):
@@ -369,7 +369,7 @@ class ClientDebts(BaseHandler):
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'message.html')
- 
+
 
 
 class ClientDebtsAdd(BaseHandler):
@@ -403,11 +403,11 @@ class ClientDebtsAdd(BaseHandler):
             selected = None
         if form.is_valid():
             new_debt = form.save(commit=False)
-            new_debt.creditor = creditor 
+            new_debt.creditor = creditor
             if creditor.creditor.is_collector:
-                new_debt.collected_for = selected 
+                new_debt.collected_for = selected
             else:
-                new_debt.collector = selected 
+                new_debt.collector = selected
             new_debt.put()
             url = urlparse.urlsplit(self.request.url)
             logging.error(url.path)
@@ -441,7 +441,7 @@ class ClientDebtsSelectCreditor(BaseHandler):
             creditors = models.Creditor.all()
             #creditors.filter('display_name =', 'Woonbron')
             creditors = creditors.filter('is_collector !=', is_collector)
-      
+
             vars = { 'user': user,
                      'come_from': come_from,
                      'is_collector': is_collector,
@@ -452,7 +452,7 @@ class ClientDebtsSelectCreditor(BaseHandler):
 
     def post(self, *args, **kwargs):
         self.get(*args, **kwargs)
-        
+
 class ClientDebtsCreditorActions(BaseHandler):
     """Show details for a CreditorLink"""
     def get(self, selected):
@@ -496,7 +496,7 @@ class OrganisationNew(BaseHandler):
             # FIXME: we should have an intermediate step to
             # retrieve the crop data for the image.
             # Size should be approximately 80x80 pixels
-                 
+
             if photo:
                 # Resize the image
                 image = images.Image(image_data=photo)
@@ -562,7 +562,7 @@ class OrganisationEditEmployee(BaseHandler):
         organisation = user.organisation
         if key:
             employee = models.SocialWorker.get(key)
-            form = forms.SocialWorkerForm(instance=employee)	
+            form = forms.SocialWorkerForm(instance=employee)
         else:
             form = forms.SocialWorkerForm()
         vars = { 'forms': [form] }
@@ -580,12 +580,12 @@ class OrganisationEditEmployee(BaseHandler):
             form = forms.SocialWorkerForm(self.request.POST, instance=instance)
         else:
             form = forms.SocialWorkerForm(self.request.POST)
-            
+
         photo = self.request.get('photo')
         if form.is_valid():
             employee = form.save(commit=False)
             # FIXME: this password code can happen in the form class
-            employee.set_password(form.cleaned_data['password1']) 
+            employee.set_password(form.cleaned_data['password1'])
             employee.organisation = organisation
             if photo:
                 image = images.Image(image_data=photo)
@@ -616,7 +616,7 @@ class OrganisationEmployeeResize(BaseHandler):
         x2 = float(self.request.get('x2'))
         y1 = float(self.request.get('y'))
         y2 = float(self.request.get('y2'))
- 
+
         worker = models.SocialWorker.get(key)
         vars = { 'worker': worker }
         if not worker.original_photo:
@@ -635,7 +635,7 @@ class OrganisationEmployeeResize(BaseHandler):
         worker.photo = image
         worker.put()
         self.redirect('/organisation/employees')
-            
+
         #self.dump()
 
 class OrganisationZipcodes(BaseHandler):
@@ -655,7 +655,7 @@ class OrganisationZipcodes(BaseHandler):
         user.organisation.zipcodes = zipcodes
         user.organisation.put()
         self.redirect(self.request.url)
-        
+
 
 class Todo(BaseHandler):
     def get(self):
@@ -696,7 +696,7 @@ class ResetPassword(BaseHandler):
             vars['token'] = token
             vars['message'] = 'Er is een e-mail verstuurd naar uw account met daarin een code. Met deze code kunt u uw wachtwoord opnieuw instellen.'
             text = template.render(path, vars)
-            
+
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
                            to="<h.then@pythea.nl>",
                            subject="U heeft een nieuw wachtwoord aangevraagd op schuldendossier.nl",
@@ -736,7 +736,7 @@ class Login(BaseHandler):
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'login.html')
-  
+
     def post(self):
         userid = self.request.get('userid')
         passwd = self.request.get('password')
@@ -770,7 +770,7 @@ class EmployeeWaiting(BaseHandler):
     def get(self):
         clients = models.Client.all()
         clients.filter('state !=', 'FINISHED')
-        vars = { 
+        vars = {
                  'clients' : clients }
 
         self.render(vars, 'employeecaseslist.html')
@@ -892,14 +892,14 @@ class ShowCategories(BaseHandler):
          for category in categories:
              self.response.out.write(category.label + '<br>')
 
-          
+
 class EnterCreditors(BaseHandler):
     """Does not appear to be in use"""
     def get(self):
         """Show a list of possible creditors"""
         session = get_current_session()
         user = session.get('user')
-        vars = { 
+        vars = {
                  'user': user, }
         path = os.path.join(os.path.dirname(__file__), 'templates', 'clientcreditors.html')
         self.response.out.write(template.render(path, vars))
@@ -916,7 +916,7 @@ class EnterCreditors(BaseHandler):
                 logging.info('Really different, write to database.')
             else:
                 logging.info('Not really all that different, do not write to database.')
-        
+
         self.redirect('/debts')
 
 class ShowCreditors(BaseHandler):
@@ -933,7 +933,7 @@ class AdminCreditorEdit(BaseHandler):
 	"""Show a form to enter a new creditor"""
         if creditor:
             creditor = models.Creditor.get_by_id(int(creditor))
-            form = forms.CreditorForm(instance=creditor)	
+            form = forms.CreditorForm(instance=creditor)
         else:
             form = forms.Form()
         vars = { 'forms': [form] }
@@ -985,7 +985,7 @@ class Test(BaseHandler):
         creditor = models.Creditor(website=args)
         creditor.expand()
         self.response.out.write(creditor.icon)
-        
+
 
     def post(self):
         """Testing the code to resize a passphoto"""
@@ -995,7 +995,7 @@ class Test(BaseHandler):
         x2 = float(self.request.get('x2'))
         y1 = float(self.request.get('y'))
         y2 = float(self.request.get('y2'))
- 
+
         with open('nopassphoto.gif') as file:
             image = images.Image(image_data=file.read())
         image.crop( x1 / image.width,
@@ -1005,7 +1005,7 @@ class Test(BaseHandler):
 
         image = image.execute_transforms(output_encoding=images.JPEG)
         self.response.out.write(image)
-            
+
         #self.dump()
 
 class TaskInitialize(BaseHandler):
@@ -1016,17 +1016,17 @@ class TaskInitialize(BaseHandler):
     def post(self):
         """Background task to initialize the database with a list of clients and creditors"""
         try:
-            client = models.Client(key_name='hans.then', username='clientXX', first_name='client', 
-                                   last_name='XX', email='hans.then@gmail.com', 
+            client = models.Client(key_name='hans.then', username='clientXX', first_name='client',
+                                   last_name='XX', email='hans.then@gmail.com',
                                    address='Rochussenstraat 347a', zipcode='3023 HE',
                                    city='Rotterdam', mobile='+31634751204')
             client.set_password('XX')
             client.put()
         except:
             logging.info('Error creating client')
-        
+
         try:
-            contact = models.SocialWorker(key_name='hans.then@gmail.com', username='contact XX', first_name='SMDD contact', 
+            contact = models.SocialWorker(key_name='hans.then@gmail.com', username='contact XX', first_name='SMDD contact',
                                           last_name='XX', email='hans.then@gmail.com')
             contact.set_password('XX')
             organisation = models.SocialWork(key_name='SMDD', display_name='SMDD', website='http://www.smdd.nl',
@@ -1035,14 +1035,14 @@ class TaskInitialize(BaseHandler):
             organisation.put()
             contact.organisation = organisation
             contact.put()
-            worker = models.SocialWorker(key_name='h.then@gpythea.nl', username='medewerker XX', first_name='SMDD MW', 
+            worker = models.SocialWorker(key_name='h.then@gpythea.nl', username='medewerker XX', first_name='SMDD MW',
                                           last_name='XX', email='hans.then@gmail.com', organisation=organisation)
             worker.put()
- 
+
         except Exception, e:
             logging.info('Error creating organisation')
             logging.info(e)
-   
+
         with open('schuldeisers.txt') as file:
             for line in file:
                 website, display_name = line.strip().split(None,1)
@@ -1066,16 +1066,16 @@ class TaskInitialize(BaseHandler):
                         categories.append('Deurwaarder')
                         website = website[1:]
                     website = 'http://' + website
-                    creditor = models.Creditor(website=website, 
-                                               is_collector=is_collector, 
+                    creditor = models.Creditor(website=website,
+                                               is_collector=is_collector,
                                                display_name=display_name, categories=categories)
                     try:
                         creditor.expand()
                         creditor.put()
                     except Exception, e:
                         logging.info( "Failed to put %s %s" % (display_name, e) )
-                        
- 
+
+
         with open('categories.txt') as file:
             for line in file:
                 try:
@@ -1124,7 +1124,7 @@ application = webapp.WSGIApplication([
   (r'/client/register/validate', ClientValidate),
   (r'/client/register/previewletter/(.*)', ClientRegisterPreviewLetter),
   (r'/client/register/printletter/(.*)', ClientRegisterPrintLetter),
-  (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a 
+  (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a
                                            # real GET/POST
 # The clients edit debts use case
   (r'/client/debts/list', ClientDebts),

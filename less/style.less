@@ -20,14 +20,43 @@
 		   -moz-box-sizing: border-box;
 		-webkit-box-sizing: border-box;
 				box-sizing: border-box;
-		
+
 		/* set the base font */
 		font-size: 100%;
-		font-family: Arial, Verdana, Helvetica, sans-serif; 
+		font-family: Arial, Verdana, Helvetica, sans-serif;
 }
 
 a {
 	color: inherit;
+}
+
+input[type=text] {
+	border: none;
+	border-radius: .2em;
+	background-color: @color_bg_app_status;
+	position: relative;
+	padding: .2em;
+}
+
+input[type=text].currency {
+	text-align: right;
+}
+input[type=text].currency:before {
+	content: "€";
+	color: @color_text;
+	display: block;
+	position: absolute;
+	left: .5em;
+}
+input[type=submit],
+input[type=button],
+button {
+	color: @color_text;
+	background-color: @color_bg_app_status;
+	border: none;
+	border-radius: .2em;
+	text-transform: uppercase;
+	padding: .5em;
 }
 
 /*input {
@@ -131,7 +160,7 @@ header > form input {
 	margin: 0;
 	padding: .5em;
 	width: 100%;
-	
+
 	background-color: @color_bg_content;
 	border-radius: @size_content_radius;
 	-webkit-box-shadow: 3px 0px 9px 0px @color_shadow_content;
@@ -148,6 +177,9 @@ header > form input {
 	-moz-box-shadow: inset 0 0 9px @color_shadow_content_inner;
 	box-shadow: inset 0 0 9px @color_shadow_content_inner;
 	min-height: 500px;
+}
+#content {
+	position: relative;
 }
 
 /* Tabs -------------------------------------------------------------------- */
@@ -255,13 +287,13 @@ ul.tabset {
 	text-align: center;
 	font-weight: bold;
 	text-decoration: none;
-	
+
 	-moz-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
 	-webkit-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
 	-o-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
 	-ms-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
 	transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
-	
+
 	position: fixed;
 	right: 2.27421875%; /* (1024-980)/4/1024*100 */
 	top: 12em;
@@ -310,6 +342,89 @@ ul.tabset {
 	padding: .5em;
 	background-color: @color_bg_app_status;
 	border-radius: .2em;
+}
+
+/* Form - Collector Selection ---------------------------------------------- */
+form.file-setup {
+	display: table;
+	width: 100%;
+	clear: both;
+
+	.selector-container {
+		display: table-row;
+	}
+
+	.selector-container > div.selector {
+		display: table-cell;
+		border-right: solid 1px @color_text;
+		width: 33.3333333333333%;
+		padding: 1em;
+
+		ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+
+			> li {
+				padding: 0;
+				margin: 0;
+			}
+		}
+
+		input[type="checkbox"] {
+			display: none;
+		}
+		input[type="checkbox"] + .custom-indicator {
+			border: solid 2px @color_text;
+			background-color: transparent;
+			display: inline-block;
+			width: 1em;
+			height: 1em;
+			border-radius: .5em;
+		}
+
+		input[type="checkbox"]:checked + .custom-indicator {
+			background-color: @color_text;
+		}
+	}
+	.selector-container > div.selector.categories {
+		li > a {
+			text-decoration: none;
+		}
+		li.active > a {
+			font-weight: bold;
+		}
+	}
+	.selector-container > div.selector.selection {
+		li:before {
+			content: "- ";
+		}
+	}
+	.selector-container > div.selector:nth-child(3) {
+		border: none;
+	}
+
+	> div.submit {
+		display: table-row;
+		position: relative;
+		text-align: right;
+
+		> div {
+			position: absolute;
+			right: 0;
+		}
+
+	}
+}
+.debt-entry td:first-child:before {
+	content: "- ";
+}
+
+/* Admin - Plus ------------------------------------------------------------ */
+#admin_plus {
+	position: absolute;
+	top: .5em;
+	right: .5em;
 }
 
 /* Alternative look switcher */
