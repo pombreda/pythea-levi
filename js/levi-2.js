@@ -246,7 +246,8 @@ function loadPopup(url) {
 
 function setAppStatus(status) {
 	if ($("#appstatus").length > 0) {
-		if (typeof status === "string" && status !== "") {
+		if (typeof status === "string") {
+			if (status === "") status = "&nbsp;";
 			$("#appstatus").html(status);
 		}
 	} else {
