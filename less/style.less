@@ -10,6 +10,7 @@
 @color_shadow_content_inner: rgba(0,0,0,.2);
 @color_app_status: #B5373D;
 @color_bg_app_status: #F0FBFB;
+@color_bg_row_odd: #C0DDDC;
 
 /* Sizes ------------------------------------------------------------------- */
 @size_content_radius: .5em;
@@ -30,7 +31,9 @@ a {
 	color: inherit;
 }
 
-input[type=text] {
+input[type=text],
+input[type=password],
+textarea {
 	border: none;
 	border-radius: .2em;
 	background-color: @color_bg_app_status;
@@ -323,6 +326,7 @@ ul.tabset {
 	left: 50%;
 	margin: 0;
 	background-color: white;
+	max-width: 940px;
 }
 .popup .close {
 	display: block;
@@ -345,7 +349,7 @@ ul.tabset {
 }
 
 /* Form - Collector Selection ---------------------------------------------- */
-form.file-setup {
+.file-setup {
 	display: table;
 	width: 100%;
 	clear: both;
@@ -414,6 +418,144 @@ form.file-setup {
 			right: 0;
 		}
 
+	}
+
+	.creditor-details {
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 50%;
+		min-height: 400px;
+		background-color: @color_bg_app_status;
+		border-radius: .5em;
+		padding: 1em;
+
+		p {
+			vertical-align: bottom;
+		}
+
+		.action {
+			display: inline-block;
+			width: 40px;
+			height: 40px;
+			text-indent: 100%;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    background-color: @color_text;
+		    border-radius: 50%;
+		    background-position: center;
+		    background-repeat: no-repeat;
+		}
+
+		.action.mail {
+			background-image: url(/images/buttonmail_up.png);
+		}
+		.action.mail:active {
+			background-image: url(/images/buttonmail_down.png);
+		}
+		.action.print {
+			background-image: url(/images/buttonprint_up.png);
+		}
+		.action.print:active {
+			background-image: url(/images/buttonprint_down.png);
+		}
+
+		.add-annotation {
+			border-style: solid;
+			border-width: 1px 0;
+			border-color: @color_text;
+			padding: 1em;
+			margin-bottom: 2em;
+			overflow: auto;
+
+			textarea {
+				border: solid 1px @color_text;
+				width: 100%;
+				height: 5em;
+			}
+
+			input[type=submit] {
+				float: right;
+			}
+		}
+	}
+
+	.creditor-overview {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		position: relative;
+
+		li.new .status > span {
+			width: 20px;
+			background: #dc6060;
+			background: -moz-radial-gradient(center, ellipse cover,  #dc6060 0%, #b00f23 100%);
+			background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#dc6060), color-stop(100%,#b00f23));
+			background: -webkit-radial-gradient(center, ellipse cover,  #dc6060 0%,#b00f23 100%);
+			background: -o-radial-gradient(center, ellipse cover,  #dc6060 0%,#b00f23 100%);
+			background: -ms-radial-gradient(center, ellipse cover,  #dc6060 0%,#b00f23 100%);
+			background: radial-gradient(center, ellipse cover,  #dc6060 0%,#b00f23 100%);
+		}
+
+		li.waiting .status > span {
+			width: 40px;
+			background: #f0b28b;
+			background: -moz-radial-gradient(center, ellipse cover,  #f0b28b 0%, #f68743 100%);
+			background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#f0b28b), color-stop(100%,#f68743));
+			background: -webkit-radial-gradient(center, ellipse cover,  #f0b28b 0%,#f68743 100%);
+			background: -o-radial-gradient(center, ellipse cover,  #f0b28b 0%,#f68743 100%);
+			background: -ms-radial-gradient(center, ellipse cover,  #f0b28b 0%,#f68743 100%);
+			background: radial-gradient(center, ellipse cover,  #f0b28b 0%,#f68743 100%);
+		}
+
+		li.in_collection .status > span,
+		li.done .status > span {
+			width: 60px;
+			background: #8fbb83;
+			background: -moz-radial-gradient(center, ellipse cover,  #8fbb83 0%, #499d38 100%);
+			background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#8fbb83), color-stop(100%,#499d38));
+			background: -webkit-radial-gradient(center, ellipse cover,  #8fbb83 0%,#499d38 100%);
+			background: -o-radial-gradient(center, ellipse cover,  #8fbb83 0%,#499d38 100%);
+			background: -ms-radial-gradient(center, ellipse cover,  #8fbb83 0%,#499d38 100%);
+			background: radial-gradient(center, ellipse cover,  #8fbb83 0%,#499d38 100%);
+		}
+
+		li {
+			margin: 0;
+			padding: .2em .5em;
+
+
+			a {
+				text-decoration: none;
+				display: block;
+				position: relative;
+
+				.status {
+					width: 65px;
+					height: 15px;
+					display: inline-block;
+					position: absolute;
+					right: 500px;
+
+					-webkit-box-shadow: inset 0 0 9px @color_shadow_content_inner;
+					-moz-box-shadow: inset 0 0 9px @color_shadow_content_inner;
+					box-shadow: inset 0 0 9px @color_shadow_content_inner;
+
+					> span {
+						display: block;
+						position: absolute;
+						top: 2.5px;
+						left: 2.5px;
+						height: 10px;
+						background-color: red;
+						border-radius: 5px;
+					}
+				}
+			}
+		}
+		li:nth-child(odd) {
+			background-color: @color_bg_row_odd;
+		}
 	}
 }
 .debt-entry td:first-child:before {

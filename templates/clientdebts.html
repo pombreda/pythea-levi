@@ -1,9 +1,44 @@
-        <div id="content"> 
+<div class="file-setup debt-overview">
+  <h2>Overzicht Schuldeisers</h2>
+  <ul class="creditor-overview">
+  {% for creditor in client.creditors %}
+    <li class="{{creditor.status|lower}}">
+      <a href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions" target="creditor-details">
+        <img src="{{ creditor.creditor.icon}}" alt="" width="16" height="16">&nbsp;{{ creditor.creditor.display_name }}
+        <span class="status"><span></span></span>
+        {% if creditor.status.action %}
+        <span class="action {{creditor.status.action}}">!</span>
+        {% endif %}
+      </a>
+      {% comment %}
+      <div class="creditor-details">
+        <p>Schuldeiser: <strong>{{ creditor.creditor.display_name }}</strong></p>
+        <p>
+          Actie:
+          <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
+          <a href="#" class="action mail">Mail</a></p>
+        <p>Gegevens schuldeiser:</p>
+    {% endcomment %}
+    </li>
+  {% endfor %}
+  </ul>
+  <div class="creditor-details" id="creditor-details"></div>
+</div>
+
+
+
+
+
+
+
+{% comment %}
+<hr>
+        <div id="content">
             <form method="post" action="{{self.request.url}}">
                 <div id="message">Klik op een schuldeiser om een schuldbewijs te verwerken.</div>
                 <table>
                 {% for creditor in client.creditors %}
-	               <tr class="{{creditor.status}}">
+                 <tr class="{{creditor.status}}">
                       <td>
                           <a href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions" target="_popup">
                           <img src="{{creditor.creditor.icon}}" alt="" width="16" height="16">
@@ -21,3 +56,4 @@
                 <input type="submit" name="action" value="Klaar">
             </form>
         </div>
+{% endcomment %}
