@@ -111,11 +111,11 @@ $(document).ready(function(){
 						checkLogin();
 					}
 					
-                                        if(target == '_popup') {
-                                                loadPopup(location);
-                                        } else {
-					       $.address.value(location);
-                                        }
+                    if(target == '_popup') {
+                        loadPopup(location);
+                    } else {
+			            $.address.value(location);
+                    }
 				} else {
 					$("#"+target).html(data);
 					$.address.value(location);
