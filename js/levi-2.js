@@ -128,7 +128,8 @@ $(document).ready(function(){
                     }
 				} else {
 					$("#"+target).html(data);
-					$.address.value(location);
+                    setAppStatus();
+					//$.address.value(location);
 					appLoading(false);
 				}
 			},
@@ -186,6 +187,7 @@ $(document).ready(function(){
                    function( html ) {
                        document.body.style.cursor = "default";
                        $('#content').html(html);
+                       setAppStatus();
                        document.body.style.cursor = "default";
                });
 
@@ -203,9 +205,10 @@ $(document).ready(function(){
             type: "GET",
             url: event.value,
             //data: event.parameters,
-	    headers: {"Accept":"x-text/html-fragment"},
+            headers: {"Accept":"x-text/html-fragment"},
             success: function(html, textStatus, jqXHR) {
                 $('#content').html(html);
+                setAppStatus();
                 document.body.style.cursor = "default";
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -255,11 +258,17 @@ function loadPopup(url) {
 }
 
 function setAppStatus(status) {
-	if ($("#appstatus").length > 0) {
-		if (typeof status === "string") {
-			if (status === "") status = "&nbsp;";
-			$("#appstatus").html(status);
+    if (!status) {
+        status = $('#message').html();
+    }
+    if (!status) {
+        status = "&nbsp;";
+    }
+    if ($("#appstatus").length > 0) {
+	    if (typeof status === "string") {
+		    if (status === "") status = "&nbsp;";
 		}
+	   	$("#appstatus").html(status);
 	} else {
 		$("#content").parent().prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
 	}
