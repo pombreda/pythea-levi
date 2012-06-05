@@ -356,9 +356,7 @@ class ClientRegisterPrintLetter(BaseHandler):
 class ClientDebts(BaseHandler):
     def get(self):
         user = self.get_user()
-        vars = { 'user': user }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebts.html')
-        #self.response.out.write(template.render(path, vars))
+        vars = { 'client': user }
         self.render(vars, 'clientdebts.html')
 
     def post(self):
@@ -372,25 +370,23 @@ class ClientDebts(BaseHandler):
 
 
 
-class ClientDebtsAdd(BaseHandler):
+class ClientDebtsView(BaseHandler):
     def get(self, creditor):
-        user = self.get_user()
+        client = self.user
         creditor = models.CreditorLink.get_by_id(int(creditor))
         form = forms.DebtForm()
         selected = self.request.get('selected')
         if selected:
             selected = models.Creditor.get_by_id(int(selected))
 
-        vars = { 'user': user,
+        vars = { 'client': client,
                  'creditor': creditor,
                  'selected': selected,
                  'form': form }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
-        #self.response.out.write(template.render(path, vars))
         if creditor.creditor.is_collector:
-            self.render(vars, 'clientdebtsadd_collector.html')
+            self.render(vars, 'clientdebtsview_collector.html')
         else:
-            self.render(vars, 'clientdebtsadd.html')
+            self.render(vars, 'clientdebtsview.html')
 
     def post(self, creditor):
         user = self.get_user()
@@ -435,20 +431,29 @@ class ClientDebtsSelectCreditor(BaseHandler):
     """This is used to select a 'deurwaarder' for a debt (or a creditor in case of a 'deurwaarder'"""
     def get(self, selected=None):
         user = self.get_user()
-        come_from = self.request.get('come_from')
+        come_from = self.request.get('come_from') # Dit is het id van de CreditorLink
+        creditor = models.CreditorLink.get_by_id(int(come_from))
+        client = creditor.user
+
         is_collector = self.request.get('is_collector') == 'True'
         if not selected:
             creditors = models.Creditor.all()
             #creditors.filter('display_name =', 'Woonbron')
             creditors = creditors.filter('is_collector !=', is_collector)
+            if user.class_name == 'Client':
+                base_url = "/client/debts"
+            else:
+                base_url = "/employee/cases/view/%s" % client.key()
 
             vars = { 'user': user,
+                     'client': client,
+                     'base_url': base_url,
                      'come_from': come_from,
                      'is_collector': is_collector,
                      'creditors': creditors }
             self.render(vars, 'clientdebtsselectcreditor.html')
         else:
-            self.redirect("/client/debts/add/%s?selected=%s" % (urllib.unquote(come_from), selected))
+            self.redirect("%s/view/%s?selected=%s" % (base_url, urllib.unquote(come_from), selected))
 
     def post(self, *args, **kwargs):
         self.get(*args, **kwargs)
@@ -766,7 +771,31 @@ class Session(BaseHandler):
         self.render(vars, 'session.html')
 
 
-class EmployeeWaiting(BaseHandler):
+class EmployeeViewCase(BaseHandler):
+    def get(self, client):
+        client = models.Client.get(client)
+        vars = { 'client' : client }
+        self.render(vars, 'clientdebts.html')
+
+class EmployeeViewCaseDetails(BaseHandler):
+    def get(self, client, creditor):
+        client = models.Client.get(client)
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        form = forms.DebtForm()
+        selected = self.request.get('selected')
+        if selected:
+            selected = models.Creditor.get_by_id(int(selected))
+        vars = { 'client': client,
+                 'creditor': creditor,
+                 'selected': selected,
+                 'form': form }
+        if creditor.creditor.is_collector:
+            self.render(vars, 'clientdebtsview_collector.html')
+        else:
+            self.render(vars, 'clientdebtsview.html')
+
+
+class EmployeeCasesList(BaseHandler):
     def get(self):
         clients = models.Client.all()
         clients.filter('state !=', 'FINISHED')
@@ -1128,8 +1157,8 @@ application = webapp.WSGIApplication([
   (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a
                                            # real GET/POST
 # The clients edit debts use case
-  (r'/client/debts/list', ClientDebts),
-  (r'/client/debts/add/(.*)', ClientDebtsAdd),
+  (r'/client/debts', ClientDebts),
+  (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
@@ -1146,8 +1175,13 @@ application = webapp.WSGIApplication([
   (r'/employee/photo/(.*)', Photo),
 
 # Several employee use cases
-  (r'/employee/cases/list', EmployeeWaiting),
-  (r'/employee/handle/approve/(.*)', EmployeeApprove),
+  (r'/employee/cases/list', EmployeeCasesList),
+# The shared screens between client and employee
+  (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
+  (r'/employee/cases/view/(.*)', EmployeeViewCase), # => /client/debts
+  (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
+  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
+  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
 
 # Catch all
   (r'/(.*)', Handle404),
