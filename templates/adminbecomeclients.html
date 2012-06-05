@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      <div id="content-container"> 
+        <div id="content"> 
+            Selecteer de client.
+            <form method="post">
+            {% for client in clients %}
+	         <li>
+                 <a href="/admin/become/client/{{client.key.name}}"> 
+                         {{client.first_name}} {{client.last_name}} {{client.class_name}} </a>
+             </li>
+            {% endfor %}
+            </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

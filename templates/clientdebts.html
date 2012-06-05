@@ -1,0 +1,23 @@
+        <div id="content"> 
+            <form method="post" action="{{self.request.url}}">
+                <div id="message">Klik op een schuldeiser om een schuldbewijs te verwerken.</div>
+                <table>
+                {% for creditor in client.creditors %}
+	               <tr class="{{creditor.status}}">
+                      <td>
+                          <a href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions" target="_popup">
+                          <img src="{{creditor.creditor.icon}}" alt="" width="16" height="16">
+                          {{ creditor.creditor.display_name }}
+                          </a>
+                      </td>
+<!--
+                      <td><a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a></td>
+                                           <td><a target="_popup" href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>-->
+                      <td class="status {{creditor.status}}"> {{creditor.status}} </td>
+                      <td class="action {{creditor.status.action}}"> {{creditor.status.action}} </td>
+                    </tr>
+                {% endfor %}
+                </table>
+                <input type="submit" name="action" value="Klaar">
+            </form>
+        </div>

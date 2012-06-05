@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+  </head> 
+  <body id="body">
+    <div id="main"> 
+      {% block main %}
+      <div id="content-container"> 
+        <div id="content"> 
+            <form method="post" action="{{self.request.path}}" target="_popup">
+                {{ creditor.creditor.display_name }}<br>
+            <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a>
+
+            <br>
+            <textarea name="text"></textarea>
+            <input type="submit">
+            <table>
+            {% for note in creditor.annotations %}
+	         <tr>
+                      <td>{{note.user}}</td> 
+                      <td>{{note.entry_date}}</td>
+                      <td>{{note.text}}</td>
+             </tr>
+            {% endfor %}
+            </table>
+            </form>
+        </div>
+      </div>
+      {% endblock %}            
+      <a href="/client/debts">Terug naar het overzicht</a>
+    </div>
+  </body>
+</html>
