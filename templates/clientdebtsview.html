@@ -1,5 +1,10 @@
 <form method="post" action="{{self.request.path}}">
-<a href="/client/debts/list">[&lt;]</a>
+{% if self.user.class_name == 'Client' %}
+<a href="/client/debts">[&lt;]</a>
+{% else %}
+<a href="/employee/cases/view/{{creditor.user.key}}">[&lt;]</a>
+{% endif %}
+
 {{ creditor.creditor.display_name }} 
 <input type="hidden" name="creditor" value="{{creditor.key.id}}">
 <table>
