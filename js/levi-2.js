@@ -110,6 +110,7 @@ $(document).ready(function(){
 
 					if (data != "") {
 						appStatus = data;
+						setAppStatus(data);
 						// @TODO: Process this AFTER redirect
 					}
 
@@ -129,6 +130,7 @@ $(document).ready(function(){
                     	});
                     } else {
 			            $.address.value(location);
+			            $.address.update(); // Since location probably won't change, force an update
                     }
 				} else if ($("#"+target)) {
 					$("#"+target).html(data);
@@ -264,7 +266,6 @@ function loadPopup(url) {
 
 		$popup.find("a").attr("data-actions","close-popup");
 		$popup.addClass("active");
-		console.log($popupContent.width());
 		$popupContent.css("margin-left","-" + Math.min($popupContent.width() / 2,470) + "px");
 		//$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
 		appLoading(false);
