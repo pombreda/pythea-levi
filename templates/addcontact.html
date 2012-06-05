@@ -1,0 +1,19 @@
+        <div id="content"> 
+
+<form method="post" action="{{self.request.path}}">
+<fieldset>
+<legend>{{title}}</legend>
+<table>
+   {% for o in organisations %}
+      {% for c in o.employees %}
+          <tr><td><input type="checkbox" value="{{c.key}}" name="selected"></td>
+              <td><img src="/employee/photo/{{c.key}}"></td>
+              <td>{{ c.first_name }} {{c.last_name}}</td></tr>
+      {% endfor %}
+   {% endfor %}
+</table>
+<p class="submit"><input type="submit" value="Submit" /></p>
+</form>
+
+
+        </div>

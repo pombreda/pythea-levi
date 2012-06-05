@@ -1,0 +1,7 @@
+{% if message %}
+  {{ message }}
+{% else %}
+	{% if user %}
+	U bent ingelogd als {{ user.first_name }} {{ user.last_name }}
+	{% endif %}
+{% endif %}
