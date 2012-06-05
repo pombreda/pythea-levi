@@ -12,7 +12,7 @@
             Klik op een schuldeiser om een schuldbewijs te verwerken.
             <table>
             {% for creditor in client.creditors %}
-	         <tr class="{{creditor.status.0}}">
+	         <tr class="{{creditor.status}}">
                       <td>
                           <a href="{{self.request.path}}/view/{{creditor.key.id}}">
                           <img src="{{creditor.creditor.icon}}" alt="" width="16" height="16">
@@ -25,7 +25,7 @@
                       </td>
                       <td><a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a></td>
                       <td><a target="_popup" href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>
-                      <td class="action {{creditor.status.1}}"> !
+                      <td class="action {{creditor.status.action}}"> !
                       </td>
                  </tr>
             {% endfor %}
