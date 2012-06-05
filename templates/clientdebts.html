@@ -1,18 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title>Jubilee</title> 
-  </head> 
-  <body id="body">
-    <div id="main"> 
-      {% block main %}
-      <div id="content-container"> 
         <div id="content"> 
             <form method="post" action="{{self.request.url}}">
-            Klik op een schuldeiser om een schuldbewijs te verwerken.
-            <table>
-            {% for creditor in client.creditors %}
-	         <tr class="{{creditor.status}}">
+                <div id="message">Klik op een schuldeiser om een schuldbewijs te verwerken.</div>
+                <table>
+                {% for creditor in client.creditors %}
+	               <tr class="{{creditor.status}}">
                       <td>
                           <a href="{{self.request.path}}/view/{{creditor.key.id}}">
                           <img src="{{creditor.creditor.icon}}" alt="" width="16" height="16">
@@ -25,16 +16,11 @@
                       </td>
                       <td><a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a></td>
                       <td><a target="_popup" href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>
-                      <td class="action {{creditor.status.action}}"> !
-                      </td>
-                 </tr>
-            {% endfor %}
-            </table>
-            <input type="submit" name="action" value="Klaar">
+                      <td class="status {{creditor.status}}"> {{creditor.status}} </td>
+                      <td class="action {{creditor.status.action}}"> {{creditor.status.action}} </td>
+                    </tr>
+                {% endfor %}
+                </table>
+                <input type="submit" name="action" value="Klaar">
             </form>
         </div>
-      </div>
-      {% endblock %}            
-    </div>
-  </body>
-</html>

@@ -297,7 +297,7 @@ class ClientValidate(BaseHandler):
             # FIXME: also mark that the user has finished data entry.
             # And make sure that the initial e-mail is sent only once.
             #self.redirect('/client/register/submitted')
-            self.redirect('/client/debts/list')
+            self.redirect('/client/debts')
         else:
             self.redirect('/client/register/creditors')
 
@@ -1158,6 +1158,7 @@ application = webapp.WSGIApplication([
                                            # real GET/POST
 # The clients edit debts use case
   (r'/client/debts', ClientDebts),
+  (r'/client/debts/list', ClientDebts),
   (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),

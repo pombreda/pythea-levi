@@ -1,9 +1,12 @@
+<div id="message">Openstaande dossiers</div>
 <div id="content"> 
-    <ul>
+    <table>
         {% for client in clients %}
-        <li>
-             <a href="/employee/cases/view/{{client.key}}"> {{ client.first_name }} {{ client.last_name }} </a>
-        </li>
+        <tr>
+            <td><a href="/employee/cases/view/{{client.key}}"> {{ client.first_name }} {{ client.last_name }} </a></td>
+            <td class="status {{client.status}}"> {{client.status}} </td>
+            <td class="action {{client.status.action}}"> {{client.status.action}} </td>
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
 </div>
