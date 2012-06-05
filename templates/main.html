@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8"> 
+	<meta charset="utf-8">
 	<!--[if IE ]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
 	<meta name="viewport" content="width=device-width, target-densityDpi=device-dpi, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 	<meta name="robots" content="index, follow">
@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="css/style.css">
 	<script src="js/jquery-1.7.2.min.js"></script>
 	<script src="js/jquery.validate.min.js"></script>
-	<script src="js/jquery.address-1.4.min.js"></script>
+	<script src="js/jquery.address-1.4.js"></script>
 	<script src="js/levi-2.js"></script>
 </head>
 <body>
@@ -21,7 +21,7 @@
 					addClassSelector = $this.attr("data-addclass-selector"),
 					addClass = $this.attr("data-addclass")
 					$addClassElement = $(addClassSelector) || null;
-				
+
 				if ($addClassElement) {
 					if (this.checked) {
 						$addClassElement.addClass(addClass);
