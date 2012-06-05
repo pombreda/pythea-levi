@@ -117,7 +117,7 @@ $(document).ready(function(){
 					// Check where we're being redirected, and set tabs accordingly
 					if (location.indexOf("/client") > -1) {
 						setTabs("client");
-					//	checkLogin();
+						checkLogin();
 					}
 					
                     if(target == '_popup') {
@@ -130,7 +130,7 @@ $(document).ready(function(){
                         }
 
                     }
-				} else {
+				} else if ($("#"+target)) {
 					$("#"+target).html(data);
                     setAppStatus();
 					//$.address.value(location);
@@ -172,13 +172,22 @@ $(document).ready(function(){
 		
 		event.preventDefault();
 		appLoading(true);
-		
+
+		if (state.url === "#") {
+			return false;
+		}
+
 		if ($this.attr("data-actions") && $this.attr("data-actions").indexOf("close-popup") > -1) {
 			$("#popup").removeClass("active");
 		}
 		
 		if (state.target === "_popup") {
 			loadPopup(state.url);
+		} else if (state.target !== "content" && $("#"+state.target)) {
+			$("#"+state.target).load(state.url,function(){
+				appLoading(false);
+				setAppStatus();
+			});
 		} else {
 			$.address.value(state.url);
 		}
@@ -250,19 +259,19 @@ function loadPopup(url) {
 	appLoading(true);
 	$("#popup .content").load(url,function(){
 		var $popup = $("#popup"),
-			$popupContent = $popup.find(".content"),
-			$popupCloser = $popup.find(".close");
-		
+			$popupContent = $(".content",$popup),
+			$popupCloser = $(".close",$popup);
+
 		$popup.find("a").attr("data-actions","close-popup");
 		$popup.addClass("active");
-		$popupContent.css("margin-left","-" + ($popupContent.width() / 2) + "px");
-		$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
+		$popupContent.css("margin-left","-" + Math.min($popupContent.width() / 2,470) + "px");
+		//$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
 		appLoading(false);
 	});
 }
 
 function setAppStatus(status) {
-    if (!status) {
+    if (!status && $('#message')) {
         status = $('#message').html();
     }
     if (!status) {

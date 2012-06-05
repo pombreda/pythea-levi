@@ -1,34 +1,41 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title>Jubilee</title> 
-  </head> 
-  <body id="body">
-    <div id="main"> 
-      {% block main %}
-      <div id="content-container"> 
-        <div id="content"> 
-            <form method="post" action="{{self.request.path}}" target="_popup">
-                {{ creditor.creditor.display_name }}<br>
-            <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a>
+<p>Schuldeiser: <strong>{{ creditor.creditor.display_name }}</strong></p>
+<p>
+  Actie:
+  <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
+  <a href="#" class="action mail">Mail</a>
+</p>
+<p>Gegevens schuldeiser:</p>
+<form method="post" action="{{self.request.path}}" target="creditor-details" class="add-annotation">
+  <label for="creditor_annotation">voeg een notitie toe:</label><br>
+  <textarea name="text" id="creditor_annotation"></textarea><br>
+  <input type="submit" value="voeg toe">
+</form>
+{% for note in creditor.annotations %}
+<p>
+  <strong>{{note.entry_date}}</strong><br>
+  <em>{{note.user}}</em><br>
+  <span>{{note.text}}</span>
+ </p>
+{% endfor %}
 
-            <br>
-            <textarea name="text"></textarea>
-            <input type="submit">
-            <table>
-            {% for note in creditor.annotations %}
-	         <tr>
-                      <td>{{note.user}}</td> 
-                      <td>{{note.entry_date}}</td>
-                      <td>{{note.text}}</td>
-             </tr>
-            {% endfor %}
-            </table>
-            </form>
-        </div>
-      </div>
-      {% endblock %}            
-      <a href="/client/debts">Terug naar het overzicht</a>
-    </div>
-  </body>
-</html>
+
+{% comment %}
+<form method="post" action="{{self.request.path}}" target="_popup">
+    {{ creditor.creditor.display_name }}<br>
+<a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a>
+<a target="_popup" href="/client/debts/view/{{creditor.key.id}}">[beheer schulden]</a>
+
+<br>
+<textarea name="text"></textarea>
+<input type="submit">
+<table>
+{% for note in creditor.annotations %}
+<tr>
+          <td>{{note.user}}</td>
+          <td>{{note.entry_date}}</td>
+          <td>{{note.text}}</td>
+ </tr>
+{% endfor %}
+</table>
+</form>
+{% endcomment %}
