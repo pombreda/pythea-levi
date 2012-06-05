@@ -12,7 +12,7 @@
 
 <table>
 {% for form in forms %}
-    <tr><td colspan=2>{{form.title}}</td></tr>
+<tr><td colspan=2><div id="message">{{form.title}}</div></td></tr>
     {{ form.as_table }}
 {% endfor %}
 </table>
