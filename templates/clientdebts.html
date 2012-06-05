@@ -5,17 +5,14 @@
                 {% for creditor in client.creditors %}
 	               <tr class="{{creditor.status}}">
                       <td>
-                          <a href="{{self.request.path}}/view/{{creditor.key.id}}">
+                          <a href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions" target="_popup">
                           <img src="{{creditor.creditor.icon}}" alt="" width="16" height="16">
-                          </a>
-                      </td>
-                      <td>
-                          <a href="{{self.request.path}}/view/{{creditor.key.id}}">
                           {{ creditor.creditor.display_name }}
                           </a>
                       </td>
+<!--
                       <td><a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a></td>
-                      <td><a target="_popup" href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>
+                                           <td><a target="_popup" href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>-->
                       <td class="status {{creditor.status}}"> {{creditor.status}} </td>
                       <td class="action {{creditor.status.action}}"> {{creditor.status.action}} </td>
                     </tr>
