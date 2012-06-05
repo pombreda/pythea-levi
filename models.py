@@ -224,6 +224,27 @@ class Client(User):
         self.state = "APPROVED"
         self.put()
 
+    def status(self):
+        count = 0
+        count_new = 0
+        count_incomplete = 0
+        for creditor in self.creditors:
+            count += 1
+            if creditor.status().status != 'COMPLETE':
+                count_incomplete += 1
+            if not creditor.last_email_date:
+                count_new +=1
+        if count == 0:
+            return Status('NEW')
+        elif count_new == count:
+            return Status('BUSY')
+        elif count_incomplete != 0:
+            action = 'NEEDS_APPROVAL' if count_new != 0 else ''
+            return Status('BUSY', action)
+        else:
+            return Status('COMPLETE')
+
+
 class Category(db.Model):
     label = db.StringProperty()
     question = db.StringProperty()
