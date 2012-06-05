@@ -9,7 +9,9 @@
       <div id="content-container"> 
         <div id="content"> 
             <form method="post" action="{{self.request.path}}" target="_popup">
-            {{ creditor.creditor.display_name }}
+                {{ creditor.creditor.display_name }}<br>
+            <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a>
+
             <br>
             <textarea name="text"></textarea>
             <input type="submit">
