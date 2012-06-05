@@ -1179,6 +1179,7 @@ application = webapp.WSGIApplication([
   (r'/employee/cases/list', EmployeeCasesList),
 # The shared screens between client and employee
   (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
+  (r'/employee/cases/view/(.*)/actions', ClientDebtsCreditorActions), # => /client/debts
   (r'/employee/cases/view/(.*)', EmployeeViewCase), # => /client/debts
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
