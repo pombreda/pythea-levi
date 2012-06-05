@@ -5,14 +5,14 @@ String.prototype.repeat = function( num )
 
 /**
  * Renders the tabs necessary for the logged in user type
- *
+ * 
  * @param {string} type The desired tabset type
  * @return void
  */
 function setTabs(type) {
 	var $currentTabs = $("#tabs"),
 		tabHtml;
-
+	
 	switch(type) {
 		case "client":
 			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/register/creditors">Schuldendossier</a></li><li><a href="/client/register">Mijn gegevens</a></li></ul>';
@@ -23,7 +23,7 @@ function setTabs(type) {
 		default:
 			tabHtml = "";
 	}
-
+	
 	if (tabHtml) {
 		if ($currentTabs) {
 			$currentTabs.remove();
@@ -34,7 +34,7 @@ function setTabs(type) {
 
 /**
  * Enable or disable app waiting state on AJAX calls
- *
+ * 
  * @param {bool} Wether we're currently loading an AJAX resource.
  * @return void
  */
@@ -48,10 +48,10 @@ function appLoading(loading) {
 }
 
 $(document).ready(function(){
-
+	
 	// Set up automated validation for login form
 	$("#login").validate();
-
+	
 	// Make sure submit button values are included in AJAX calls
 	$("input[type=submit]").live("click",function(e){
 		var $this = $(this),
@@ -67,12 +67,12 @@ $(document).ready(function(){
 			$this.after('<input type="hidden" name="'+setValue[0]+'" value="'+setValue[1]+'">');
 		}
 	});
-
+	
 	// Catch all form execution and pass it through AJAX calls
-	$("form").live("submit",function(event) {
+	$("form").live("submit",function(event) { 
 		event.preventDefault();
 		event.stopPropagation();
-
+		
 		var $this = $(this),
 			url = $this.attr("action"),
 			method = $this.attr("method") ? $this.attr("method").toLowerCase() : "get"
@@ -80,12 +80,12 @@ $(document).ready(function(){
 			context = this,
 			redirected = false
 			;
-
+		
 		// If validation marked any errors, stop processing.
 		if ($this.find("input.error").length > 0) {
 			return;
 		}
-
+		
 		$.ajax({
 			url: url,
 			type: method.toUpperCase(),
@@ -102,30 +102,30 @@ $(document).ready(function(){
 			},
 			success: function(data, textStatus, jqXHR) {
 				var location = jqXHR.getResponseHeader("Location");
-
+				
 				if (location) {
 					if (location.match(/^https?\:\/\//)) {
 						location = location.replace(/https?\:\/\/[^\/]+/,"");
 					}
-
+					
 					if (data != "") {
 						appStatus = data;
 						// @TODO: Process this AFTER redirect
 					}
-
+					
 					redirected = true;
-
+					
 					// Check where we're being redirected, and set tabs accordingly
 					if (location.indexOf("/client") > -1) {
 						setTabs("client");
 						checkLogin();
 					}
-
-                                        if(target == '_popup') {
-                                                loadPopup(location);
-                                        } else {
-					       $.address.value(location);
-                                        }
+					
+                    if(target == '_popup') {
+                        loadPopup(location);
+                    } else {
+			            $.address.value(location);
+                    }
 				} else {
 					$("#"+target).html(data);
 					$.address.value(location);
@@ -138,7 +138,7 @@ $(document).ready(function(){
 			}
 		});
 	});
-
+	
 	/**
 	 * Enable the popup close button
 	 */
@@ -149,7 +149,7 @@ $(document).ready(function(){
     	$(".content","#popup").empty();
 		return false;
     });
-
+	
 	/**
 	 * Catch all links and pass them through AJAX calls
 	 */
@@ -160,18 +160,18 @@ $(document).ready(function(){
 				target : $this.attr("target") || "content",
 				title : $this.attr("data-title") || document.title,
 			};
-
+		
 		if ($this.attr("id") === "popup-close" || $this.attr("target") === "_blank") {
 			return true;
 		}
-
+		
 		event.preventDefault();
 		appLoading(true);
-
+		
 		if ($this.attr("data-actions") && $this.attr("data-actions").indexOf("close-popup") > -1) {
 			$("#popup").removeClass("active");
 		}
-
+		
 		if (state.target === "_popup") {
 			loadPopup(state.url);
 		} else {
@@ -189,10 +189,10 @@ $(document).ready(function(){
                        document.body.style.cursor = "default";
                });
 
-        });
+        });	
 	/**
 	 * jQuery.address change handler
-	 *
+	 * 
 	 * @param {object} The change event
 	 * @return {void}
 	 */
@@ -245,7 +245,7 @@ function loadPopup(url) {
 		var $popup = $("#popup"),
 			$popupContent = $popup.find(".content"),
 			$popupCloser = $popup.find(".close");
-
+		
 		$popup.find("a").attr("data-actions","close-popup");
 		$popup.addClass("active");
 		$popupContent.css("margin-left","-" + ($popupContent.width() / 2) + "px");
