@@ -109,8 +109,7 @@ $(document).ready(function(){
 					}
 					
 					if (data != "") {
-						appStatus = data;
-						// @TODO: Process this AFTER redirect
+                        setAppStatus(data);
 					}
 					
 					redirected = true;
@@ -118,13 +117,18 @@ $(document).ready(function(){
 					// Check where we're being redirected, and set tabs accordingly
 					if (location.indexOf("/client") > -1) {
 						setTabs("client");
-						checkLogin();
+					//	checkLogin();
 					}
 					
                     if(target == '_popup') {
                         loadPopup(location);
                     } else {
-			            $.address.value(location);
+                        if( location == $.address.value() ) {
+                            $.address.update();
+                        } else {
+			                $.address.value(location);
+                        }
+
                     }
 				} else {
 					$("#"+target).html(data);
