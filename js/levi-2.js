@@ -41,7 +41,7 @@ function setTabs(type) {
 function appLoading(loading) {
 // @TODO: This stuff should be handled with classes
 	if (loading) {
-		$("body").css("cursor","waiting");
+		$("body").css("cursor","wait");
 	} else {
 		$("body").css("cursor","default");
 	}
@@ -192,19 +192,18 @@ $(document).ready(function(){
 			$.address.value(state.url);
 		}
 	});
-        $(":checkbox.check").live("click",function(event) {
-               var checked = $(this).is(':checked');
-               var creditor = $(this).val()
-               var url = $(this).closest("form").attr("action");
-               $.post(url, { checked: checked, creditor: creditor },
-                   function( html ) {
-                       document.body.style.cursor = "default";
-                       $('#content').html(html);
-                       setAppStatus();
-                       document.body.style.cursor = "default";
-               });
-
-        });	
+    $(":checkbox.check").live("click",function(event) {
+        var checked = $(this).is(':checked');
+        var creditor = $(this).val()
+        var url = $(this).closest("form").attr("action");
+        document.body.style.cursor = "wait";
+        $.post(url, { checked: checked, creditor: creditor },
+            function( html ) {
+                $('#content').html(html);
+                setAppStatus();
+                document.body.style.cursor = "default";
+            });
+    });	
 	/**
 	 * jQuery.address change handler
 	 * 

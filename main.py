@@ -82,7 +82,7 @@ class BaseHandler(webapp.RequestHandler):
     admin = property(get_admin)
     session = property(get_session)
 
-    def redirect(self, uri, permanent=False, message="Success"):
+    def redirect(self, uri, permanent=False):
         if 'x-text/html-fragment' in self.request.headers['Accept']: #or 'JSON' in self.session:
             status = 200
         elif permanent:
@@ -92,7 +92,6 @@ class BaseHandler(webapp.RequestHandler):
         self.response.set_status(status)
         self.response.headers['Location'] = str(uri)
         self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write(message)
 
     def render(self, vars, templ=None):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -354,9 +353,18 @@ class ClientRegisterPrintLetter(BaseHandler):
                 self.response.out.write(asset.data)
 
 class ClientDebts(BaseHandler):
-    def get(self):
+    def get(self, creditor=None):
         user = self.get_user()
-        vars = { 'client': user }
+        base_url = '/client/debts'
+        if not creditor:
+            creditor = user.creditors.get()
+            self.redirect('%s/creditor/%s' % (user.key(), creditor.key().id()))
+        else:
+            creditor = models.CreditorLink.get_by_id(int(creditor))
+        logging.error("%s:%s" % (self.request.path, creditor))
+        vars = { 'client': user,
+                 'creditor': creditor,
+                 'base_url': base_url }
         self.render(vars, 'clientdebts.html')
 
     def post(self):
@@ -367,7 +375,6 @@ class ClientDebts(BaseHandler):
         #path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'message.html')
-
 
 
 class ClientDebtsView(BaseHandler):
@@ -440,7 +447,7 @@ class ClientDebtsSelectCreditor(BaseHandler):
             creditors = models.Creditor.all()
             #creditors.filter('display_name =', 'Woonbron')
             creditors = creditors.filter('is_collector !=', is_collector)
-            if user.class_name == 'Client':
+            if user.class_name() == 'Client':
                 base_url = "/client/debts"
             else:
                 base_url = "/employee/cases/view/%s" % client.key()
@@ -461,14 +468,13 @@ class ClientDebtsSelectCreditor(BaseHandler):
 class ClientDebtsCreditorActions(BaseHandler):
     """Show details for a CreditorLink"""
     def get(self, selected):
-        user = self.get_user()
+        user = self.user
         creditor = models.CreditorLink.get_by_id(int(selected))
-        vars = { 'user': user,
+        vars = { 'client': user,
                  'creditor': creditor }
         self.render(vars, 'clientdebtscreditoractions.html')
 
     def post(self, selected):
-        logging.info("I am here")
         user = self.get_user()
         creditor = models.CreditorLink.get_by_id(int(selected))
         text = self.request.get('text')
@@ -772,9 +778,18 @@ class Session(BaseHandler):
 
 
 class EmployeeViewCase(BaseHandler):
-    def get(self, client):
+    def get(self, client, creditor=None):
         client = models.Client.get(client)
-        vars = { 'client' : client }
+        base_url = '/employee/cases/view/%s' % client.key()
+        if not creditor:
+            creditor = client.creditors.get()
+            self.redirect("%s/creditors/%s" % (self.request.url, creditor.key().id()))
+        else:
+            creditor = models.CreditorLink.get_by_id(int(creditor))
+        logging.error(creditor.key().id())
+        vars = { 'client' : client,
+                 'base_url': base_url,
+                 'creditor': creditor }
         self.render(vars, 'clientdebts.html')
 
 class EmployeeViewCaseDetails(BaseHandler):
@@ -794,6 +809,24 @@ class EmployeeViewCaseDetails(BaseHandler):
         else:
             self.render(vars, 'clientdebtsview.html')
 
+class EmployeeViewCaseCreditorActions(BaseHandler):
+    """Show details for a CreditorLink"""
+    def get(self, client, creditor):
+        user = self.user
+        client = models.Client.get(client)
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        vars = { 'user': user,
+                 'client': client,
+                 'creditor': creditor }
+        self.render(vars, 'clientdebtscreditoractions.html')
+
+    def post(self, client, creditor):
+        user = self.user
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        text = self.request.get('text')
+        annotation = models.Annotation(subject=creditor, author=user, text=text)
+        annotation.put()
+        self.redirect(self.request.url)
 
 class EmployeeCasesList(BaseHandler):
     def get(self):
@@ -1158,6 +1191,7 @@ application = webapp.WSGIApplication([
                                            # real GET/POST
 # The clients edit debts use case
   (r'/client/debts', ClientDebts),
+  (r'/client/debts/creditor/(.*)', ClientDebts),
   (r'/client/debts/list', ClientDebts),
   (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
@@ -1179,7 +1213,8 @@ application = webapp.WSGIApplication([
   (r'/employee/cases/list', EmployeeCasesList),
 # The shared screens between client and employee
   (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
-  (r'/employee/cases/view/(.*)/actions', ClientDebtsCreditorActions), # => /client/debts
+  (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),
+  (r'/employee/cases/view/(.*)/creditor/(.*)/actions', EmployeeViewCaseCreditorActions),
   (r'/employee/cases/view/(.*)', EmployeeViewCase), # => /client/debts
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
