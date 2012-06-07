@@ -305,6 +305,11 @@ class Status():
     def __str__(self):
         return self.status
 
+    def serialize(self):
+        return ':'.join([self.status, self.action, self.description])
+
+
+
 class CreditorLink(db.Model):
     creditor = db.ReferenceProperty(Creditor)
     user = db.ReferenceProperty(Client, collection_name='creditors')
@@ -314,6 +319,7 @@ class CreditorLink(db.Model):
     complete = db.BooleanProperty()
     registration_date = db.DateProperty(auto_now_add=True)
     last_changed_date = db.DateProperty(auto_now=True)
+    cached_state = db.StringProperty()
 
     def send_email(self):
         logging.error("FIXME: need to actually send an email")
@@ -324,19 +330,15 @@ class CreditorLink(db.Model):
         self.approved = True
 
     def status(self):
-        """Old version: to be removed"""
-        if not self.approved:
-            return "WAITING FOR APPROVAL"
-        elif not self.last_email_date:
-            return "NO EMAIL SENT"
-        elif not self.debts.count():
-            return "WAITING FOR ANSWER"
-        elif self.complete:
-            return "COMPLETE"
-        else:
-            return "ILLEGAL STATE"
+        if not self.cached_state:
+            status = self.calc_status()
+            self.cached_state = status.serialize()
+            self.put()
+        status, action, description = self.cached_state.split(':',2)
+        s = Status(status, action, description)
+        return s
 
-    def status(self):
+    def calc_status(self):
         #FIXME: if not self.approved:
         #    return "WAITING FOR APPROVAL"
         count = 0
@@ -381,6 +383,11 @@ class Debt(db.Model):
     amount = DecimalProperty(default=decimal.Decimal('0.00'))
     payment_amount = DecimalProperty(default=decimal.Decimal('0.00'))
 
+
+    def put(self):
+        self.creditor.cached_state = None
+        self.creditor.put()
+        db.Model.put(self)
 
 class Annotation(db.Model):
     subject = db.ReferenceProperty(db.Model, collection_name='annotations')

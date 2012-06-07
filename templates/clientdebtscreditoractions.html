@@ -3,6 +3,12 @@
   Actie:
   <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
   <a href="#" class="action mail">Mail</a>
+  <br>
+  {% if user.class_name == 'Client' %}
+  <a href="/client/debts/view/{{creditor.key.id}}">[beheer schulden]</a>
+  {% else %}
+  <a href="/employee/cases/view/{{client.key}}/view/{{creditor.key.id}}">[beheer schulden]</a>
+  {% endif %}
 </p>
 <p>Gegevens schuldeiser:</p>
 <form method="post" action="{{self.request.path}}" target="creditor-details" class="add-annotation">
@@ -23,7 +29,6 @@
 <form method="post" action="{{self.request.path}}" target="_popup">
     {{ creditor.creditor.display_name }}<br>
 <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a>
-<a target="_popup" href="/client/debts/view/{{creditor.key.id}}">[beheer schulden]</a>
 
 <br>
 <textarea name="text"></textarea>
