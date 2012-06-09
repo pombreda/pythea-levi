@@ -11,7 +11,7 @@ import models
 class ClientForm(df.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(widget=forms.PasswordInput, required=False)
-  
+
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:
         model = models.Client
@@ -86,6 +86,9 @@ class CreditorForm(df.ModelForm):
 
 class DebtForm(df.ModelForm):
     #creditor_or_collector = forms.CharField()
+    original_date = forms.DateField(localize=True)
+    amount = forms.DecimalField(localize=True, required=False)
+    payment_amount = forms.DecimalField(localize=True, required=False)
     class Meta:
         model = models.Debt
         fields = ['original_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']

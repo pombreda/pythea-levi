@@ -90,6 +90,7 @@ class BaseHandler(webapp.RequestHandler):
             status = 301
         else:
             status = 302
+        logging.error("In redirect %s" % self.request.headers['Accept'])
         self.response.set_status(status)
         self.response.headers['Location'] = str(uri)
         logging.error("redirect to: %s" % uri)
@@ -420,21 +421,21 @@ class ClientDebtsView(BaseHandler):
             logging.error(url.path)
 	    self.redirect(url.path)
         else:
-            # logging.error("error")
-            # logging.error( form.non_field_errors() )
-            # errors = [ (field.name, field.errors) for field in form ]
-            # logging.error( errors )
             for field in form:
                  logging.error( field )
                  logging.error( dir(field) )
                  logging.error( type(field) )
 
             vars = { 'user': user,
+                     'client': user,
                      'creditor': creditor,
                      'selected': selected,
                      'form': form }
-            self.render(vars, 'clientdebtsadd.html')
-            #path = os.path.join(os.path.dirname(__file__), 'templates', 'clientdebtsadd.html')
+            if creditor.creditor.is_collector:
+                self.render(vars, 'clientdebtsview_collector.html')
+            else:
+                self.render(vars, 'clientdebtsview.html')
+
             #self.response.out.write(template.render(path, vars))
 
 
@@ -821,6 +822,44 @@ class EmployeeViewCaseDetails(BaseHandler):
             self.render(vars, 'clientdebtsview_collector.html')
         else:
             self.render(vars, 'clientdebtsview.html')
+
+    def post(self, client, creditor):
+        user = self.get_user()
+        client = models.Client.get(client)
+        form = forms.DebtForm(self.request.POST)
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        selected = self.request.get('selected')
+        if selected:
+            selected = models.Creditor.get_by_id(int(selected))
+        else:
+            selected = None
+        if form.is_valid():
+            new_debt = form.save(commit=False)
+            new_debt.creditor = creditor
+            if creditor.creditor.is_collector:
+                new_debt.collected_for = selected
+            else:
+                new_debt.collector = selected
+            new_debt.put()
+            url = urlparse.urlsplit(self.request.url)
+            logging.error(url.path)
+	    self.redirect(url.path)
+        else:
+            for field in form:
+                 logging.error( field )
+                 logging.error( dir(field) )
+                 logging.error( type(field) )
+
+            vars = { 'user': user,
+                     'client': client,
+                     'creditor': creditor,
+                     'selected': selected,
+                     'form': form }
+            if creditor.creditor.is_collector:
+                self.render(vars, 'clientdebtsview_collector.html')
+            else:
+                self.render(vars, 'clientdebtsview.html')
+
 
 class EmployeeViewCaseCreditorActions(BaseHandler):
     """Show details for a CreditorLink"""
