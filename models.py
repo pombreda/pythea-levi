@@ -184,13 +184,13 @@ class Client(User):
 
     def start_page(self):
         if self.state == 'APPROVED':
-            return '/client/debts/list'
+            return '/client/debts'
         elif self.state == 'COMPLETED':
-            return '/client/register/creditors'
+            return '/client/creditors'
         elif self.state == 'FINISHED':
             return '/client/register/finished'
         else:
-            return '/client/register/creditors'
+            return '/client/debts'
 
     def hasCreditor(self, creditor):
         for link in self.creditors:
