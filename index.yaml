@@ -1,0 +1,6 @@
+indexes:
+- kind: Annotation
+  properties:
+    - name: subject
+    - name: entry_date
+      direction: desc 
