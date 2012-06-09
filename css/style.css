@@ -9,12 +9,17 @@
   box-sizing: border-box;
   /* set the base font */
 
-  font-size: 100%;
+  font-size: 99%;
   font-family: Arial, Verdana, Helvetica, sans-serif;
 }
+html, body {
+  height: 100%;
+}
+
 a {
   color: inherit;
 }
+
 input[type=text],
 input[type=password],
 textarea {
@@ -24,6 +29,7 @@ textarea {
   position: relative;
   padding: .2em;
 }
+
 input[type=text].currency {
   text-align: right;
 }
@@ -59,6 +65,12 @@ body > .wrapper {
   max-width: 980px;
   margin: 0 auto;
   padding: .5em 0 0 0;
+  position: relative;
+
+  /* Stretch to full height */
+  height: 100%;
+  height: auto !important;
+  min-height: 100%
 }
 /* Header ------------------------------------------------------------------ */
 header {
@@ -129,34 +141,50 @@ header.alt form label {
 header.alt form input[type=submit] {
   float: right;
 }
+
+header.alt p#login {
+  float: right;
+}
 /* Intro -------------------------------------------------------------------- */
 .intro-flow {
   display: block;
   margin: 0 auto;
 }
 /* Contents ----------------------------------------------------------------- */
+#message {
+  display: none;
+}
+
 .content {
   color: #003339;
 }
 .content-wrapper {
   margin: 0;
-  padding: .5em;
+  padding: .6em .5em 0px .5em;
   width: 100%;
   background-color: #d6f2ef;
-  border-radius: 0.5em;
+  border-radius: .5em .5em 0em 0em;
   -webkit-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
+
+  /* Make sure content is stretched */
+  position: absolute; /* absolute in .wrapper */
+  top: 92px;          /* room for the header */
+  bottom: 0;          /* stretch to the bottom */
+  z-index: 50;        /* push it behind the front tab */
+
 }
 .content-inner {
   background-color: #d1ebea;
   border: solid 1px #e2f4f6;
-  border-radius: 0.5em;
+  border-radius: 0.5em 0.5em 0em 0em;
   padding: 1em;
   -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
-  min-height: 500px;
+  /* min-height: 500px; */
+  min-height: 100%;
 }
 #content {
   position: relative;
@@ -178,79 +206,15 @@ header.alt form input[type=submit] {
   border-radius: 0.5em 0.5em 0 0;
 }
 .tabs li.active {
+  position: relative;
   background-color: #d6f2ef;
+  z-index: 100;
 }
 .tabs li a {
   font-weight: bold;
   text-decoration: none;
   color: #003339;
 }
-/*
-.content {
-	position: relative;
-	margin: 0;
-	padding: 0;
-	overflow: visible;
-}
-
-ul.tabset {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.tabset > li {
-	margin-top: 3em;
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 1;
-	width: 100%;
-}
-
-.tabset > li.active {
-	background-color: @color_tab_active;
-	z-index: 2;
-}
-
-.tabset > li h2 {
-	height: 2.5em;
-	display: block;
-	padding: .5em 0;
-	width: 165px;
-	text-align: center;
-	background-color: @color_bg_content;
-	border-radius: @size_tab_radius @size_tab_radius 0 0;
-	position: absolute;
-	top: -3em;
-	left: .5em;
-	font-size: .9em;
-	font-weight: bold;
-}
-
-.tabset > li:nth-child(3) h2 {
-	left: 18.836734693878%; /* (16.836734693878)+2 * /
-}
-
-.tabset > li:nth-child(4) h2 {
-	left: 37.673469387756%; /* (16.836734693878*2)+2 * /
-}
-
-.tabset > li:nth-child(5) h2 {
-	left: 52.510204081634%; /* (16.836734693878*3)+2 * /
-}
-
-.tabset > li > div {
-	background-color: #c3e9f4;
-	border: solid 1px #e2f4f6;
-	border-radius: @size_tab_radius;
-	padding: 1em;
-	-webkit-box-shadow: inset 0 0 9px @color_tab_shadow_inner;
-	-moz-box-shadow: inset 0 0 9px @color_tab_shadow_inner;
-	box-shadow: inset 0 0 9px @color_tab_shadow_inner;
-	min-height: 500px;
-}
-*/
 /* Online help ------------------------------------------------------------- */
 .online-help {
   background-color: #d6f2ef;
@@ -282,7 +246,9 @@ ul.tabset {
   display: none;
 }
 .popup.active {
+  position: fixed;
   display: block;
+  z-index: 200;
 }
 .popup .overlay {
   background-color: rgba(64, 64, 64, 0.5);
@@ -315,7 +281,7 @@ ul.tabset {
 }
 /* Application status ------------------------------------------------------ */
 .appstatus {
-  margin: 1em 0 2em 0;
+  margin: .3em 0 .7em 0;
   color: #b5373d;
   padding: .5em;
   background-color: #f0fbfb;
@@ -334,8 +300,9 @@ ul.tabset {
   display: table-cell;
   border-right: solid 1px #003339;
   width: 33.3333333333333%;
-  padding: 1em;
+  padding: 0 1em 0 1em;
 }
+
 .file-setup .selector-container > div.selector ul {
   list-style: none;
   padding: 0;
@@ -349,7 +316,7 @@ ul.tabset {
   display: none;
 }
 .file-setup .selector-container > div.selector input[type="checkbox"] + .custom-indicator {
-  border: solid 2px #003339;
+  border: solid 1px #003339; 
   background-color: transparent;
   display: inline-block;
   width: 1em;
@@ -357,7 +324,7 @@ ul.tabset {
   border-radius: .5em;
 }
 .file-setup .selector-container > div.selector input[type="checkbox"]:checked + .custom-indicator {
-  background-color: #003339;
+  background-color: #003333;
 }
 .file-setup .selector-container > div.selector.categories li > a {
   text-decoration: none;
@@ -365,9 +332,11 @@ ul.tabset {
 .file-setup .selector-container > div.selector.categories li.active > a {
   font-weight: bold;
 }
+/* HTH: removed after discussion with Jeremine
 .file-setup .selector-container > div.selector.selection li:before {
   content: "- ";
 }
+*/
 .file-setup .selector-container > div.selector:nth-child(3) {
   border: none;
 }
@@ -388,7 +357,9 @@ ul.tabset {
   min-height: 400px;
   background-color: #f0fbfb;
   border-radius: .5em;
-  padding: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+  margin-top: .3em;
 }
 .file-setup .creditor-details p {
   vertical-align: bottom;
@@ -418,17 +389,26 @@ ul.tabset {
   background-image: url(/images/buttonprint_down.png);
 }
 .file-setup .creditor-details .add-annotation {
-  border-style: solid;
+/*  border-style: solid; */
   border-width: 1px 0;
   border-color: #003339;
-  padding: 1em;
-  margin-bottom: 2em;
+/*  padding: 1em; */
+  margin-bottom: 1em;
   overflow: auto;
 }
 .file-setup .creditor-details .add-annotation textarea {
-  border: solid 1px #003339;
+  border-top: solid 1px #003339;
+  border-bottom: solid 1px #003339;
+  margin-top: .5em;
+  padding: .2em;
   width: 100%;
   height: 5em;
+  border-radius: 0;
+  padding-top: .5em;
+}
+
+.file-setup .creditor-details .add-annotation textarea:focus {
+  outline: none;
 }
 .file-setup .creditor-details .add-annotation input[type=submit] {
   float: right;
@@ -460,7 +440,7 @@ ul.tabset {
   background: radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
 }
 .file-setup .creditor-overview li.in_collection .status > span,
-.file-setup .creditor-overview li.done .status > span {
+.file-setup .creditor-overview li.complete .status > span {
   width: 60px;
   background: #8fbb83;
   background: -moz-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
@@ -470,6 +450,15 @@ ul.tabset {
   background: -ms-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
   background: radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
 }
+
+.file-setup .creditor-overview li .status > span span {
+  display: none;
+}
+
+.file-setup .creditor-overview li .action {
+  display: none;
+}
+
 .file-setup .creditor-overview li {
   margin: 0;
   padding: .2em .5em;
@@ -484,10 +473,11 @@ ul.tabset {
   height: 15px;
   display: inline-block;
   position: absolute;
-  right: 500px;
+  right: 550px;
   -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  box-shadow: minset 0 0 9px rgba(0, 0, 0, 0.2);
+  margin-top: 2px; /* FIXME: this is a hack, the children of this list element should be properly aligned */
 }
 .file-setup .creditor-overview li a .status > span {
   display: block;
@@ -501,11 +491,24 @@ ul.tabset {
 .file-setup .creditor-overview li:nth-child(odd) {
   background-color: #c0dddc;
 }
+
+.debt-entry table {
+}
+.debt-entry td, tr { 
+    padding: 0px;
+    margin: 0px;
+}
+.debt-entry input {
+    margin: 1px;
+}
+/* As discussed with Jeremine
 .debt-entry td:first-child:before {
   content: "- ";
 }
+*/
 /* Admin - Plus ------------------------------------------------------------ */
 #admin_plus {
+  /* display: none; /* FIXME */
   position: absolute;
   top: .5em;
   right: .5em;

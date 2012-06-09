@@ -1,13 +1,16 @@
+<div id="message">
+    U kunt nu de antwoorden van uw schuldeisers verwerken.
+</div>    
 <div class="file-setup debt-overview">
-  <h2>Overzicht Schuldeisers</h2>
+  <h2>Schuldeisers</h2>
   <ul class="creditor-overview">
   {% for cred in client.creditors %}
     <li class="{{cred.status|lower}}">
       <a href="{{base_url}}/creditor/{{cred.key.id}}">
         <img src="{{ cred.creditor.icon}}" alt="" width="16" height="16">&nbsp;{{ cred.creditor.display_name }}
         <span class="status"><span></span></span>
-        <span class="action {{cred.status.action}}">{{cred.status.action}}</span>
-        <span class="status {{cred.status}}">{{cred.status}}</span>
+        <span class="action {{cred.status.action}}"><span class="status-text">{{cred.status.action}}</span></span>
+        <span class="status {{cred.status}}"><span><span class="status-text">{{cred.status}}</span></span>
       </a>
     </li>
   {% endfor %}
@@ -17,35 +20,3 @@
   </div>
 </div>
 
-
-
-
-
-
-
-{% comment %}
-<hr>
-        <div id="content">
-            <form method="post" action="{{self.request.url}}">
-                <div id="message">Klik op een schuldeiser om een schuldbewijs te verwerken.</div>
-                <table>
-                {% for creditor in client.creditors %}
-                 <tr class="{{creditor.status}}">
-                      <td>
-                          <a href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions" target="_popup">
-                          <img src="{{creditor.creditor.icon}}" alt="" width="16" height="16">
-                          {{ creditor.creditor.display_name }}
-                          </a>
-                      </td>
-<!--
-                      <td><a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a></td>
-                                           <td><a target="_popup" href="{{self.request.path}}/creditor/{{creditor.key.id}}/actions">[commentaar]</a></td>-->
-                      <td class="status {{creditor.status}}"> {{creditor.status}} </td>
-                      <td class="action {{creditor.status.action}}"> {{creditor.status.action}} </td>
-                    </tr>
-                {% endfor %}
-                </table>
-                <input type="submit" name="action" value="Klaar">
-            </form>
-        </div>
-{% endcomment %}

@@ -4,17 +4,17 @@
   <input type="hidden" name="klaar" value="klaar">
 <div class="selector-container">
   <div id="categories" class="selector categories">
-    <h2>Categorie&euml;n</h2>
+      <h2>Categorie&euml;n ></h2>
     <ul>
       {% for category in categories %}
-        <li{% if category.label == currentcategory %} class="active"{% endif %}>
+        <li{% if category.label == selected %} class="active"{% endif %}>
           <a href="{{self.request.path}}?category={{category.label}}">{{category.label}}</a>
         </li>
       {% endfor %}
     </ul>
   </div>
   <div id="creditors" class="selector creditors">
-    <h2>{{currentcategory}}</h2>
+      <h2>{{selected}} ></h2>
     <ul>
       {% for company in creditors %}
       <li>

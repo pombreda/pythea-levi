@@ -1,3 +1,4 @@
+{% load l10n %}
 <div id="message">Als u een overzicht heeft ontvangen van uw schuldeiser, kunt u dit hieronder invullen</div>
 <form method="post" action="{{self.request.path}}">
 {% if self.user.class_name == 'Client' %}
@@ -14,7 +15,7 @@
 {% for debt in creditor.debts %}
  <tr>
 		  <td>{{debt.collector.display_name}}</td> 
-		  <td>{{debt.original_date}}</td>
+		  <td>{{debt.original_date|date:"d-m-Y"}}</td>
 		  <td>{{debt.creditor_dossier_number}}</td>
 		  <td>{{debt.amount}}</td>
 		  <td>{{debt.payment_amount}}</td>
