@@ -15,7 +15,7 @@ function setTabs(type) {
 	
 	switch(type) {
 		case "client":
-			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/register/creditors">Schuldendossier</a></li><li><a href="/client/register">Mijn gegevens</a></li></ul>';
+			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/creditors">Schuldendossier</a></li><li><a href="/client/register">Mijn gegevens</a></li></ul>';
 			break;
 		case "organisation":
 			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/employee/cases/list">Dossiers</a></li></ul>';
@@ -91,6 +91,7 @@ $(document).ready(function(){
 			type: method.toUpperCase(),
 			data: $this.serialize(),
 			headers: {"Accept":"x-text/html-fragment"},
+			headers: {"Accept-Language":"nl"},
 			context: context,
 			beforeSend: function(jqXHR, settings) {
 				appLoading(true);

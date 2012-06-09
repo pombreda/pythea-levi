@@ -1,7 +1,8 @@
 from __future__ import with_statement
 from google.appengine.dist import use_library
-use_library('django', '1.2')
 import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+use_library('django', '1.2')
 import logging
 import cgi
 import datetime
@@ -91,6 +92,7 @@ class BaseHandler(webapp.RequestHandler):
             status = 302
         self.response.set_status(status)
         self.response.headers['Location'] = str(uri)
+        logging.error("redirect to: %s" % uri)
         self.response.headers['Content-Type'] = 'text/plain'
 
     def render(self, vars, templ=None):
@@ -188,7 +190,7 @@ class ClientContact(BaseHandler):
         contact = models.SocialWorker.get(key)
         user.contact = contact
         user.put()
-        self.redirect('/client/register/creditors')
+        self.redirect('/client/creditors')
 
 
 class ClientSelectCreditors(BaseHandler):
@@ -206,7 +208,7 @@ class ClientSelectCreditors(BaseHandler):
             logging.error("creditor %d %s" % (creditor.key().id() , creditor.selected))
 
         vars = { 'categories': categories,
-                 'category': category,
+                 'selected': category,
                  'creditors': creditors,
                  'user': user }
         self.render(vars, 'crediteuren.html')
@@ -224,15 +226,15 @@ class ClientSelectCreditors(BaseHandler):
                 user.removeCreditor(creditor)
         action = self.request.get('action')
         if action == 'opslaan':
-            self.redirect('/client/register/creditors')
+            self.redirect('/client/creditors')
         else:
-            self.redirect('/client/register/validate')
+            self.redirect('/client/creditors/validate')
 
     def post(self):
         action = self.request.get('klaar')
         logging.error("action  %s" % (action))
         if action == 'klaar':
-            self.redirect('/client/register/validate')
+            self.redirect('/client/creditors/validate')
             return
 
         user = self.user
@@ -361,9 +363,11 @@ class ClientDebts(BaseHandler):
             self.redirect('%s/creditor/%s' % (user.key(), creditor.key().id()))
         else:
             creditor = models.CreditorLink.get_by_id(int(creditor))
-        logging.error("%s:%s" % (self.request.path, creditor))
+        annotations = creditor.annotations.order('-entry_date').run(limit=3)
+        logging.error(annotations)
         vars = { 'client': user,
                  'creditor': creditor,
+                 'annotations': annotations,
                  'base_url': base_url }
         self.render(vars, 'clientdebts.html')
 
@@ -470,17 +474,26 @@ class ClientDebtsCreditorActions(BaseHandler):
     def get(self, selected):
         user = self.user
         creditor = models.CreditorLink.get_by_id(int(selected))
+        #annotations = creditor.annotations.order('-entry_date')
+        annotations = creditor.annotations
+        logging.error(annotations)
         vars = { 'client': user,
-                 'creditor': creditor }
+                 'creditor': creditor,
+                 'annotations': annotations,
+                 }
+
         self.render(vars, 'clientdebtscreditoractions.html')
 
     def post(self, selected):
         user = self.get_user()
         creditor = models.CreditorLink.get_by_id(int(selected))
+        come_from = self.request.get('come_from')
         text = self.request.get('text')
-        annotation = models.Annotation(subject=creditor, author=user, text=text)
-        annotation.put()
-        self.redirect(self.request.url)
+        if text:
+            annotation = models.Annotation(subject=creditor, author=user, text=text)
+            annotation.put()
+        logging.info(come_from)
+        self.redirect(come_from)
 
 class OrganisationNew(BaseHandler):
     def get(self):
@@ -1182,22 +1195,13 @@ application = webapp.WSGIApplication([
   (r'/client/register', ClientNew),
   (r'/client/register/contact', ClientContact),
   (r'/client/register/creditors/new', ClientCreditorsNew),
-  (r'/client/register/creditors', ClientSelectCreditors),
-  (r'/client/register/creditors/select', ClientSelectCreditors),
-  (r'/client/register/validate', ClientValidate),
+  (r'/client/creditors', ClientSelectCreditors),
+  (r'/client/creditors/select', ClientSelectCreditors),
+  (r'/client/creditors/validate', ClientValidate),
   (r'/client/register/previewletter/(.*)', ClientRegisterPreviewLetter),
   (r'/client/register/printletter/(.*)', ClientRegisterPrintLetter),
   (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a
                                            # real GET/POST
-# The clients edit debts use case
-  (r'/client/debts', ClientDebts),
-  (r'/client/debts/creditor/(.*)', ClientDebts),
-  (r'/client/debts/list', ClientDebts),
-  (r'/client/debts/view/(.*)', ClientDebtsView),
-  (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
-  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
-  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
-
 # The register organisation use case
   (r'/organisation/register', OrganisationNew),
   (r'/organisation/employees', OrganisationEmployeesList),
@@ -1209,6 +1213,15 @@ application = webapp.WSGIApplication([
   (r'/employee/photo/(.*)/(original)', Photo),
   (r'/employee/photo/(.*)', Photo),
 
+# The clients edit debts use case
+  (r'/client/debts', ClientDebts),
+  (r'/client/debts/list', ClientDebts),
+  (r'/client/debts/view/(.*)', ClientDebtsView),
+  (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
+  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
+  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
+  (r'/client/debts/creditor/(.*)', ClientDebts),
+
 # Several employee use cases
   (r'/employee/cases/list', EmployeeCasesList),
 # The shared screens between client and employee
@@ -1216,9 +1229,9 @@ application = webapp.WSGIApplication([
   (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),
   (r'/employee/cases/view/(.*)/creditor/(.*)/actions', EmployeeViewCaseCreditorActions),
   (r'/employee/cases/view/(.*)', EmployeeViewCase), # => /client/debts
-  (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
-  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
-  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
+#  (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
+#  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
+#  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
 
 # Catch all
   (r'/(.*)', Handle404),

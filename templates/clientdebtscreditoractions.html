@@ -1,46 +1,26 @@
-<p>Schuldeiser: <strong>{{ creditor.creditor.display_name }}</strong></p>
+<p><strong>{{ creditor.creditor.display_name }}</strong></p>
 <p>
-  Actie:
   <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
   <a href="#" class="action mail">Mail</a>
-  <br>
   {% if user.class_name == 'Client' %}
-  <a href="/client/debts/view/{{creditor.key.id}}">[beheer schulden]</a>
+  <a href="/client/debts/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
   {% else %}
-  <a href="/employee/cases/view/{{client.key}}/view/{{creditor.key.id}}">[beheer schulden]</a>
+  <a href="/employee/cases/view/{{client.key}}/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
   {% endif %}
 </p>
-<p>Gegevens schuldeiser:</p>
-<form method="post" action="{{self.request.path}}" target="creditor-details" class="add-annotation">
-  <label for="creditor_annotation">voeg een notitie toe:</label><br>
-  <textarea name="text" id="creditor_annotation"></textarea><br>
-  <input type="submit" value="voeg toe">
+<form method="post" action="/client/debts/creditor/{{creditor.key.id}}/actions" class="add-annotation">
+  <input type="hidden" name="come_from" value="{{self.request.path}}">
+  <textarea name="text" id="creditor_annotation" placeholder="Voeg een aantekening toe"></textarea><br>
+  <input type="submit" value="Opslaan">
 </form>
-{% for note in creditor.annotations %}
+{% for note in annotations %}
 <p>
-  <strong>{{note.entry_date}}</strong><br>
-  <em>{{note.user}}</em><br>
+  <strong>{{note.entry_date|date:"d-m-Y"}}</strong>
+  {% if note.author.key != self.user.key %}
+  <em>{{note.author.first_name}} {{note.author.last_name}}</em>:<br>
+  {% endif %}
   <span>{{note.text}}</span>
- </p>
+</p>
+{% empty %}
+Geen commentaar
 {% endfor %}
-
-
-{% comment %}
-<form method="post" action="{{self.request.path}}" target="_popup">
-    {{ creditor.creditor.display_name }}<br>
-<a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}">[print prief]</a>
-
-<br>
-<textarea name="text"></textarea>
-<input type="submit">
-<table>
-{% for note in creditor.annotations %}
-<tr>
-          <td>{{note.user}}</td>
-          <td>{{note.entry_date}}</td>
-          <td>{{note.text}}</td>
- </tr>
-{% endfor %}
-</table>
-</form>
-{% endcomment %}

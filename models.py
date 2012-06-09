@@ -394,8 +394,8 @@ class Annotation(db.Model):
     author = db.ReferenceProperty(User)
     admin = db.StringProperty()
     ag = db.CategoryProperty()
-    entry_date = db.DateProperty(auto_now_add=True)
-    date = db.DateProperty()
+    entry_date = db.DateTimeProperty(auto_now_add=True)
+    date = db.DateTimeProperty()
     text = db.TextProperty()
 
 class Screen(db.Model):
