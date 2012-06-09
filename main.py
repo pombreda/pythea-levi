@@ -301,7 +301,7 @@ class ClientValidate(BaseHandler):
             #self.redirect('/client/register/submitted')
             self.redirect('/client/debts')
         else:
-            self.redirect('/client/register/creditors')
+            self.redirect('/client/creditors')
 
 
 class ClientSubmitted(BaseHandler):
