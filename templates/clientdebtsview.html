@@ -32,11 +32,14 @@
   </tr>
   <tr>
 	{% if not selected %}
-	<td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" target="_popup">{{debt.creditor_or_collector}}Klik me</a></td>
+    <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" 
+           target="_popup">Zoek</a>
+        <input type="hidden" name="selected" value="{{selected.key.id}}"></td>
 	{% else %}
-	<td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" target="_popup">{{selected.display_name}}</a></td>
+    <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" 
+           target="_popup">{{selected.display_name}}</a>
+        <input type="hidden" name="selected" value="{{selected.key.id}}"></td>
 	{% endif %}
-	<input type="hidden" name="selected" value="{{selected.key.id}}">
 	<td>{{form.original_date}}</td>
 	<td>{{form.creditor_dossier_number}}</td>
 	<td>{{form.amount}}</td>

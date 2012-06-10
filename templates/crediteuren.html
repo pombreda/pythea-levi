@@ -8,7 +8,7 @@
     <ul>
       {% for category in categories %}
         <li{% if category.label == selected %} class="active"{% endif %}>
-          <a href="{{self.request.path}}?category={{category.label}}">{{category.label}}</a>
+          <a href="/client/creditors/category/{{category.label}}">{{category.label}}</a>
         </li>
       {% endfor %}
     </ul>
