@@ -90,7 +90,7 @@ $(document).ready(function(){
 			url: url,
 			type: method.toUpperCase(),
 			data: $this.serialize(),
-			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"de"},
+			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
 			context: context,
 			beforeSend: function(jqXHR, settings) {
 				appLoading(true);
@@ -217,7 +217,7 @@ $(document).ready(function(){
             type: "GET",
             url: event.value,
             //data: event.parameters,
-			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"de"},
+			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
             success: function(html, textStatus, jqXHR) {
                 $('#content').html(html);
                 setAppStatus();
