@@ -167,8 +167,13 @@ class SocialWorker(User):
         else:
             worker.sysadmin = flag
 
+    def tabs(self):
+        logging.error("tabs for the SocialWorkers")
+        return (("/employee/cases", "Open dossiers"),
+                ("/organisation/employees", "Medewerkers"))
+
     def start_page(self):
-        return '/employee/cases/list'
+        return '/employee/cases'
 
 class Client(User):
     address = db.StringProperty()
@@ -186,11 +191,18 @@ class Client(User):
         if self.state == 'APPROVED':
             return '/client/debts'
         elif self.state == 'COMPLETED':
-            return '/client/creditors'
+            return '/client/debts'
         elif self.state == 'FINISHED':
             return '/client/register/finished'
         else:
             return '/client/debts'
+
+    def tabs(self):
+        return (
+                ("/client/register", "Mijn gegevens"),
+                ("/client/creditors", "Mijn schuldeisers"),
+                ("/client/debts", "Mijn dossier"),
+               )
 
     def hasCreditor(self, creditor):
         for link in self.creditors:

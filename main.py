@@ -42,20 +42,6 @@ import yaml
 import inspect
 import django
 
-class JSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        try:
-            if isinstance(obj, unicode):
-                return obj.encode('utf-8', 'replace')
-            elif isinstance(obj, models.decimal.Decimal):
-                return str(obj)
-            elif isinstance(obj, datetime.datetime):
-                return str(obj)
-            else:
-                return json.JSONEncoder.default(self, obj)
-        except Exception, e:
-            return '--Could not encode object %s of type %s, because of %s--' % (str(obj), type(obj), e)
-
 class BaseHandler(webapp.RequestHandler):
     def get_user(self):
         try:
@@ -118,7 +104,9 @@ class Main(BaseHandler):
         """Show the default screen. This is now the login screen"""
         user = self.user
         self.session['JSON'] = False
+        message = self.request.get("message")
         vars = {
+                 'message': message,
                  'user': user }
         self.render(vars, 'main.html')
 
@@ -137,8 +125,9 @@ class ClientNew(BaseHandler):
             form = forms.ClientForm(instance=self.user)
         else:
             form = forms.ClientForm()
+        message = self.request.get("message")
         form.title = 'Registreer'
-        vars = { 'forms': [form] , 'title': 'Registreer'}
+        vars = { 'forms': [form] , 'title': 'Registreer', 'message': message}
         self.render(vars, 'form.html')
 
     def post(self):
@@ -163,9 +152,11 @@ class ClientNew(BaseHandler):
             if mode == "create":
                 self.redirect('/client/register/contact')
             else:
-                self.redirect(self.request.url)
+                message = "Success"
+                self.redirect("%s?message=%s" % (self.request.path, message))
         else:
-            vars = { 'forms': [form], 'title': 'Registreer'}
+            message = "Fout in formulier"
+            vars = { 'forms': [form], 'title': 'Registreer', 'message': message}
             self.render(vars, 'form.html')
 
 
@@ -195,18 +186,19 @@ class ClientContact(BaseHandler):
 
 
 class ClientSelectCreditors(BaseHandler):
-    def get(self):
+    def get(self, category=None):
         """Show a list of available creditors
         """
+        if not category:
+            category = 'Banken'
         user = self.user
-        category = self.request.get('category')
         creditors = models.Creditor.all()
-        creditors.filter('categories =', category)
         categories = models.Category.all()
+
+        creditors.filter('categories =', category)
         creditors = list(creditors)
         for creditor in creditors:
             creditor.selected = user.hasCreditor(creditor)
-            logging.error("creditor %d %s" % (creditor.key().id() , creditor.selected))
 
         vars = { 'categories': categories,
                  'selected': category,
@@ -214,32 +206,13 @@ class ClientSelectCreditors(BaseHandler):
                  'user': user }
         self.render(vars, 'crediteuren.html')
 
-    def post(self):
-        """Add the selected creditors to the database OLD: """
-        user = self.user
-        selected_ids = [ int(id) for id in self.request.get_all('selected') ]
-        visible_ids = [ int(id) for id in self.request.get_all('visible') ]
-        creditors = models.Creditor.get_by_id(visible_ids)
-        for creditor in creditors:
-            if creditor.key().id() in selected_ids:
-                user.addCreditor(creditor)
-            else:
-                user.removeCreditor(creditor)
-        action = self.request.get('action')
-        if action == 'opslaan':
-            self.redirect('/client/creditors')
-        else:
-            self.redirect('/client/creditors/validate')
-
-    def post(self):
+    def post(self, category=None):
         action = self.request.get('klaar')
         logging.error("action  %s" % (action))
         if action == 'klaar':
             self.redirect('/client/creditors/validate')
             return
-
         user = self.user
-        category = self.request.get('category')
         creditor = int(self.request.get('creditor'))
         checked = self.request.get('checked') == 'true'
         cred = models.Creditor.get_by_id(creditor)
@@ -310,8 +283,6 @@ class ClientSubmitted(BaseHandler):
         message = 'De gegevens worden naar uw maatschappelijk werker gestuurd voor controle.'
         vars = { 'user': user,
                  'message': message }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
-        #self.response.out.write(template.render(path, vars))
         self.render(vars, 'message.html')
 
 class ClientRegisterPreviewLetter(BaseHandler):
@@ -387,6 +358,7 @@ class ClientDebtsView(BaseHandler):
         client = self.user
         creditor = models.CreditorLink.get_by_id(int(creditor))
         form = forms.DebtForm()
+        ## GETGET
         selected = self.request.get('selected')
         if selected:
             selected = models.Creditor.get_by_id(int(selected))
@@ -648,9 +620,6 @@ class OrganisationEmployeeResize(BaseHandler):
             logging.error("No original photo, we make a clone.")
             worker.original_photo = db.Blob(worker.photo)
         image = images.Image(image_data=worker.original_photo)
-        logging.error("In resize")
-        logging.error(image.width)
-        logging.error(image.height)
         image.crop( x1 / image.width,
                     y1 / image.height,
                     x2 / image.width,
@@ -758,8 +727,6 @@ class Logout(BaseHandler):
 class Login(BaseHandler):
     def get(self):
     	vars = { 'user': self.user }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'login.html')
-        #self.response.out.write(template.render(path, vars))
         self.render(vars, 'login.html')
 
     def post(self):
@@ -772,10 +739,12 @@ class Login(BaseHandler):
             user = models.User.get_by_key_name(userid)
             if user and user.authenticate(passwd):
                 session['user'] = user
-                self.redirect(user.start_page())
+                #self.redirect(user.start_page())
+                self.redirect("/#"+user.start_page())
             else:
-                vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
-                self.render(vars, 'login.html')
+                #vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
+                #self.render(vars, 'login.html')
+                self.redirect("/?message=Gebruikersnaam of wachtwoord is ongeldig")
         except Exception, e:
             logging.info("Error, probably user not found.")
             self.response.out.write(e)
@@ -800,9 +769,10 @@ class EmployeeViewCase(BaseHandler):
             self.redirect("%s/creditors/%s" % (self.request.url, creditor.key().id()))
         else:
             creditor = models.CreditorLink.get_by_id(int(creditor))
-        logging.error(creditor.key().id())
+        annotations = creditor.annotations.order('-entry_date').run(limit=3)
         vars = { 'client' : client,
                  'base_url': base_url,
+                 'annotations': annotations,
                  'creditor': creditor }
         self.render(vars, 'clientdebts.html')
 
@@ -1235,7 +1205,7 @@ application = webapp.WSGIApplication([
   (r'/client/register/contact', ClientContact),
   (r'/client/register/creditors/new', ClientCreditorsNew),
   (r'/client/creditors', ClientSelectCreditors),
-  (r'/client/creditors/select', ClientSelectCreditors),
+  (r'/client/creditors/category/(.*)', ClientSelectCreditors),
   (r'/client/creditors/validate', ClientValidate),
   (r'/client/register/previewletter/(.*)', ClientRegisterPreviewLetter),
   (r'/client/register/printletter/(.*)', ClientRegisterPrintLetter),
@@ -1262,7 +1232,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/creditor/(.*)', ClientDebts),
 
 # Several employee use cases
-  (r'/employee/cases/list', EmployeeCasesList),
+  (r'/employee/cases', EmployeeCasesList),
 # The shared screens between client and employee
   (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
   (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),

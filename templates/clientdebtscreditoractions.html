@@ -2,7 +2,7 @@
 <p>
   <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
   <a href="#" class="action mail">Mail</a>
-  {% if user.class_name == 'Client' %}
+  {% if self.user.class_name == 'Client' %}
   <a href="/client/debts/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
   {% else %}
   <a href="/employee/cases/view/{{client.key}}/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
@@ -17,8 +17,8 @@
 <p>
   <strong>{{note.entry_date|date:"d-m-Y"}}</strong>
   {% if note.author.key != self.user.key %}
-  <em>{{note.author.first_name}} {{note.author.last_name}}</em>:<br>
-  {% endif %}
+  <em>{{note.author.first_name}} {{note.author.last_name}}</em>
+  {% endif %}:<br>
   <span>{{note.text}}</span>
 </p>
 {% empty %}

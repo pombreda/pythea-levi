@@ -23,13 +23,14 @@ function setTabs(type) {
 		default:
 			tabHtml = "";
 	}
-	
+/*	
 	if (tabHtml) {
 		if ($currentTabs) {
 			$currentTabs.remove();
 		}
 		$("section.content").prepend(tabHtml);
 	}
+*/
 }
 
 /**
@@ -69,10 +70,11 @@ $(document).ready(function(){
 	});
 	
 	// Catch all form execution and pass it through AJAX calls
-	$("form").live("submit",function(event) { 
+	$("#content form").live("submit",function(event) { 
 		event.preventDefault();
 		event.stopPropagation();
 		
+		appLoading(true);
 		var $this = $(this),
 			url = $this.attr("action"),
 			method = $this.attr("method") ? $this.attr("method").toLowerCase() : "get"
@@ -85,7 +87,7 @@ $(document).ready(function(){
 		if ($this.find("input.error").length > 0) {
 			return;
 		}
-		
+	
 		$.ajax({
 			url: url,
 			type: method.toUpperCase(),
@@ -138,7 +140,7 @@ $(document).ready(function(){
 				}
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-                                $('#'+target).html(textStatus + ' ' + jqXHR.responseText);
+                $('#'+target).html(textStatus + ' ' + jqXHR.responseText);
 				appLoading(false);
 			}
 		});
@@ -158,32 +160,35 @@ $(document).ready(function(){
 	/**
 	 * Catch all links and pass them through AJAX calls
 	 */
-	$("a").live("click",function(event){
+	$("#content a:not([target=_popup]), header a, .tabs a").live("click",function(event){
 		var $this = $(this),
 			state = {
 				url : $this.attr("href"),
 				target : $this.attr("target") || "content",
 				title : $this.attr("data-title") || document.title,
 			};
-		
+    /*
 		if ($this.attr("id") === "popup-close" || $this.attr("target") === "_blank") {
 			return true;
 		}
-		
+	*/	
 		event.preventDefault();
-		appLoading(true);
-
 		if (state.url === "#") {
 			return false;
 		}
+        if (state.url === $.address.value()) {
+            return false;
+        }
+		appLoading(true);
+    /*
 
 		if ($this.attr("data-actions") && $this.attr("data-actions").indexOf("close-popup") > -1) {
 			$("#popup").removeClass("active");
 		}
-		
 		if (state.target === "_popup") {
 			loadPopup(state.url);
-		} else if (state.target !== "content" && $("#"+state.target)) {
+		} else */
+        if (state.target !== "content" && $("#"+state.target)) {
 			$("#"+state.target).load(state.url,function(){
 				appLoading(false);
 				setAppStatus();
@@ -192,6 +197,30 @@ $(document).ready(function(){
 			$.address.value(state.url);
 		}
 	});
+
+	$("a[target=_popup]").live("click",function(event) {
+		event.preventDefault();
+        var anchor = $(this);
+		var url = anchor.attr("href");
+        appLoading(true);
+        $("#popup .content").load(url,function(){
+            $('#popup').addClass("active");
+            appLoading(false);
+			$popupContent = $("#popup .content");
+		    $popupContent.css("margin-left","-" + Math.min($popupContent.width()/2, 470) + "px");
+	        $("#popup a").click(function(event) {
+		        event.preventDefault();
+                var target = $(event.currentTarget);
+                var text = target.html();
+                var selection = target.attr("href").split('=')[1];
+                anchor.html(text);
+                $('input[name=selected]').val(selection);
+		        $("#popup").removeClass("active");
+            });
+        });
+    });
+
+
     $(":checkbox.check").live("click",function(event) {
         var checked = $(this).is(':checked');
         var creditor = $(this).val()
@@ -212,11 +241,19 @@ $(document).ready(function(){
 	 */
     $.address.change(function(event) {
         if(event.path == '/') return;
+        $("#tabs a").each( function( index, object ) {
+            var obj = $(object);
+            
+            if( event.path.indexOf(object.pathname) != -1 ) {
+		        $(object).parent().addClass("active");
+            }
+        });
+
         document.body.style.cursor = "wait";
         $.ajax({
             type: "GET",
             url: event.value,
-            //data: event.parameters,
+            data: event.parameters,
 			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
             success: function(html, textStatus, jqXHR) {
                 $('#content').html(html);
@@ -229,8 +266,9 @@ $(document).ready(function(){
             }
         });
     });
+/*
     checkLogin();
-
+*/
 	$("a","#tabs").live("click",function(e){
 		$("li","#tabs").removeClass("active");
 		$(this).parent().addClass("active");
@@ -263,7 +301,6 @@ function loadPopup(url) {
 
 		$popup.find("a").attr("data-actions","close-popup");
 		$popup.addClass("active");
-		$popupContent.css("margin-left","-" + Math.min($popupContent.width() / 2,470) + "px");
 		//$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
 		appLoading(false);
 	});
