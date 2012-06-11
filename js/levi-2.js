@@ -301,7 +301,7 @@ function loadPopup(url) {
 
 		$popup.find("a").attr("data-actions","close-popup");
 		$popup.addClass("active");
-		//$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
+		$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
 		appLoading(false);
 	});
 }

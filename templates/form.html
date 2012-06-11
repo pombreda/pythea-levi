@@ -8,7 +8,7 @@
       <div id="content-container"> 
         <div id="content"> 
 
-<form method="post" action="{{self.request.path}}" enctype="multipart/form-data">
+<form method="post" class="form-generiek" action="{{self.request.path}}" enctype="multipart/form-data">
 
 <table>
 {% for form in forms %}
@@ -16,7 +16,7 @@
     {{ form.as_table }}
 {% endfor %}
 </table>
-<p class="submit"><input type="submit" value="Submit" /></p>
+<p class="submit"><input type="submit" value="Opslaan" /></p>
 </form>
 
 

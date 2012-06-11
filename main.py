@@ -1066,9 +1066,8 @@ class Test(BaseHandler):
     """I use this to test new code"""
     def get(self, args = "http://www.ing.nl"):
         """Show the test response"""
-        creditor = models.Creditor(website=args)
-        creditor.expand()
-        self.response.out.write(creditor.icon)
+
+        self.render({}, 'test.html')
 
 
     def post(self):

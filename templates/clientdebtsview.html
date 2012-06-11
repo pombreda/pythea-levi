@@ -1,5 +1,5 @@
 <div id="message">Als u een overzicht heeft ontvangen van uw schuldeiser, kunt u dit hieronder invullen</div>
-<form method="post" action="{{self.request.path}}">
+<form method="post" action="{{self.request.path}}" class="client-debts-form">
 {% if self.user.class_name == 'Client' %}
 <a href="/client/debts">[&lt;]</a>
 {% else %}
@@ -14,22 +14,26 @@
 {% for debt in creditor.debts %}
  <tr>
 		  <td>{{debt.collector.display_name}}</td> 
-		  <td>{{debt.original_date|date:"d-m-Y"}}</td>
-		  <td>{{debt.creditor_dossier_number}}</td>
-		  <td>{{debt.amount}}</td>
-		  <td>{{debt.payment_amount}}</td>
+		  <td class="date">{{debt.original_date|date:"d-m-Y"}}</td>
+		  <td class="dossier">{{debt.creditor_dossier_number}}</td>
+		  <td class="amount">{{debt.amount}}</td>
+          <td class="amount">{{debt.payment_amount}}</td>
  </tr>
 {% endfor %}
+{% for field in form %}
   <tr>
-	<td colspan="7">
-	   {% if form.non_field_errors %}
-		  {{ form.non_field_errors }}<br>
-	   {% endif %}
-	   {% for field in form %}
+	<td colspan="5" class="error">
 		  {{ field.errors }} 
-	   {% endfor %}
-	<td>
+	</td>
   </tr>
+{% endfor %}
+{% if form.non_field_errors %}
+  <tr>
+	<td colspan="5" class="error">
+		  {{ form.non_field_errors }}<br>
+	</td>
+  </tr>
+{% endif %}
   <tr>
 	{% if not selected %}
     <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" 
@@ -44,7 +48,7 @@
 	<td>{{form.creditor_dossier_number}}</td>
 	<td>{{form.amount}}</td>
 	<td>{{form.payment_amount}}</td>
-	<td><input type="submit"></td>
  </tr>
+ <tr><td colspan="5"><input type="submit" value="Opslaan"></td></tr>
 </table>
 </form>
