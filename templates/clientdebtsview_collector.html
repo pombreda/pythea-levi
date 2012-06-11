@@ -1,4 +1,4 @@
-<form method="post" action="{{self.request.path}}">
+<form method="post" action="{{self.request.path}}" class="client-debts-form">
 <a href="/client/debts/list">[&lt;]</a>
 {{ creditor.creditor.display_name }}
 <input type="hidden" name="creditor" value="{{creditor.creditor.key.id}}">
@@ -8,15 +8,15 @@
 {% for debt in creditor.debts %}
  <tr>
 		  <td>{{debt.collected_for.display_name}}</td> 
-		  <td>{{debt.original_date}}</td>
-		  <td>{{debt.collector_dossier_number}}</td>
-		  <td>{{debt.creditor_dossier_number}}</td>
-		  <td>{{debt.amount}}</td>
-		  <td>{{debt.payment_amount}}</td>
+		  <td class="date">{{debt.original_date}}</td>
+		  <td class="dossier">{{debt.collector_dossier_number}}</td>
+		  <td class="dossier">{{debt.creditor_dossier_number}}</td>
+		  <td class="amount">{{debt.amount}}</td>
+		  <td class="amount">{{debt.payment_amount}}</td>
  </tr>
 {% endfor %}
   <tr>
-	<td colspan="7">
+	<td colspan="0">
 	   {% if form.non_field_errors %}
 		  {{ form.non_field_errors }}<br>
 	   {% endif %}
@@ -37,7 +37,7 @@
 	<td>{{form.creditor_dossier_number}}</td>
 	<td>{{form.amount}}</td>
 	<td>{{form.payment_amount}}</td>
-	<td><input type="submit"></td>
  </tr>
+ <tr><td colspan="0"><input type="submit" value="Opslaan"></td></tr>
 </table>
 </form>

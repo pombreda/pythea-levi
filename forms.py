@@ -9,8 +9,8 @@ import re
 import models
 
 class ClientForm(df.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput, required=False)
-    password2 = forms.CharField(widget=forms.PasswordInput, required=False)
+    password1 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord')
+    password2 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord controle')
 
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:

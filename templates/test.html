@@ -2,39 +2,9 @@
 <html>
   <head>
     <title>Jubilee</title> 
-    <link rel="stylesheet" type="text/css" href="/css/snn.css">
-      <script src="/js/jquery.min.js"></script>
-      <script src="/js/jquery.Jcrop.min.js"></script>
-      <script language="javascript">
-         $(function(){
-           $('#jcrop_target').Jcrop({
-             onChange: showCoords,
-             onSelect: showCoords,
-             aspectRatio: 3/4
-           });
-         });
-         function showCoords(c)
-         {
-           $('#x').val(c.x);
-           $('#y').val(c.y);
-           $('#x2').val(c.x2);
-           $('#y2').val(c.y2);
-           $('#w').val(c.w);
-           $('#h').val(c.h);
-         };
-      </script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
   </head> 
   <body id="body">
-    <img src="/images/nopassphoto.gif" id="jcrop_target">
-<form method="post">
-    <label>X1 <input type="text" size="4" id="x" name="x" /></label>
-    <label>Y1 <input type="text" size="4" id="y" name="y" /></label>
-    <label>X2 <input type="text" size="4" id="x2" name="x2" /></label>
-
-    <label>Y2 <input type="text" size="4" id="y2" name="y2" /></label>
-    <label>W <input type="text" size="4" id="w" name="w" /></label>
-    <label>H <input type="text" size="4" id="h" name="h" /></label>
-    <input type="submit">
-</form>
+      <a title='this is my link' href='#'> My Link </a>
   </body>
 </html>

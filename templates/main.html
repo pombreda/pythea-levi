@@ -14,7 +14,7 @@
 </head>
 <body>
 	<div class="wrapper">
-		<header class="alt">
+		<header>
 		    <nav>
 				<p>Informatie over <strong>schuldendossier.nl</strong> voor:</p>
 				<ul>
@@ -43,6 +43,7 @@
         {% endif %}
 		</header>
 
+		<section class="content">
         {% if self.user %}
         <ul class="tabs" id="tabs">
             {% for tab in self.user.tabs %}
@@ -50,7 +51,6 @@
             {% endfor %}
         </ul>
         {% endif %}
-		<section class="content">
 			<div class="content-wrapper">
 				<div class="content-inner">
                     <p id="appstatus" class="appstatus">{{message|default:"&nbsp;"}}</p>

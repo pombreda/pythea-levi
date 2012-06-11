@@ -65,12 +65,14 @@ body > .wrapper {
   max-width: 980px;
   margin: 0 auto;
   padding: .5em 0 0 0;
+
+  /* This adds a positioning wrapper */
   position: relative;
 
   /* Stretch to full height */
   height: 100%;
   height: auto !important;
-  min-height: 100%
+  min-height: 100%;
 }
 /* Header ------------------------------------------------------------------ */
 header {
@@ -157,6 +159,23 @@ header.alt p#login {
 
 .content {
   color: #003339;
+  width: 100%;
+
+  /* This is a hack */
+  /* Right now, .content-wrapper expands beyond the bottom of .content.
+   * I do not know why that is, but it is approximately for the size of
+   * the tabs.
+   * Maybe we should set relative and absolute positioning somewhat 
+   * lower in the hierarchy.
+   */
+  overflow: hidden;
+
+  /* A few scribbles as test for Hans */
+  position: absolute; /* absolute in .wrapper */
+  top: 75px;          /* room for the header */
+  bottom: 0;          /* stretch to the bottom */
+  z-index: 50;        /* push it behind the front tab */
+
 }
 .content-wrapper {
   margin: 0;
@@ -168,22 +187,36 @@ header.alt p#login {
   -moz-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
 
-  /* Make sure content is stretched */
-  position: absolute; /* absolute in .wrapper */
-  top: 92px;          /* room for the header */
-  bottom: 0;          /* stretch to the bottom */
-  z-index: 50;        /* push it behind the front tab */
+  /* Stretch to full height */
+  height: 100%;
+  height: auto !important;
+  min-height: 100%;
+
+  /* Make sure content is stretched HTH Removed */
+/*  position: absolute; /* absolute in .wrapper */
+/*  top: 95px;          /* room for the header */
+/*  bottom: 0;          /* stretch to the bottom */
+/*  z-index: 50;        /* push it behind the front tab */
 
 }
 .content-inner {
   background-color: #d1ebea;
   border: solid 1px #e2f4f6;
+/*  border: solid 1px yellow; */
   border-radius: 0.5em 0.5em 0em 0em;
   padding: 1em;
   -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   /* min-height: 500px; */
+
+  position: absolute;
+  top: 2.7em;
+  bottom: 0;
+  right: .5em;
+  left: .5em;
+}
+.content-inner {
   min-height: 100%;
 }
 #content {
@@ -287,6 +320,56 @@ header.alt p#login {
   background-color: #f0fbfb;
   border-radius: .2em;
 }
+
+/* Generiek formulier -------------------------------------------------------*/
+.form-generiek th {
+  text-align: right;
+}
+
+.form-generiek td {
+}
+
+.form-generiek input:not([type=submit]) {
+  padding: 3px;
+  margin: 1px;
+}
+
+.form-generiek ul.errorlist + input {
+  background-color: pink;
+}
+
+/* margin and padding must be the same as for the text input fields */
+.form-generiek ul.errorlist {
+  float: right;
+  list-style-type: none;  
+  padding: 3px;
+  margin: 1px;
+}
+/* clientdebtsview tabel + formulier */
+.client-debts-form {
+}
+.client-debts-form td, th {
+  padding-right: 2px !important; /* somehow does not work */
+  text-align: right;
+  border: 1px solid grey;
+  border: none;
+  margin: 0px;
+}
+.client-debts-form td.date, td.dossier, td.amount {
+  text-align: right;
+}
+.client-debts-form input {
+  width: 100%;
+}
+.client-debts-form td.error {
+  /* border: none; */
+  margin: 0px;
+} 
+.client-debts-form input[type=submit] {
+  float: right;
+  width: auto;
+} 
+
 /* Form - Collector Selection ---------------------------------------------- */
 .file-setup {
   display: table;
@@ -397,8 +480,8 @@ header.alt p#login {
   overflow: auto;
 }
 .file-setup .creditor-details .add-annotation textarea {
-  border-top: solid 1px #003339;
-  border-bottom: solid 1px #003339;
+  border-top: solid 1px #003333;
+  border-bottom: solid 1px #003333;
   margin-top: .5em;
   padding: .2em;
   width: 100%;
@@ -500,6 +583,7 @@ header.alt p#login {
 }
 .debt-entry input {
     margin: 1px;
+    margin-left: 1em;
 }
 /* As discussed with Jeremine
 .debt-entry td:first-child:before {
@@ -520,3 +604,4 @@ header.alt p#login {
   right: 0;
   background-color: #fff;
 }
+

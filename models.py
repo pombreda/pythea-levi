@@ -53,10 +53,10 @@ def decode_b36(number):
     return int(number,36)
 
 class User(polymodel.PolyModel):
-    username = db.StringProperty()
-    first_name = db.StringProperty()
-    last_name= db.StringProperty()
-    email = db.EmailProperty()
+    username = db.StringProperty('Gebruikers id')
+    first_name = db.StringProperty('Voornaam')
+    last_name= db.StringProperty('Achternaam')
+    email = db.EmailProperty('E-mail adres')
     password = db.ByteStringProperty()
 
     is_active = db.BooleanProperty()
@@ -176,11 +176,11 @@ class SocialWorker(User):
         return '/employee/cases'
 
 class Client(User):
-    address = db.StringProperty()
-    zipcode = db.StringProperty()
-    city = db.StringProperty()
-    phone = db.PhoneNumberProperty()
-    mobile = db.PhoneNumberProperty()
+    address = db.StringProperty(verbose_name='Adres')
+    zipcode = db.StringProperty(verbose_name='Postcode')
+    city = db.StringProperty(verbose_name='Woonplaats')
+    mobile = db.PhoneNumberProperty(verbose_name='Mobiele telefoon')
+    phone = db.PhoneNumberProperty(verbose_name='Vaste telefoon')
     state = db.StringProperty(default="NEW") # One of NEW, COMPLETED, APPROVED, DONE
     completion_date = db.DateProperty()
     approval_date = db.DateProperty()
