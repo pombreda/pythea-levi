@@ -2,7 +2,7 @@ from __future__ import with_statement
 from google.appengine.dist import use_library
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-use_library('django', '1.2')
+use_library('django', '1.3')
 import logging
 import cgi
 import datetime
@@ -76,10 +76,8 @@ class BaseHandler(webapp.RequestHandler):
             status = 301
         else:
             status = 302
-        logging.error("In redirect %s" % self.request.headers['Accept'])
         self.response.set_status(status)
         self.response.headers['Location'] = str(uri)
-        logging.error("redirect to: %s" % uri)
         self.response.headers['Content-Type'] = 'text/plain'
 
     def render(self, vars, templ=None):
@@ -167,9 +165,6 @@ class ClientContact(BaseHandler):
         zipcode = user.zipcode
         orgs = [ i for i in models.SocialWork.all() if i.accepts(zipcode)]
 
-        logging.error(orgs)
-        logging.error(models.SocialWork.all())
-        logging.error([i for i in models.SocialWork.all()])
         vars = { 'user': user,
                  'organisations': orgs,
                  'title': 'Met wie heeft u gesproken?' }
@@ -177,9 +172,9 @@ class ClientContact(BaseHandler):
 
     def post(self):
         """Add the selected contact person to the database"""
-        key = self.request.get('selected')
+        selected = self.request.get("selected")
         user = self.user
-        contact = models.SocialWorker.get(key)
+        contact = models.SocialWorker.get(selected)
         user.contact = contact
         user.put()
         self.redirect('/client/creditors')
@@ -261,7 +256,7 @@ class ClientValidate(BaseHandler):
 
     def post(self):
         action = self.request.get('action')
-        if action == 'correct': #FIXME: the submit value is not transmitted using jQuery.
+        if action != 'go back':
             user = self.user
             user.complete()
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
@@ -269,9 +264,6 @@ class ClientValidate(BaseHandler):
                            subject="Dossier Entered",
                            body="Dossier is toegevoegd voor %s %s" % (user.first_name, user.last_name))
 
-            # FIXME: also mark that the user has finished data entry.
-            # And make sure that the initial e-mail is sent only once.
-            #self.redirect('/client/register/submitted')
             self.redirect('/client/debts')
         else:
             self.redirect('/client/creditors')
@@ -297,7 +289,7 @@ class ClientRegisterPreviewLetter(BaseHandler):
         vars['client'] = user
         vars['key'] = key
         vars['creditor'] = creditor
-        vars['today'] = 'VANDAAG'
+        vars['today'] = datetime.date.today().strftime("%d-%m-%Y")
         vars['preview'] = True
         self.response.out.write(template.render(path, vars))
 
@@ -306,13 +298,16 @@ class ClientRegisterPrintLetter(BaseHandler):
         """Verstuur een brief aan een schuldeiser"""
         key = creditor
         creditor = models.CreditorLink.get_by_id(int(creditor))
+        creditor.cached_state = None
+        creditor.last_email_date = datetime.date.today()
+        creditor.put()
         user = creditor.user
         creditor = creditor.creditor
         path = os.path.join(os.path.dirname(__file__), 'brieven', 'schuldeiser-1.html')
         vars = {}
         vars['client'] = user
         vars['creditor'] = creditor
-        vars['today'] = 'VANDAAG'
+        vars['today'] = datetime.date.today().strftime("%d-%m-%Y")
         vars['preview'] = False
         html = template.render(path, vars)
         from google.appengine.api import conversion
@@ -336,7 +331,6 @@ class ClientDebts(BaseHandler):
         else:
             creditor = models.CreditorLink.get_by_id(int(creditor))
         annotations = creditor.annotations.order('-entry_date').run(limit=3)
-        logging.error(annotations)
         vars = { 'client': user,
                  'creditor': creditor,
                  'annotations': annotations,
@@ -390,14 +384,8 @@ class ClientDebtsView(BaseHandler):
                 new_debt.collector = selected
             new_debt.put()
             url = urlparse.urlsplit(self.request.url)
-            logging.error(url.path)
 	    self.redirect(url.path)
         else:
-            for field in form:
-                 logging.error( field )
-                 logging.error( dir(field) )
-                 logging.error( type(field) )
-
             vars = { 'user': user,
                      'client': user,
                      'creditor': creditor,
@@ -449,7 +437,6 @@ class ClientDebtsCreditorActions(BaseHandler):
         creditor = models.CreditorLink.get_by_id(int(selected))
         #annotations = creditor.annotations.order('-entry_date')
         annotations = creditor.annotations
-        logging.error(annotations)
         vars = { 'client': user,
                  'creditor': creditor,
                  'annotations': annotations,
@@ -467,6 +454,16 @@ class ClientDebtsCreditorActions(BaseHandler):
             annotation.put()
         logging.info(come_from)
         self.redirect(come_from)
+
+class ClientDebtsPrintDossier(BaseHandler):
+    """Show all debts for a creditor"""
+    def get(self, client=None):
+        if not client:
+            client = self.user
+        else:
+            client = models.Client.get(client)
+        vars = { 'client': client }
+        self.render(vars, 'clientdebtsprintdossier.html')
 
 class OrganisationNew(BaseHandler):
     def get(self):
@@ -617,7 +614,6 @@ class OrganisationEmployeeResize(BaseHandler):
         worker = models.SocialWorker.get(key)
         vars = { 'worker': worker }
         if not worker.original_photo:
-            logging.error("No original photo, we make a clone.")
             worker.original_photo = db.Blob(worker.photo)
         image = images.Image(image_data=worker.original_photo)
         image.crop( x1 / image.width,
@@ -812,14 +808,8 @@ class EmployeeViewCaseDetails(BaseHandler):
                 new_debt.collector = selected
             new_debt.put()
             url = urlparse.urlsplit(self.request.url)
-            logging.error(url.path)
 	    self.redirect(url.path)
         else:
-            for field in form:
-                 logging.error( field )
-                 logging.error( dir(field) )
-                 logging.error( type(field) )
-
             vars = { 'user': user,
                      'client': client,
                      'creditor': creditor,
@@ -1225,6 +1215,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts', ClientDebts),
   (r'/client/debts/list', ClientDebts),
   (r'/client/debts/view/(.*)', ClientDebtsView),
+  (r'/client/debts/print', ClientDebtsPrintDossier),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
@@ -1234,6 +1225,7 @@ application = webapp.WSGIApplication([
   (r'/employee/cases', EmployeeCasesList),
 # The shared screens between client and employee
   (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
+  (r'/employee/cases/view/(.*)/print', ClientDebtsPrintDossier), # => /client/debts/print
   (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),
   (r'/employee/cases/view/(.*)/creditor/(.*)/actions', EmployeeViewCaseCreditorActions),
   (r'/employee/cases/view/(.*)', EmployeeViewCase), # => /client/debts
