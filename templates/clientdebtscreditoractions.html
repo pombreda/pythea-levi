@@ -2,11 +2,7 @@
 <p>
   <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
   <a href="#" class="action mail">Mail</a>
-  {% if self.user.class_name == 'Client' %}
-  <a href="/client/debts/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
-  {% else %}
-  <a href="/employee/cases/view/{{client.key}}/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
-  {% endif %}
+  <a href="{{base_url}}/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
 </p>
 <form method="post" action="/client/debts/creditor/{{creditor.key.id}}/actions" class="add-annotation">
   <input type="hidden" name="come_from" value="{{self.request.path}}">
