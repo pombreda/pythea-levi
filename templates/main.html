@@ -10,6 +10,7 @@
 	<script src="js/jquery-1.7.2.min.js"></script>
 	<script src="js/jquery.validate.min.js"></script>
 	<script src="js/jquery.address-1.4.min.js"></script>
+	<script src="js/jquery.tinyscrollbar.js"></script>
 	<script src="js/levi-2.js"></script>
 </head>
 <body>
@@ -26,6 +27,7 @@
 			</nav>
         {% if self.user %}
         <p id="login">{{self.user.first_name}} {{ self.user.last_name}}</p>
+        <a href="/logout" target="_top">logout</a>
         {% else %}
 			<form method="post" action="/login" id="login" target="_top">
 				<p>
@@ -50,6 +52,12 @@
             <li><a href="{{tab.0}}">{{tab.1}}</a></li>
             {% endfor %}
         </ul>
+        {% else %}
+        <ul class="tabs" id="tabs">
+            <li><a href="#">Info</a></li>
+            <li><a href="#">Werkwijze</a></li>
+            <li><a href="#">Aanmelden</a></li>
+        </ul>
         {% endif %}
 			<div class="content-wrapper">
 				<div class="content-inner">
@@ -60,9 +68,11 @@
 		</section>
 	</div>
 	<div id="popup" class="popup">
-		<div class="overlay"></div>
-		<div class="content">my content</div>
-		<a href="#" class="close" id="popup-close"></a>
+      <div class="popup-wrapper">
+		<a href="#" class="popup-close">[close]</a>
+		<div class="popup-content">My content</div>
+      </div>
+	  <div class="overlay"></div>
 	</div>
 </body>
 </html>
