@@ -200,7 +200,7 @@ class Client(User):
 
     def tabs(self):
         return (
-                ("/client/register", "Mijn gegevens"),
+                ("/client/info", "Mijn gegevens"),
                 ("/client/creditors", "Mijn schuldeisers"),
                 ("/client/debts", "Mijn dossier"),
                )
@@ -237,7 +237,13 @@ class Client(User):
         self.state = "APPROVED"
         self.put()
 
+    def close(self):
+        self.state = "CLOSED"
+        self.put()
+
     def status(self):
+        if self.state == "CLOSED":
+            return Status('CLOSED')
         count = 0
         count_new = 0
         count_incomplete = 0
