@@ -117,6 +117,7 @@ $(document).ready(function(){
 						checkLogin();
 					}
 					*/
+					checkLogin();
                     if(target == '_popup') {
                         loadPopup(location);
                     } else {
@@ -295,9 +296,6 @@ $(document).ready(function(){
           $('#id_username').val(username);
        });
     }
-/* HTH: is this used ?
-    checkLogin();
-*/
 	$("a","#tabs").live("click",function(e){
 		$("li","#tabs").removeClass("active");
 		$(this).parent().addClass("active");
@@ -323,6 +321,9 @@ $(document).ready(function(){
  *  HTH: This does not appear to be used.
  */
 function checkLogin() {
+    // This does not work, as the cookie is set to HttpOnly
+    //alert( $.cookie('DgU00') );
+/**
 	$.ajax({
 		url: "/login",
 		type: "GET",
@@ -337,6 +338,7 @@ function checkLogin() {
 			appLoading(false);
 		}
 	});
+*/
 }
 
 /*
@@ -371,4 +373,6 @@ function setAppStatus(status) {
 	} else {
 		$("#content").parent().prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
 	}
+    $("#tabs").html($("#session-tabs").html());
+    // alert($("#session-tabs").html());
 }

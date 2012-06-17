@@ -659,6 +659,11 @@ ul.contact-list input {
   top: .5em;
   right: .5em;
 }
+
+#session-info {
+  display: none;
+}
+
 /* Alternative look switcher */
 .style-switches {
   position: fixed;

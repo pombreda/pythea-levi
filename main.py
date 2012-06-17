@@ -80,6 +80,17 @@ class BaseHandler(webapp.RequestHandler):
         self.response.headers['Location'] = str(uri)
         self.response.headers['Content-Type'] = 'text/plain'
 
+    def tabs(self):
+        if self.user:
+            return self.user.tabs()
+        else:
+            t = (("/info/clienten.html", "Info"),
+                    ("/info/werkwijze.html", "Werkwijze"),
+                    ("/client/register", "Aanmelden"))
+            logging.error(t)
+            return t
+
+
     def render(self, vars, templ=None):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if not template or 'application/json' in self.request.headers['Accept']: #or 'JSON' in self.session:
@@ -91,6 +102,10 @@ class BaseHandler(webapp.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'templates', 'admin_plus.html')
                 admin_vars = {'template': templ, 'self': self}
                 self.response.out.write(template.render(path, admin_vars))
+
+            if templ != 'main.html':
+                path = os.path.join(os.path.dirname(__file__), 'templates', 'session_info.html')
+                self.response.out.write(template.render(path, {'self': self}))
 
             path = os.path.join(os.path.dirname(__file__), 'templates', templ)
             vars['self'] = self
