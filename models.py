@@ -142,6 +142,7 @@ class SocialWork(Organisation):
     zipcodes = db.StringListProperty()
 
     def accepts(self, zipcode):
+        # FIXME: this does not work yet
         if True:
             return True
         for zipcode in self.zipcodes:
@@ -241,11 +242,15 @@ class Client(User):
         count_new = 0
         count_incomplete = 0
         for creditor in self.creditors:
+            if self.username == 'isabelle.then':
+                logging.error("%s/%s/%s" % (creditor.key().id(), creditor.status(), creditor.last_email_date))
             count += 1
             if creditor.status().status != 'COMPLETE':
                 count_incomplete += 1
             if not creditor.last_email_date:
                 count_new +=1
+            if self.username == 'isabelle.then':
+                logging.error("%d/%d/%d/%d" % (creditor.key().id(), count, count_new, count_incomplete))
         if count == 0:
             return Status('NEW')
         elif count_new == count:
@@ -351,8 +356,6 @@ class CreditorLink(db.Model):
         return s
 
     def calc_status(self):
-        #FIXME: if not self.approved:
-        #    return "WAITING FOR APPROVAL"
         count = 0
         for debt in self.debts:
             if debt.collector:
@@ -365,7 +368,7 @@ class CreditorLink(db.Model):
                         count2 = count2 + 1
                         try:
                              if debt2.collected_for and debt2.collected_for.key().id() == debt.creditor.creditor.key().id():
-                                  return Status("IN_COLLECTION", "COMPLETE")
+                                  return Status("COMPLETE")
                         except Exception, e:
                              logging.error("An error occurred matching %s", e)
                     if count2:
@@ -377,6 +380,8 @@ class CreditorLink(db.Model):
         else:
             if count:
                 return Status("COMPLETE")
+            elif not self.last_email_date:
+                return Status("NEW")
             else:
                 return Status("WAITING")
         return Status("ERROR")
@@ -395,6 +400,8 @@ class Debt(db.Model):
     amount = DecimalProperty(default=decimal.Decimal('0.00'))
     payment_amount = DecimalProperty(default=decimal.Decimal('0.00'))
 
+    def dossier_number(self):
+        return self.collector_dossier_number if self.collector_dossier_number else self.creditor_dossier_number
 
     def put(self):
         self.creditor.cached_state = None
