@@ -23,14 +23,6 @@ function setTabs(type) {
 		default:
 			tabHtml = "";
 	}
-/*	
-	if (tabHtml) {
-		if ($currentTabs) {
-			$currentTabs.remove();
-		}
-		$("section.content").prepend(tabHtml);
-	}
-*/
 }
 
 /**
@@ -82,7 +74,8 @@ $(document).ready(function(){
 			context = this,
 			redirected = false
 			;
-		
+	
+        // HTH: this does not appear to be used.	
 		// If validation marked any errors, stop processing.
 		if ($this.find("input.error").length > 0) {
 			return;
@@ -94,6 +87,7 @@ $(document).ready(function(){
 			data: $this.serialize(),
 			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
 			context: context,
+/* HTH: This does not appear to be used?
 			beforeSend: function(jqXHR, settings) {
 				appLoading(true);
 			},
@@ -102,6 +96,7 @@ $(document).ready(function(){
 					appLoading(false);
 				}
 			},
+*/
 			success: function(data, textStatus, jqXHR) {
 				var location = jqXHR.getResponseHeader("Location");
 				
@@ -115,13 +110,13 @@ $(document).ready(function(){
 					}
 					
 					redirected = true;
-					
+					/* HTH: This does not appear to be necessary anymore
 					// Check where we're being redirected, and set tabs accordingly
 					if (location.indexOf("/client") > -1) {
 						setTabs("client");
 						checkLogin();
 					}
-					
+					*/
                     if(target == '_popup') {
                         loadPopup(location);
                     } else {
@@ -147,6 +142,7 @@ $(document).ready(function(){
 	});
 	
 	/**
+     * HTH: this does not appear to be used anymore.
 	 * Enable the popup close button
 	 */
     $("#popup-close").live("click",function(e){
@@ -160,14 +156,14 @@ $(document).ready(function(){
 	/**
 	 * Catch all links and pass them through AJAX calls
 	 */
-	$("#content a:not([target=_popup]), header a, .tabs a").live("click",function(event){
+	$("#content a:not([target=_popup]), header a:not([target=_top]), .tabs a").live("click",function(event){
 		var $this = $(this),
 			state = {
 				url : $this.attr("href"),
 				target : $this.attr("target") || "content",
 				title : $this.attr("data-title") || document.title,
 			};
-    /*
+    /* HTH: Not used
 		if ($this.attr("id") === "popup-close" || $this.attr("target") === "_blank") {
 			return true;
 		}
@@ -180,8 +176,8 @@ $(document).ready(function(){
             return false;
         }
 		appLoading(true);
-    /*
 
+    /* HTH: Not used
 		if ($this.attr("data-actions") && $this.attr("data-actions").indexOf("close-popup") > -1) {
 			$("#popup").removeClass("active");
 		}
@@ -198,17 +194,27 @@ $(document).ready(function(){
 		}
 	});
 
+    /*
+     * Load a link into the popup screen
+     */
 	$("a[target=_popup]").live("click",function(event) {
 		event.preventDefault();
         var anchor = $(this);
 		var url = anchor.attr("href");
         appLoading(true);
-        $("#popup .content").load(url,function(){
+        $("#popup .popup-content").load(url,function(){
             $('#popup').addClass("active");
             appLoading(false);
-			$popupContent = $("#popup .content");
+
+			$popupContent = $("#popup .popup-wrapper");
 		    $popupContent.css("margin-left","-" + Math.min($popupContent.width()/2, 470) + "px");
-	        $("#popup a").click(function(event) {
+			$popupCloser = $("#popup .close");
+		    $popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
+
+            /*
+             * And close it again when something is selected.
+             */
+	        $("#popup a.popup-select").click(function(event) {
 		        event.preventDefault();
                 var target = $(event.currentTarget);
                 var text = target.html();
@@ -217,10 +223,17 @@ $(document).ready(function(){
                 $('input[name=selected]').val(selection);
 		        $("#popup").removeClass("active");
             });
+	        $("#popup a.popup-close").click(function(event) {
+		        event.preventDefault();
+                $('#popup .content').empty();
+		        $("#popup").removeClass("active");
+            });
         });
     });
 
-
+    /* 
+     * When a creditor is selected, add it to the database
+     */
     $(":checkbox.check").live("click",function(event) {
         var checked = $(this).is(':checked');
         var creditor = $(this).val()
@@ -248,6 +261,8 @@ $(document).ready(function(){
 		        $(object).parent().addClass("active");
             }
         });
+        $('#popup .content').empty();
+		$("#popup").removeClass("active");
 
         document.body.style.cursor = "wait";
         $.ajax({
@@ -266,15 +281,45 @@ $(document).ready(function(){
             }
         });
     });
-/*
+    /**
+     * Check the registration form
+     * FIXME: Only add the suggested username if the form is displayed for the first time.
+     */
+    var obj = $('#id_firstname');
+    if ( $('#id_username').val() ) {
+    } else {
+       $("input[name=first_name],input[name=last_name]").live("blur",function(event) {
+          username = $("#id_first_name").val()+'.'+$("#id_last_name").val();
+          $('#id_username').val(username);
+       });
+    }
+/* HTH: is this used ?
     checkLogin();
 */
 	$("a","#tabs").live("click",function(e){
 		$("li","#tabs").removeClass("active");
 		$(this).parent().addClass("active");
 	});
+
+
+    /* If the user selects a radio button, we immediately submit  */
+    /* FIXME: add an onclick=this.form.submit(); Easier than this */
+    $(".contact-list input[type=radio]").live("click", function(e) {
+        var url = $(this).closest("form").attr("action");
+        var selected = $(this).val();
+        document.body.style.cursor = "wait";
+        $.post(url, { selected: selected },
+            function( html ) {
+                $.address.value("/client/creditors");
+                document.body.style.cursor = "default";
+            });
+
+    });
 });
 
+/*
+ *  HTH: This does not appear to be used.
+ */
 function checkLogin() {
 	$.ajax({
 		url: "/login",
@@ -292,6 +337,9 @@ function checkLogin() {
 	});
 }
 
+/*
+ *  HTH: This does not appear to be used.
+ */
 function loadPopup(url) {
 	appLoading(true);
 	$("#popup .content").load(url,function(){
