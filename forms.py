@@ -16,7 +16,7 @@ class ClientForm(df.ModelForm):
     class Meta:
         model = models.Client
         #exclude = ['display_name', '_class', 'password', 'username', 'is_active', 'is_staff', 'is_superuser']
-        fields = ['first_name', 'last_name', 'email', 'address', 'zipcode', 'city', 'phone', 'mobile']
+        fields = ['first_name', 'last_name', 'username', 'email', 'address', 'zipcode', 'city', 'phone', 'mobile']
 
     def clean(self):
         if self.instance:
@@ -27,10 +27,11 @@ class ClientForm(df.ModelForm):
         password2 = data.get('password2')
         first_name = data.get('first_name')
         last_name = data.get('last_name')
-        username = "%s.%s" % (first_name.lower(), last_name.lower())
-        data['username'] = username
-        # FIXME: we should check if the username already exists in the database
+        username = data.get('username')
         data['key_name'] = username
+        #username = "%s.%s" % (first_name.lower(), last_name.lower())
+        #data['username'] = username
+        # FIXME: we should check if the username already exists in the database
         phone = data.get('phone')
         mobile = data.get('mobile')
         if phone:
