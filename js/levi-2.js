@@ -259,6 +259,8 @@ $(document).ready(function(){
             
             if( event.path.indexOf(object.pathname) != -1 ) {
 		        $(object).parent().addClass("active");
+            } else {
+		        $(object).parent().removeClass("active");
             }
         });
         $('#popup .content').empty();
