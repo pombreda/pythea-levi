@@ -175,8 +175,8 @@ header.alt p#login {
   top: 6.7em;          /* room for the header */
   bottom: 0;          /* stretch to the bottom */
   z-index: 50;        /* push it behind the front tab */
-}
 
+}
 .content-wrapper {
   margin: 0;
   padding: .6em .5em 0px .5em;
@@ -191,31 +191,31 @@ header.alt p#login {
   height: 100%;
   height: auto !important;
   min-height: 100%;
-}
+
   /* Make sure content is stretched HTH Removed */
 /*  position: absolute; /* absolute in .wrapper */
 /*  top: 95px;          /* room for the header */
 /*  bottom: 0;          /* stretch to the bottom */
 /*  z-index: 50;        /* push it behind the front tab */
 
+}
 .content-inner {
   background-color: #d1ebea;
   border: solid 1px #e2f4f6;
-  border: solid 1px yellow;
+/*  border: solid 1px yellow; */
   border-radius: 0.5em 0.5em 0em 0em;
-  padding: 1em 1em 2em 1em;
+  padding: 1em;
   -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  /* min-height: 500px; */
 
   position: absolute;
-  /* push the top down to make room for the tabs */
-  top: 2.75em;
-  left: 0.5em;
-  right: 0.5em;
-  bottom: 0px;
+  top: 2.7em;
+  bottom: 0;
+  right: .5em;
+  left: .5em;
 }
-
 .content-inner {
   min-height: 100%;
 }
@@ -232,7 +232,7 @@ header.alt p#login {
 .tabs li {
   float: left;
   padding: .5em 0;
-  margin: 0em .25em;
+  margin: 0 .25em;
   width: 165px;
   text-align: center;
   background-color: #97d0e3;
@@ -283,6 +283,12 @@ header.alt p#login {
   display: block;
   z-index: 200;
 }
+
+.popup.active #admin_plus {
+  display: none;
+}
+
+
 .popup .overlay {
   background-color: rgba(64, 64, 64, 0.5);
   position: fixed;
@@ -293,24 +299,39 @@ header.alt p#login {
   bottom: 0;
   left: 0;
 }
-.popup .content {
+
+.popup .popup-wrapper {
   position: fixed;
   width: auto;
   top: 1em;
   left: 50%;
   margin: 0;
+  padding: .5em;
   background-color: white;
+  border-radius: .2em;
   max-width: 940px;
+  z-index: 300;
 }
-.popup .close {
+
+.popup .popup-close {
+/*
   display: block;
   width: 29px;
   height: 29px;
+*/
   background: transparent url(../images/close-button.png) center no-repeat;
-  position: fixed;
-  z-index: 2;
+  z-index: 300;
+/*  position: fixed;
   top: 1em;
   right: 50%;
+*/ 
+  /* Code below is a bit of a hack to hide the text from the anchor */
+  display: inline-block;
+  overflow: hidden;
+  width: 0;
+  height: 29px;
+  padding-left: 29px;
+  float: right;
 }
 /* Application status ------------------------------------------------------ */
 .appstatus {
@@ -590,6 +611,39 @@ header.alt p#login {
   content: "- ";
 }
 */
+/* addcontact.html --------------------------------------------------------- */
+ul.contact-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul.contact-list li {
+  display: inline-block;
+  margin: 0;
+}
+
+ul.contact-list div {
+  text-align: center;
+  padding: 3px;
+  cursor: pointer;
+}
+
+ul.contact-list img {
+  float: left;
+  width: 124px;
+  height: 155px;
+}
+
+ul.contact-list span {
+  width: 100%;
+  float: left;
+  clear: both;
+  text-align: center;
+}
+ul.contact-list input {
+  display: none;
+}
+
 /* Admin - Plus ------------------------------------------------------------ */
 #admin_plus {
   /* display: none; /* FIXME */
