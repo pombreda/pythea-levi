@@ -1,9 +1,0 @@
-<form method="post" action="/client/register" enctype="multipart/form-data">
-<table>
-{% for form in forms %}
-    <tr><td colspan=2>{{form.title}}</td></tr>
-    {{ form.as_table }}
-{% endfor %}
-</table>
-<p class="submit"><input type="submit" value="Submit" /></p>
-</form>
