@@ -116,7 +116,7 @@ class Screens(BaseHandler):
         self.render( {'docs': doc.docs, 'tree': dict(doc.tree)}, 'screens.html' )
 
 
-class ClientNew(BaseHandler):
+class ClientEdit(BaseHandler):
     def get(self):
         """Show the form to add a new client"""
         if self.user:
@@ -1190,7 +1190,8 @@ application = webapp.WSGIApplication([
 #  (r'/task/init', TaskInitialize),
 
 # The register client use case
-  (r'/client/register', ClientNew),
+  (r'/client/register', ClientEdit),
+  (r'/client/info', ClientEdit),
   (r'/client/register/contact', ClientContact),
   (r'/client/register/creditors/new', ClientCreditorsNew),
   (r'/client/creditors', ClientSelectCreditors),
