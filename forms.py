@@ -34,20 +34,44 @@ class ClientForm(df.ModelForm):
         # FIXME: we should check if the username already exists in the database
         phone = data.get('phone')
         mobile = data.get('mobile')
-        if phone:
+        email = data.get('email')
+
+        # try to find the given username
+        try:
+            user = models.Client.get_by_key_name(username)
+        except Exception, e:
+            user = False
+
+        # try to find the given email
+        try:
+            user_by_email = models.Client.gql("WHERE email = :1",email).get()
+        except Exception, e:
+            user_by_email = False
+
+        if user:
+            self._errors['username'] = self.error_class(['Er bestaat al een gebruiker met deze naam'])
+        elif user_by_email:
+            self._errors['email'] = self.error_class(['Dit e-mail adres is reeds in gebruik'])
+        elif phone:
             m = self.phone_p.match(phone)
             if m:
                 data['phone'] = '+31' + m.group(2)
+                phone_exists = models.Client.gql("WHERE phone = :1",data['phone']).get()
             if m and m.group(2).startswith('6') and not mobile:
                 data['mobile'] = '+31' + m.group(2)
             if not m:
                 self._errors['phone'] = self.error_class(['Geen geldig telefoonnummer'])
+            elif phone_exists:
+                self._errors['phone'] = self.error_class(['Dit nummer is reeds in gebruik'])
         if mobile:
             m = self.phone_p.match(mobile)
             if not m or not m.group(2).startswith('6'):
                 self._errors['mobile'] = self.error_class(['Geen geldig mobiel nummer'])
             elif m:
                 data['mobile'] = '+31' + m.group(2)
+                mobile_exists = models.Client.gql("WHERE mobile = :1",data['mobile']).get()
+            if mobile_exists:
+                self._errors['mobile'] = self.error_class(['Dit nummer is reeds in gebruik'])
         if not self.instance and not password1:
             self._errors['password1'] = self.error_class(['Wachtwoord is verplicht'])
         if password1 != password2:
