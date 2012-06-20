@@ -5,14 +5,14 @@ String.prototype.repeat = function( num )
 
 /**
  * Renders the tabs necessary for the logged in user type
- * 
+ *
  * @param {string} type The desired tabset type
  * @return void
  */
 function setTabs(type) {
 	var $currentTabs = $("#tabs"),
 		tabHtml;
-	
+
 	switch(type) {
 		case "client":
 			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/creditors">Schuldendossier</a></li><li><a href="/client/register">Mijn gegevens</a></li></ul>';
@@ -27,7 +27,7 @@ function setTabs(type) {
 
 /**
  * Enable or disable app waiting state on AJAX calls
- * 
+ *
  * @param {bool} Wether we're currently loading an AJAX resource.
  * @return void
  */
@@ -41,10 +41,10 @@ function appLoading(loading) {
 }
 
 $(document).ready(function(){
-	
+
 	// Set up automated validation for login form
 	$("#login").validate();
-	
+
 	// Make sure submit button values are included in AJAX calls
 	$("input[type=submit]").live("click",function(e){
 		var $this = $(this),
@@ -60,12 +60,12 @@ $(document).ready(function(){
 			$this.after('<input type="hidden" name="'+setValue[0]+'" value="'+setValue[1]+'">');
 		}
 	});
-	
+
 	// Catch all form execution and pass it through AJAX calls
-	$("#content form").live("submit",function(event) { 
+	$("#content form").live("submit",function(event) {
 		event.preventDefault();
 		event.stopPropagation();
-		
+
 		appLoading(true);
 		var $this = $(this),
 			url = $this.attr("action"),
@@ -74,13 +74,13 @@ $(document).ready(function(){
 			context = this,
 			redirected = false
 			;
-	
-        // HTH: this does not appear to be used.	
+
+        // HTH: this does not appear to be used.
 		// If validation marked any errors, stop processing.
 		if ($this.find("input.error").length > 0) {
 			return;
 		}
-	
+
 		$.ajax({
 			url: url,
 			type: method.toUpperCase(),
@@ -99,16 +99,16 @@ $(document).ready(function(){
 */
 			success: function(data, textStatus, jqXHR) {
 				var location = jqXHR.getResponseHeader("Location");
-				
+
 				if (location) {
 					if (location.match(/^https?\:\/\//)) {
 						location = location.replace(/https?\:\/\/[^\/]+/,"");
 					}
-					
+
 					if (data != "") {
                         setAppStatus(data);
 					}
-					
+
 					redirected = true;
 					/* HTH: This does not appear to be necessary anymore
 					// Check where we're being redirected, and set tabs accordingly
@@ -126,7 +126,7 @@ $(document).ready(function(){
                         } else {
 			                $.address.value(location);
                         }
-
+                        enableDatePickers();
                     }
 				} else if ($("#"+target)) {
 					$("#"+target).html(data);
@@ -141,7 +141,7 @@ $(document).ready(function(){
 			}
 		});
 	});
-	
+
 	/**
      * HTH: this does not appear to be used anymore.
 	 * Enable the popup close button
@@ -153,7 +153,7 @@ $(document).ready(function(){
     	$(".content","#popup").empty();
 		return false;
     });
-	
+
 	/**
 	 * Catch all links and pass them through AJAX calls
 	 */
@@ -168,7 +168,7 @@ $(document).ready(function(){
 		if ($this.attr("id") === "popup-close" || $this.attr("target") === "_blank") {
 			return true;
 		}
-	*/	
+	*/
 		event.preventDefault();
 		if (state.url === "#") {
 			return false;
@@ -211,6 +211,7 @@ $(document).ready(function(){
 		    $popupContent.css("margin-left","-" + Math.min($popupContent.width()/2, 470) + "px");
 			$popupCloser = $("#popup .close");
 		    $popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
+            enableDatePickers();
 
             /*
              * And close it again when something is selected.
@@ -232,7 +233,7 @@ $(document).ready(function(){
         });
     });
 
-    /* 
+    /*
      * When a creditor is selected, add it to the database
      */
     $(":checkbox.check").live("click",function(event) {
@@ -245,11 +246,12 @@ $(document).ready(function(){
                 $('#content').html(html);
                 setAppStatus();
                 document.body.style.cursor = "default";
+                enableDatePickers();
             });
-    });	
+    });
 	/**
 	 * jQuery.address change handler
-	 * 
+	 *
 	 * @param {object} The change event
 	 * @return {void}
 	 */
@@ -257,7 +259,7 @@ $(document).ready(function(){
         if(event.path == '/') return;
         $("#tabs a").each( function( index, object ) {
             var obj = $(object);
-            
+
             if( event.path.indexOf(object.pathname) != -1 ) {
 		        $(object).parent().addClass("active");
             } else {
@@ -277,6 +279,7 @@ $(document).ready(function(){
                 $('#content').html(html);
                 setAppStatus();
                 document.body.style.cursor = "default";
+                enableDatePickers();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#content').empty().append(textStatus + ' ' + jqXHR.responseText);
@@ -315,7 +318,16 @@ $(document).ready(function(){
             });
 
     });
+
+    // Enable datepicker fields
+    $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+    enableDatePickers();
 });
+
+function enableDatePickers() {
+    $("input[data-ui-type='datepicker'], input[name='original_date']").datepicker();
+}
+
 
 /*
  *  HTH: This does not appear to be used.
