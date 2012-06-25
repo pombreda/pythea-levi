@@ -111,7 +111,7 @@ class CreditorForm(df.ModelForm):
 
 class DebtForm(df.ModelForm):
     #creditor_or_collector = forms.CharField()
-    original_date = forms.DateField(localize=True)
+    original_date = forms.DateField(localize=True, widget=forms.TextInput(attrs={'class':'date'}))
     amount = forms.DecimalField(localize=True, required=False)
     payment_amount = forms.DecimalField(localize=True, required=False)
     class Meta:

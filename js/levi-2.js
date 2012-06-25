@@ -324,8 +324,13 @@ $(document).ready(function(){
     enableDatePickers();
 });
 
+/**
+ * Enable datepicker for any date.input
+ * Since jQuery UI prevents setting multiple pickers on the same element,
+ * this can safely be run multiple times
+ */
 function enableDatePickers() {
-    $("input[data-ui-type='datepicker'], input[name='original_date']").datepicker();
+    $("input.date").datepicker();
 }
 
 
