@@ -729,10 +729,14 @@ class ResetPassword(BaseHandler):
 
 class Logout(BaseHandler):
     def get(self):
+        redirect = self.request.get("redirect")
         if self.session.is_active():
             self.session.terminate()
         self.response.set_status(301)
-        self.response.headers['Location'] = "/"
+        if redirect:
+            self.response.headers['Location'] = redirect
+        else:
+            self.response.headers['Location'] = "/"
         self.response.clear()
 
 class Login(BaseHandler):
