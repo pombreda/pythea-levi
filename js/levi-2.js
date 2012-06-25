@@ -126,7 +126,7 @@ $(document).ready(function(){
                         } else {
 			                $.address.value(location);
                         }
-                        enableDatePickers();
+                        prepareForms();
                     }
 				} else if ($("#"+target)) {
 					$("#"+target).html(data);
@@ -164,11 +164,7 @@ $(document).ready(function(){
 				target : $this.attr("target") || "content",
 				title : $this.attr("data-title") || document.title,
 			};
-    /* HTH: Not used
-		if ($this.attr("id") === "popup-close" || $this.attr("target") === "_blank") {
-			return true;
-		}
-	*/
+
 		event.preventDefault();
 		if (state.url === "#") {
 			return false;
@@ -176,15 +172,13 @@ $(document).ready(function(){
         if (state.url === $.address.value()) {
             return false;
         }
+        if (state.url === "/client/register" && $("a[href='/logout']")) {
+            // User wants to register. Clear running session if applicable.
+            document.location = "/logout?redirect="+encodeURIComponent("/#" + state.url);
+            return false;
+        }
 		appLoading(true);
 
-    /* HTH: Not used
-		if ($this.attr("data-actions") && $this.attr("data-actions").indexOf("close-popup") > -1) {
-			$("#popup").removeClass("active");
-		}
-		if (state.target === "_popup") {
-			loadPopup(state.url);
-		} else */
         if (state.target !== "content" && $("#"+state.target)) {
 			$("#"+state.target).load(state.url,function(){
 				appLoading(false);
@@ -211,7 +205,7 @@ $(document).ready(function(){
 		    $popupContent.css("margin-left","-" + Math.min($popupContent.width()/2, 470) + "px");
 			$popupCloser = $("#popup .close");
 		    $popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
-            enableDatePickers();
+            prepareForms();
 
             /*
              * And close it again when something is selected.
@@ -246,7 +240,7 @@ $(document).ready(function(){
                 $('#content').html(html);
                 setAppStatus();
                 document.body.style.cursor = "default";
-                enableDatePickers();
+                prepareForms();
             });
     });
 	/**
@@ -279,7 +273,7 @@ $(document).ready(function(){
                 $('#content').html(html);
                 setAppStatus();
                 document.body.style.cursor = "default";
-                enableDatePickers();
+                prepareForms();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#content').empty().append(textStatus + ' ' + jqXHR.responseText);
@@ -291,14 +285,16 @@ $(document).ready(function(){
      * Check the registration form
      * FIXME: Only add the suggested username if the form is displayed for the first time.
      */
-    var obj = $('#id_firstname');
-    if ( $('#id_username').val() ) {
-    } else {
-       $("input[name=first_name],input[name=last_name]").live("blur",function(event) {
-          username = $("#id_first_name").val()+'.'+$("#id_last_name").val();
-          $('#id_username').val(username);
-       });
-    }
+    // var obj = $('#id_firstname');
+    // if ( $('#id_username').val() ) {
+    // } else {
+    //    $("input[name=first_name],input[name=last_name]").live("blur",function(event) {
+    //       username = $("#id_first_name").val().toLowerCase().replace(/\s+/,"_")+
+    //                  '.'+
+    //                  $("#id_last_name").val().toLowerCase().replace(/\s+/,"_");
+    //       $('#id_username').val(username);
+    //    });
+    // }
 	$("a","#tabs").live("click",function(e){
 		$("li","#tabs").removeClass("active");
 		$(this).parent().addClass("active");
@@ -321,16 +317,50 @@ $(document).ready(function(){
 
     // Enable datepicker fields
     $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
-    enableDatePickers();
+    prepareForms();
+
 });
 
-/**
- * Enable datepicker for any date.input
- * Since jQuery UI prevents setting multiple pickers on the same element,
- * this can safely be run multiple times
- */
-function enableDatePickers() {
+// Preprare logic for all forms present
+function prepareForms() {
+    /*
+    Enable datepicker for any date.input
+    Since jQuery UI prevents setting multiple pickers on the same element,
+    this can safely be run multiple times
+     */
     $("input.date").datepicker();
+
+    // Prepare username field for registration form
+    handleUsername();
+}
+
+/*
+On the registration and user info forms, prevent the username from being changed before first submit, or after registration
+*/
+function handleUsername() {
+    // Find elements
+    var $form = $("form[action='/client/register'],form[action='/client/info']"),
+        $tbody = $form.find("tbody[class]"),
+        $username = $form.find("input[name=username]");
+
+    // Only operate if all necessary elements are pesent
+    if ($form && $username && $tbody) {
+        if (!$username.attr("readonly") && ($tbody.hasClass("unposted") || $tbody.hasClass("instance"))) {
+            // Form is either new or an existing instance. The username cannot be changed
+            $username.attr("readonly","readonly");
+
+            // Since username is inmutable here, we can assume that an empty field equals a new username
+            // Set up a listener to auto-populate with first_name.last_name
+            if ($username.val() == "" && $username.attr("readonly")) {
+                $form.find("input[name=first_name],input[name=last_name]").live("blur",function(event) {
+                    var username = $("#id_first_name").val().toLowerCase().replace(/\s+/,"_");
+                        username += '.';
+                        username += $("#id_last_name").val().toLowerCase().replace(/\s+/,"_");
+                    $username.val(username);
+                });
+            }
+        }
+    }
 }
 
 
