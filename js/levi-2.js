@@ -3,12 +3,11 @@ String.prototype.repeat = function( num )
 	return new Array( num + 1 ).join( this );
 }
 
-/**
+/** HTH: FIXME: does not appear to be used.
  * Renders the tabs necessary for the logged in user type
  *
  * @param {string} type The desired tabset type
  * @return void
- */
 function setTabs(type) {
 	var $currentTabs = $("#tabs"),
 		tabHtml;
@@ -24,6 +23,7 @@ function setTabs(type) {
 			tabHtml = "";
 	}
 }
+*/
 
 /**
  * Enable or disable app waiting state on AJAX calls
@@ -143,9 +143,8 @@ $(document).ready(function(){
 	});
 
 	/**
-     * HTH: this does not appear to be used anymore.
+     * HTH: FIXME: this does not appear to be used anymore.
 	 * Enable the popup close button
-	 */
     $("#popup-close").live("click",function(e){
     	e.preventDefault();
 		e.stopPropagation();
@@ -153,7 +152,7 @@ $(document).ready(function(){
     	$(".content","#popup").empty();
 		return false;
     });
-
+    */
 	/**
 	 * Catch all links and pass them through AJAX calls
 	 */
@@ -232,11 +231,17 @@ $(document).ready(function(){
      */
     $(":checkbox.check").live("click",function(event) {
         var checked = $(this).is(':checked');
-        var creditor = $(this).val()
+        var creditor = $(this).val();
+        var category = $('.selector-container li.active a')[0].innerText;
+        if (creditor === "new") {
+           $.address.value("/client/creditors/category/"+category+"/new");
+           return;
+        };
         var url = $(this).closest("form").attr("action");
         document.body.style.cursor = "wait";
         $.post(url, { checked: checked, creditor: creditor },
             function( html ) {
+                // FIXME: should only reload the result part of the screen
                 $('#content').html(html);
                 setAppStatus();
                 document.body.style.cursor = "default";
@@ -260,7 +265,7 @@ $(document).ready(function(){
 		        $(object).parent().removeClass("active");
             }
         });
-        $('#popup .content').empty();
+        $('#popup .popup-content').empty();
 		$("#popup").removeClass("active");
 
         document.body.style.cursor = "wait";
@@ -302,7 +307,7 @@ $(document).ready(function(){
 
 
     /* If the user selects a radio button, we immediately submit  */
-    /* FIXME: add an onclick=this.form.submit(); Easier than this */
+    /* FIXME: DISCUSS: add an onclick=this.form.submit(); Easier than this */
     $(".contact-list input[type=radio]").live("click", function(e) {
         var url = $(this).closest("form").attr("action");
         var selected = $(this).val();
@@ -390,18 +395,23 @@ function checkLogin() {
 
 /*
  *  HTH: This does not appear to be used.
- */
+ *  */
 function loadPopup(url) {
+    $('#popup').addClass("active");
 	appLoading(true);
-	$("#popup .content").load(url,function(){
+	$("#popup .popup-content").load(url,function(){
 		var $popup = $("#popup"),
 			$popupContent = $(".content",$popup),
 			$popupCloser = $(".close",$popup);
 
-		$popup.find("a").attr("data-actions","close-popup");
 		$popup.addClass("active");
 		$popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
 		appLoading(false);
+        $("#popup a.popup-close").click(function(event) {
+            event.preventDefault();
+            $('#popup .content').empty();
+            $("#popup").removeClass("active");
+        });
 	});
 }
 

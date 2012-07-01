@@ -42,6 +42,9 @@ import yaml
 import inspect
 import django
 
+import locale
+import decimal
+
 class BaseHandler(webapp.RequestHandler):
     def get_user(self):
         try:
@@ -202,17 +205,20 @@ class ClientSelectCreditors(BaseHandler):
         if not category:
             category = 'Banken'
         user = self.user
+        #FIXME: we should cache this
         creditors = models.Creditor.all()
         categories = models.Category.all()
 
         creditors.filter('categories =', category)
-        creditors = list(creditors)
+        creditors_2 = []
         for creditor in creditors:
-            creditor.selected = user.hasCreditor(creditor)
+            if creditor.private_for == None or creditor.private_for.key() == user.key():
+                creditor.selected = user.hasCreditor(creditor)
+                creditors_2.append(creditor)
 
         vars = { 'categories': categories,
                  'selected': category,
-                 'creditors': creditors,
+                 'creditors': creditors_2,
                  'user': user }
         self.render(vars, 'crediteuren.html')
 
@@ -233,29 +239,25 @@ class ClientSelectCreditors(BaseHandler):
         self.redirect(self.request.url)
 
 
-class ClientCreditorsNew(BaseHandler):
-    def get(self):
-        """Add a new creditor that is specific to this client
-
-        FIXME:
-        The new creditor will have status provisional, until it is validated by the SocialWorker"""
-        user = self.user
-        form = forms.CreditorForm(self.request.POST)
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'addcompany.html')
-        #vars = { 'form': form }
+class ClientAddCreditor(BaseHandler):
+    def get(self, category):
+        """Add a new creditor that is specific to this client"""
+        form = forms.CreditorForm(initial={'category':category})
         vars = { 'forms': [form] }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
-        #self.response.out.write(template.render(path, vars))
         self.render(vars, 'form.html')
 
-    def post(self):
+    def post(self, category):
         """Add the creditor to the database"""
         form = forms.CreditorForm(self.request.POST)
         if form.is_valid():
             creditor = form.save(commit=False)
-            creditor.expand()
+            #creditor.expand()
+            creditor.categories = [category]
+            creditor.private_for = self.user
+            creditor.approved = False
             creditor.put()
-            self.redirect('todo.html')
+            self.user.addCreditor(creditor)
+            self.redirect('/client/creditors/category/%s' % category)
         else:
             vars = { 'forms': [form] }
             self.render(vars, 'form.html')
@@ -267,17 +269,66 @@ class ClientValidate(BaseHandler):
         user = self.user
         vars = {
                  'user': user }
-        self.render(vars, 'clientvalidate.html')
+        self.render(vars, 'clientcontactcreditors.html')
 
     def post(self):
         action = self.request.get('action')
         if action != 'go back':
-            user = self.user
-            user.complete()
+            client = self.user
+            client.complete()
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
                            to="<h.then@pythea.nl>",
                            subject="Dossier Entered",
-                           body="Dossier is toegevoegd voor %s %s" % (user.first_name, user.last_name))
+                           body="Dossier is toegevoegd voor %s %s" % (client.first_name, client.last_name))
+            letters = []
+            for creditor in client.creditors:
+                if not creditor.last_email_date:
+                    method = creditor.creditor.contact_method()
+                    letter = creditor.generate_letter()
+                    if method in ['EMAIL', 'FAX']:
+                        logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
+                        creditor.send_message("Verzoek schuldbewijs", letter)
+                        creditor.status = method
+                    elif method == 'POST':
+                        logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
+                        creditor.status = method
+                        # FIXME: generate a letter
+                        letters.append(letter)
+            """
+            for key in self.request.arguments():
+                letters = []
+                if key.startswith("creditor-"):
+                    id = int(key.split("-")[1])
+                    creditor = models.CreditorLink.get_by_id(id)
+                    method = creditor.creditor.contact_method()
+                    letter = creditor.generate_letter()
+                    if method in ['EMAIL', 'FAX']:
+                        logging.info("Sending letter to %s by %s" % creditor.creditor.display_name, method)
+                        creditor.send_message("Verzoek schuldbewijs", letter)
+                        creditor.status = method
+                    elif method == 'POST':
+                        logging.info("Sending letter to %s by %s" % creditor.creditor.display_name, method)
+                        creditor.status = method
+                        # FIXME: generate a letter
+                        letters.append(letter)
+
+                    estimated_amount = self.request.get(key)
+                    try:
+                        estimated_amount = decimal.Decimal(str(float(estimated_amount)))
+                    except ValueError:
+                        try:
+                            estimated_amount = estimated_amount.replace(".", "").replace(",", ".")
+                            logging.error(estimated_amount)
+                            estimated_amount = decimal.Decimal(estimated_amount)
+                        except decimal.InvalidOperation, e:
+                            estimated_amount = decimal.Decimal('0.00')
+                    except decimal.InvalidOperation, e:
+                        estimated_amount = decimal.Decimal('0.00')
+                    creditor = models.CreditorLink.get_by_id(id)
+                    if creditor.estimated_amount != estimated_amount:
+                        creditor.estimated_amount = estimated_amount
+                        creditor.put()
+            """
 
             self.redirect('/client/debts')
         else:
@@ -342,6 +393,7 @@ class ClientDebts(BaseHandler):
         base_url = '/client/debts'
         if not creditor:
             creditor = user.creditors.get()
+            # FIXME: what if there is no creditor?
             self.redirect('%s/creditor/%s' % (user.key(), creditor.key().id()))
         else:
             creditor = models.CreditorLink.get_by_id(int(creditor))
@@ -1212,7 +1264,7 @@ application = webapp.WSGIApplication([
   (r'/client/register', ClientEdit),
   (r'/client/info', ClientEdit),
   (r'/client/register/contact', ClientContact),
-  (r'/client/register/creditors/new', ClientCreditorsNew),
+  (r'/client/creditors/category/(.*)/new', ClientAddCreditor),
   (r'/client/creditors', ClientSelectCreditors),
   (r'/client/creditors/category/(.*)', ClientSelectCreditors),
   (r'/client/creditors/validate', ClientValidate),
