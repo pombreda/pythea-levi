@@ -532,6 +532,16 @@ class ClientDebtsPrintDossier(BaseHandler):
         vars = { 'client': client }
         self.render(vars, 'clientdebtsprintdossier.html')
 
+class ClientDebtsCloseDossier(BaseHandler):
+    """Show all debts for a creditor"""
+    def get(self, client=None):
+        if not client:
+            client = self.user
+        else:
+            client = models.Client.get(client)
+        client.close()
+        logging.error("We should redirect to some page, but I dont know which")
+
 class OrganisationNew(BaseHandler):
     def get(self):
         form1 = forms.SocialWorkForm(prefix='f1')
@@ -1288,6 +1298,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/list', ClientDebts),
   (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/print', ClientDebtsPrintDossier),
+  (r'/client/debts/close', ClientDebtsCloseDossier),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
