@@ -222,6 +222,7 @@ $(document).ready(function(){
 		        event.preventDefault();
                 $('#popup .content').empty();
 		        $("#popup").removeClass("active");
+                location.reload(true);
             });
         });
     });
