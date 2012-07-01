@@ -70,8 +70,8 @@ class ClientForm(df.ModelForm):
             elif m:
                 data['mobile'] = '+31' + m.group(2)
                 mobile_exists = models.Client.gql("WHERE mobile = :1",data['mobile']).get()
-            if mobile_exists:
-                self._errors['mobile'] = self.error_class(['Dit nummer is reeds in gebruik'])
+                if mobile_exists:
+                    self._errors['mobile'] = self.error_class(['Dit nummer is reeds in gebruik'])
         if not self.instance and not password1:
             self._errors['password1'] = self.error_class(['Wachtwoord is verplicht'])
         if password1 != password2:
@@ -107,7 +107,7 @@ class CategoryForm(df.ModelForm):
 class CreditorForm(df.ModelForm):
     class Meta:
         model = models.Creditor
-        exclude = ['display_name', '_class', 'icon', 'tags']
+        exclude = ['_class', 'icon', 'tags', 'categories', 'approved', 'private_for']
 
 class DebtForm(df.ModelForm):
     #creditor_or_collector = forms.CharField()

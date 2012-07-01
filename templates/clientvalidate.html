@@ -5,7 +5,8 @@
     <tr>
       <td><img src="{{creditor.creditor.icon}}" alt="" width="16" height="16"></td>
       <td>{{ creditor.creditor.display_name }}</td>
-      <td><input id="{{creditor.key.id}}" type="text" class="currency"></input>
+      <td><input id="{{creditor.key.id}}" name="creditor-{{creditor.key.id}}" 
+                 type="text" class="currency" value="{{creditor.estimated_amount|default:''}}"></input>
     </tr>
   {% endfor %}
   </table>

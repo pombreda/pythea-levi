@@ -7,6 +7,8 @@ import crypt
 import decimal
 
 from google.appengine.ext import db
+from google.appengine.ext.webapp import template
+from google.appengine.api import mail
 from google.appengine.ext.db import polymodel
 import wsgiref.handlers
 
@@ -130,15 +132,16 @@ uppermask = '9999ZZ'
 
 class Organisation(polymodel.PolyModel):
     display_name = db.StringProperty()
+    address = db.StringProperty()
+    zipcode = db.StringProperty()
+    city = db.StringProperty()
     icon = db.LinkProperty()
     website = db.LinkProperty()
     email = db.EmailProperty()
-
+    phone = db.PhoneNumberProperty()
+    fax = db.PhoneNumberProperty()
 
 class SocialWork(Organisation):
-    address = db.StringProperty()
-    zipCode = db.StringProperty()
-    city = db.StringProperty()
     zipcodes = db.StringListProperty()
 
     def accepts(self, zipcode):
@@ -154,7 +157,6 @@ class SocialWork(Organisation):
             if lower <= zipcode <= higher:
                 return True
         return False
-
 
 class SocialWorker(User):
     organisation = db.ReferenceProperty(SocialWork, collection_name="employees")
@@ -248,15 +250,11 @@ class Client(User):
         count_new = 0
         count_incomplete = 0
         for creditor in self.creditors:
-            if self.username == 'isabelle.then':
-                logging.error("%s/%s/%s" % (creditor.key().id(), creditor.status(), creditor.last_email_date))
             count += 1
             if creditor.status().status != 'COMPLETE':
                 count_incomplete += 1
-            if not creditor.last_email_date:
-                count_new +=1
-            if self.username == 'isabelle.then':
-                logging.error("%d/%d/%d/%d" % (creditor.key().id(), count, count_new, count_incomplete))
+                if not creditor.last_email_date:
+                    count_new +=1
         if count == 0:
             return Status('NEW')
         elif count_new == count:
@@ -286,6 +284,18 @@ class Creditor(Organisation):
     tags = db.StringListProperty()
     categories = db.StringListProperty()
     is_collector = db.BooleanProperty(default=False)
+    private_for = db.ReferenceProperty(Client, default=None)
+    approved = db.BooleanProperty(default=False)
+
+    def contact_method(self):
+        if self.email:
+             return "EMAIL"
+        elif self.fax:
+             return "FAX"
+        elif self.address and self.zipcode:
+             return "POST"
+        else:
+             return "UNKNOWN"
 
     def expand(self):
         url = self.website
@@ -344,10 +354,37 @@ class CreditorLink(db.Model):
     last_changed_date = db.DateProperty(auto_now=True)
     cached_state = db.StringProperty()
 
-    def send_email(self):
-        logging.error("FIXME: need to actually send an email")
+    def send_message(self, subject, text):
+        faxkey = "abcde"
+        client = self.user
+        sender = "%s@pythea-levi.appspotmail.com" % client.username
+        if client.email:
+            reply_to = client.email
+        else:
+            reply_to = sender
+        if self.creditor.email:
+            to = self.creditor.email
+        elif self.creditor.fax:
+            to = "%s-%s@informaxion.faxservice.nl" % (self.creditor.fax, faxkey)
+        mail.send_mail(sender=sender,
+                       reply_to=reply_to,
+                       to="hans.then@schuldendossier.nl",
+                       subject=subject,
+                       body=text)
         self.last_email_date = datetime.date.today()
-        self.approve()
+        self.cached_state = None
+        self.put()
+
+    def generate_letter(self):
+        user = self.user
+        creditor = self.creditor
+        path = os.path.join(os.path.dirname(__file__), 'brieven', 'schuldeiser-1.html')
+        vars = {}
+        vars['client'] = user
+        vars['creditor'] = creditor
+        vars['today'] = datetime.date.today().strftime("%d-%m-%Y")
+        return template.render(path, vars)
+
 
     def approve(self):
         self.approved = True

@@ -3,6 +3,9 @@
 </div>    
 <div class="file-setup debt-overview">
   <h2>Schuldeisers</h2>
+  {% ifnotequal client.status.status "COMPLETE" %}
+      <span class="client-status">{{client.status.status}}</span>
+  {% endifnotequal %}
   <ul class="creditor-overview">
   {% for cred in client.creditors %}
     <li class="{{cred.status|lower}}">
@@ -18,7 +21,6 @@
   {% ifequal client.status.status "COMPLETE" %}
      <a href="{{base_url}}/close">[afsluiten]</a>
      <a href="{{base_url}}/print" target="_popup">[print dossier]</a>
-  {% else %}
   {% endifequal %}
   <div class="creditor-details" id="creditor-details">
       {% include "clientdebtscreditoractions.html" %}
