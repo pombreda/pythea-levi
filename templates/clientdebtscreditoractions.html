@@ -1,15 +1,13 @@
 <p>
   <strong class="name">
-    {% comment %}
-  <img src="{{creditor.creditor.icon}}" width="16" height="16">
-  {% endcomment %}
   {{ creditor.creditor.display_name }}
-  </strong>
+  </strong><br>
+  {{ creditor.creditor.phone|default:" " }}
 </p>
 <p>
   <span class="label">Actie: </span>
-  <a href="/client/register/previewletter/{{creditor.key.id}}" class="action preview">Open brief</a>
-  <a href="{{base_url}}/view/{{creditor.key.id}}" class="action response" target="_popup">Verwerk reactie</a>
+  <a href="/client/register/previewletter/{{creditor.key.id}}" class="action preview" target="_popup">Open brief</a>
+  <a href="{{base_url}}/view/{{creditor.key.id}}" class="action response">Verwerk reactie</a>
 {% comment %}
   <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
   <a href="#" class="action mail">Mail</a>
