@@ -489,44 +489,44 @@ header.alt p#login {
   padding-right: 1em;
   margin-top: .3em;
 }
+.file-setup .creditor-details .name {
+  color: #B5373D;
+}
 .file-setup .creditor-details p {
   vertical-align: bottom;
 }
+.file-setup .creditor-details p .label {
+  font-weight: bold;
+}
 .file-setup .creditor-details .action {
   display: inline-block;
-  width: 40px;
-  height: 40px;
   text-indent: 100%;
   white-space: nowrap;
   overflow: hidden;
-  background-color: #003339;
-  border-radius: 50%;
+  background-color: transparent;
   background-position: center;
   background-repeat: no-repeat;
 }
-.file-setup .creditor-details .action.mail {
-  background-image: url(/images/buttonmail_up.png);
+.file-setup .creditor-details .action.preview {
+  width: 19px;
+  height: 14px;
+  background-image: url(/images/sturen.png);
 }
-.file-setup .creditor-details .action.mail:active {
-  background-image: url(/images/buttonmail_down.png);
-}
-.file-setup .creditor-details .action.print {
-  background-image: url(/images/buttonprint_up.png);
-}
-.file-setup .creditor-details .action.print:active {
-  background-image: url(/images/buttonprint_down.png);
+.file-setup .creditor-details .action.response {
+  width: 25px;
+  height: 22px;
+  background-image: url(/images/ontvangen.png);
+  position: absolute;
+  right: .5em;
 }
 .file-setup .creditor-details .add-annotation {
-/*  border-style: solid; */
-  border-width: 1px 0;
+  border-style: solid;
+  border-width: 1px 0 0 0;
   border-color: #003339;
-/*  padding: 1em; */
   margin-bottom: 1em;
   overflow: auto;
 }
 .file-setup .creditor-details .add-annotation textarea {
-  border-top: solid 1px #003333;
-  border-bottom: solid 1px #003333;
   margin-top: .5em;
   padding: .2em;
   width: 100%;
@@ -541,13 +541,22 @@ header.alt p#login {
 .file-setup .creditor-details .add-annotation input[type=submit] {
   float: right;
 }
+.file-setup .creditor-details .annotations {
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  border-color: #003339;
+}
 .file-setup .creditor-overview {
-  list-style: none;
   padding: 0;
   margin: 0;
   position: relative;
+  width: 50%;
+  border-spacing: 0;
+  border-collapse: collapse;
 }
-.file-setup .creditor-overview li.new .status > span {
+
+.file-setup .creditor-overview .creditor.new .status > span,
+.creditor-legenda .new .status > span {
   width: 20px;
   background: #dc6060;
   background: -moz-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
@@ -557,7 +566,8 @@ header.alt p#login {
   background: -ms-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
   background: radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
 }
-.file-setup .creditor-overview li.waiting .status > span {
+.file-setup .creditor-overview .creditor.waiting .status > span,
+.creditor-legenda .waiting .status > span {
   width: 40px;
   background: #f0b28b;
   background: -moz-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
@@ -567,8 +577,9 @@ header.alt p#login {
   background: -ms-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
   background: radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
 }
-.file-setup .creditor-overview li.in_collection .status > span,
-.file-setup .creditor-overview li.complete .status > span {
+.file-setup .creditor-overview .creditor.in_collection .status > span,
+.file-setup .creditor-overview .creditor.complete .status > span,
+.creditor-legenda .complete .status > span {
   width: 60px;
   background: #8fbb83;
   background: -moz-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
@@ -578,36 +589,31 @@ header.alt p#login {
   background: -ms-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
   background: radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
 }
-
-.file-setup .creditor-overview li .status > span span {
-  display: none;
-}
-
-.file-setup .creditor-overview li .action {
-  display: none;
-}
-
-.file-setup .creditor-overview li {
+.file-setup .creditor-overview .creditor {
   margin: 0;
   padding: .2em .5em;
 }
-.file-setup .creditor-overview li a {
+.file-setup .creditor-overview .creditor a {
   text-decoration: none;
   display: block;
   position: relative;
 }
-.file-setup .creditor-overview li a .status {
+.file-setup .creditor-overview .creditor .status,
+.creditor-legenda .status {
   width: 65px;
   height: 15px;
   display: inline-block;
-  position: absolute;
-  right: 550px;
+  position: relative;
   -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   box-shadow: minset 0 0 9px rgba(0, 0, 0, 0.2);
   margin-top: 2px; /* FIXME: this is a hack, the children of this list element should be properly aligned */
 }
-.file-setup .creditor-overview li a .status > span {
+.file-setup .creditor-overview .creditor .hide {
+  display: none;
+}
+.file-setup .creditor-overview .creditor .status > span,
+.creditor-legenda .status > span {
   display: block;
   position: absolute;
   top: 2.5px;
@@ -616,7 +622,7 @@ header.alt p#login {
   background-color: red;
   border-radius: 5px;
 }
-.file-setup .creditor-overview li:nth-child(odd) {
+.file-setup .creditor-overview .creditor:nth-child(odd) {
   background-color: #c0dddc;
 }
 
@@ -629,6 +635,21 @@ header.alt p#login {
 .debt-entry input {
     margin: 1px;
     margin-left: 1em;
+}
+.creditor-legenda {
+  border: solid 1px #B5373D;
+  border-radius: .5em;
+  width: 50%;
+  margin-top: 1em;
+}
+.creditor-legenda .title {
+  color: #B5373D;
+}
+.creditor-legenda td:first-child {
+  text-align: center;
+}
+.creditor-legenda td[colspan] {
+  text-align: left;
 }
 /* As discussed with Jeremine
 .debt-entry td:first-child:before {
