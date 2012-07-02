@@ -668,6 +668,50 @@ ul.contact-list input {
   display: none;
 }
 
+/* Client - Intro ---------------------------------------------------------- */
+.client-intro {
+  position: relative;
+  background: transparent url(/images/dossier.png) center top no-repeat;
+  min-height: 553px;
+  overflow: hidden;
+}
+
+.client-intro .intro-txt {
+  position: absolute;
+  top: 0;
+  right: 150px;
+  width: 400px;
+}
+
+.client-intro .action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 350px;
+  left: 110px;
+  font-size: 1.2em;
+}
+
+.client-intro .action-list li {
+  margin-bottom: .5em;
+}
+
+.client-intro .action-list li > span {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    background-color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 1.5em;
+    margin-right: .5em;
+}
+
+.client-intro .action-list li {
+  color: #9C0006;
+}
+
 /* Admin - Plus ------------------------------------------------------------ */
 #admin_plus {
   /* display: none; /* FIXME */
