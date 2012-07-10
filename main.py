@@ -243,6 +243,7 @@ class ClientAddCreditor(BaseHandler):
     def get(self, category):
         """Add a new creditor that is specific to this client"""
         form = forms.CreditorForm(initial={'category':category})
+        form.title = 'Voeg een nieuwe schuldeiser toe'
         vars = { 'forms': [form] }
         self.render(vars, 'form.html')
 
@@ -261,6 +262,26 @@ class ClientAddCreditor(BaseHandler):
         else:
             vars = { 'forms': [form] }
             self.render(vars, 'form.html')
+
+class ClientPrintCreditorLetters(BaseHandler):
+    def get(self):
+        logging.info('printcreditorletters')
+        client = self.user
+        letters = []
+        for creditor in client.creditors:
+            if not creditor.last_email_date:
+                method = creditor.creditor.contact_method()
+                if method == 'POST':
+                    logging.info('I have an address')
+                    logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
+                    creditor.contacted_by = method
+                    creditor.put()
+                    # FIXME: generate a letter
+                    letter = creditor.generate_letter()
+                    letters.append(letter)
+        html = '<br style="page-break-after:always">'.join(letters)
+        logging.info(html)
+        self.response.out.write(html)
 
 
 class ClientValidate(BaseHandler):
@@ -389,23 +410,42 @@ class ClientRegisterPrintLetter(BaseHandler):
 
 class ClientDebts(BaseHandler):
     def get(self, creditor=None):
-        user = self.get_user()
+        user = self.user
         base_url = '/client/debts'
+        status = user.status()
+        logging.info('Status == %s' % status.status)
+        # Status --> NEW: we should not be here, no creditors in the dossier, redirect to /client/creditors
+        if status.status == 'NEW':
+            self.redirect('/client/creditors')
+            return
+        annotations = None
         if not creditor:
-            creditor = user.creditors.get()
-            # FIXME: what if there is no creditor?
-            self.redirect('%s/creditor/%s' % (user.key(), creditor.key().id()))
+            # Status --> BUSY: show the screen to print open files
+            if status.status == 'BUSY':
+                screen = 'clientdebtscontactcreditors.html'
+            # Status --> COMPLETE: show the screen to print dossier and close the file
+            elif status.status == 'COMPLETE':
+                screen = 'clientdebtsclosedossier.html'
+            else:
+                # Status --> WAITING : select the first creditor
+                creditor = user.creditors.get()
+                self.redirect('%s/creditor/%s' % (base_url, creditor.key().id()))
+                return
         else:
             creditor = models.CreditorLink.get_by_id(int(creditor))
-        annotations = creditor.annotations.order('-entry_date').run(limit=3)
+            annotations = creditor.annotations.order('-entry_date').run(limit=3)
+            screen = 'clientdebtscreditoractions.html'
+
         vars = { 'client': user,
                  'creditor': creditor,
                  'annotations': annotations,
-                 'base_url': base_url }
+                 'screen': screen,
+                 'base_url': base_url
+               }
         self.render(vars, 'clientdebts.html')
 
     def post(self):
-        user = self.get_user()
+        user = self.user
         message = 'U bent klaar'
         vars = { 'user': user,
                  'message': message }
@@ -449,9 +489,11 @@ class ClientDebtsView(BaseHandler):
                 new_debt.collected_for = selected
             else:
                 new_debt.collector = selected
+                if selected and not user.hasCreditor(selected):
+                    user.addCreditor(selected)
             new_debt.put()
             url = urlparse.urlsplit(self.request.url)
-	    self.redirect(url.path)
+            self.redirect(url.path)
         else:
             vars = { 'user': user,
                      'client': user,
@@ -836,6 +878,42 @@ class Session(BaseHandler):
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'session.html')
 
+class EmployeeCreditorsList(BaseHandler):
+    def get(self):
+        creditors = models.Creditor.all()
+        creditors.filter('private_for !=', None)
+        creditors.filter('approved == ', False)
+        self.render({'creditors': creditors}, 'employeelistnewcreditors.html')
+
+class EmployeeCreditorsApprove(BaseHandler):
+    def get(self, creditor):
+        creditor = models.Creditor.get(creditor)
+        form = forms.CreditorForm(instance=creditor)
+        is_generic = "checked" if creditor.private_for is None else ""
+        logging.info("is_generic in GET: %s" % is_generic)
+        logging.info("pirvate_for in GET: %s" % creditor.private_for)
+        vars = { 'form': form,
+                 'is_generic': is_generic
+               }
+        self.render(vars, 'employeeapprovecreditor.html')
+
+    def post(self, creditor):
+        instance = models.Creditor.get(creditor)
+        form = forms.CreditorForm(self.request.POST, instance=instance)
+        if form.is_valid():
+            logging.info("Is valid")
+            creditor = form.save(commit=False)
+            is_generic = self.request.get("is_generic")
+            logging.info("is_generic: %s" % is_generic)
+            if is_generic:
+                logging.info("private_for: %s" % creditor.private_for)
+                creditor.private_for = None
+            creditor.approved = True
+            creditor.put()
+            self.redirect(self.request.path)
+        else:
+            vars = { 'form': form }
+            self.render(vars, 'employeeapprovecreditor.html')
 
 class EmployeeViewCase(BaseHandler):
     def get(self, client, creditor=None):
@@ -843,13 +921,15 @@ class EmployeeViewCase(BaseHandler):
         base_url = '/employee/cases/view/%s' % client.key()
         if not creditor:
             creditor = client.creditors.get()
-            self.redirect("%s/creditors/%s" % (self.request.url, creditor.key().id()))
+            self.redirect("%s/creditor/%s" % (self.request.url, creditor.key().id()))
         else:
             creditor = models.CreditorLink.get_by_id(int(creditor))
         annotations = creditor.annotations.order('-entry_date').run(limit=3)
+        screen = 'clientdebtscreditoractions.html'
         vars = { 'client' : client,
                  'base_url': base_url,
                  'annotations': annotations,
+                 'screen': screen,
                  'creditor': creditor }
         self.render(vars, 'clientdebts.html')
 
@@ -1296,6 +1376,7 @@ application = webapp.WSGIApplication([
 # The clients edit debts use case
   (r'/client/debts', ClientDebts),
   (r'/client/debts/list', ClientDebts),
+  (r'/client/debts/printcreditorletters', ClientPrintCreditorLetters),
   (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/print', ClientDebtsPrintDossier),
   (r'/client/debts/close', ClientDebtsCloseDossier),
@@ -1316,6 +1397,8 @@ application = webapp.WSGIApplication([
 #  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
 #  (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
 
+  (r'/employee/creditors/new', EmployeeCreditorsList),
+  (r'/employee/creditors/approve/(.*)', EmployeeCreditorsApprove),
 # Catch all
   (r'/(.*)', Handle404),
 ], debug=True)

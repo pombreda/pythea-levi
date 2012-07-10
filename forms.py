@@ -116,5 +116,5 @@ class DebtForm(df.ModelForm):
     payment_amount = forms.DecimalField(localize=True, required=False)
     class Meta:
         model = models.Debt
-        fields = ['original_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']
+        fields = ['response_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']
 
