@@ -276,6 +276,14 @@ $(document).ready(function(){
             data: event.parameters,
 			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
             success: function(html, textStatus, jqXHR) {
+                var location = jqXHR.getResponseHeader("Location");
+                if (location) {
+                    if (location.match(/^https?\:\/\//)) {
+                        location = location.replace(/https?\:\/\/[^\/]+/,"");
+                    }
+                    $.address.value(location);
+                    return;
+                }
                 $('#content').html(html);
                 setAppStatus();
                 document.body.style.cursor = "default";

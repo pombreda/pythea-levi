@@ -217,11 +217,16 @@ class Client(User):
         if not self.hasCreditor(creditor):
             link = CreditorLink(creditor=creditor, user=self, estimated_amount=amount)
             link.put()
+            self.state = None
+            self.put()
 
     def removeCreditor(self, creditor):
         for link in self.creditors:
             if link.creditor.key().id() == creditor.key().id():
                 link.delete()
+                #FIXME: also needs to delete the associated debts and annotations?
+                self.state = None
+                self.put()
 
     def complete(self):
         self.state = "COMPLETED"
@@ -244,8 +249,6 @@ class Client(User):
         self.put()
 
     def status(self):
-        if self.state == "CLOSED":
-            return Status('CLOSED')
         count = 0
         count_new = 0
         count_incomplete = 0
@@ -257,13 +260,16 @@ class Client(User):
                     count_new +=1
         if count == 0:
             return Status('NEW')
-        elif count_new == count:
+        elif count_new != 0:
             return Status('BUSY')
-        elif count_incomplete != 0:
-            action = 'NEEDS_APPROVAL' if count_new != 0 else ''
-            return Status('BUSY', action)
-        else:
+        elif count_incomplete == 0 and self.state == 'CLOSED':
+            return Status('CLOSED')
+        elif count_incomplete == 0:
             return Status('COMPLETE')
+        elif count_new == 0:
+            return Status('WAITING')
+        else:
+            return Status('ERROR')
 
 
 class Category(db.Model):
@@ -342,13 +348,14 @@ class Status():
         return ':'.join([self.status, self.action, self.description])
 
 
-
 class CreditorLink(db.Model):
     creditor = db.ReferenceProperty(Creditor)
     user = db.ReferenceProperty(Client, collection_name='creditors')
     estimated_amount = DecimalProperty(default=decimal.Decimal('0.00'))
     approved = db.BooleanProperty()
     last_email_date = db.DateProperty()
+    last_print_date = db.DateProperty()
+    contacted_by = db.StringProperty()
     complete = db.BooleanProperty()
     registration_date = db.DateProperty(auto_now_add=True)
     last_changed_date = db.DateProperty(auto_now=True)
@@ -432,10 +439,11 @@ class CreditorLink(db.Model):
 
 class Debt(db.Model):
     creditor = db.ReferenceProperty(CreditorLink, collection_name='debts')
-    collector = db.ReferenceProperty(Creditor, collection_name="debts")
-    collected_for = db.ReferenceProperty(Creditor, collection_name="collections")
+    collector = db.ReferenceProperty(Creditor, collection_name='debts')
+    collected_for = db.ReferenceProperty(Creditor, collection_name='collections')
 
     original_date = db.DateProperty()
+    response_date = db.DateProperty()
     creditor_dossier_number = db.StringProperty()
     collector_dossier_number = db.StringProperty()
     registration_date = db.DateProperty(auto_now_add=True)
