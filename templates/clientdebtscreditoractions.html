@@ -1,0 +1,35 @@
+<p>
+  <strong class="name">
+  {{ creditor.creditor.display_name }}
+  </strong><br>
+  {{ creditor.creditor.phone|default:" " }}
+</p>
+<p>
+  <span class="label">Actie: </span>
+  <a href="/client/register/previewletter/{{creditor.key.id}}" class="action preview" target="_popup">Open brief</a>
+  <a href="{{base_url}}/view/{{creditor.key.id}}" class="action response">Verwerk reactie</a>
+{% comment %}
+  <a target="_popup" href="/client/register/previewletter/{{creditor.key.id}}" class="action print">Print</a>
+  <a href="#" class="action mail">Mail</a>
+  <a href="{{base_url}}/view/{{creditor.key.id}}">[Ik heb antwoord]</a>
+{% endcomment %}
+</p>
+<form method="post" action="/client/debts/creditor/{{creditor.key.id}}/actions" class="add-annotation">
+  <input type="hidden" name="come_from" value="{{self.request.path}}">
+  <textarea name="text" id="creditor_annotation" placeholder="Voeg een aantekening toe"></textarea>
+  <input type="submit" value="Opslaan">
+</form>
+
+<div class="annotations">
+{% for note in annotations %}
+<p>
+  <strong>{{note.entry_date|date:"d-m-Y"}}</strong><br>
+  {% if note.author.key != self.user.key %}
+  <em>{{note.author.first_name}} {{note.author.last_name}}</em><br>
+  {% endif %}
+  <span>{{note.text}}</span>
+</p>
+{% empty %}
+Geen commentaar
+{% endfor %}
+</div>

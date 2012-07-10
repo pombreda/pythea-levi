@@ -1,0 +1,54 @@
+<div id="message">Kies per categorie uit bij wie u schulden heeft</div>
+<form method="post" action="{{self.request.url}}" class="file-setup collector-selection">
+  <input type="hidden" name="klaar" value="klaar">
+<div class="selector-container">
+  <div id="categories" class="selector categories">
+      <h2>Categorie&euml;n ></h2>
+    <ul>
+      {% for category in categories %}
+        <li{% if category.label == selected %} class="active"{% endif %}>
+          <a href="/client/creditors/category/{{category.label}}">{{category.label}}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div id="creditors" class="selector creditors">
+      <h2>{{selected}} ></h2>
+    <ul>
+      {% for company in creditors %}
+      <li>
+        <label for="company_{{company.key.id}}">
+          <input type="checkbox" name="selected" class="check" id="company_{{company.key.id}}" value="{{company.key.id}}" {% if company.selected %} checked {% endif %}>&nbsp;
+          <span class="custom-indicator"></span>
+          <!-- input type="hidden" name="visible" value="{{company.key.id}}" -->
+          <img src="{{company.icon}}" width="16" height="16"> {{ company.display_name }}
+        </label>
+      </li>
+      {% endfor %}
+      <li>
+        <label for="company_new">
+          <input type="checkbox" name="selected" class="check" id="company_new" value="new">&nbsp;
+          <span class="custom-indicator"></span>
+          <!-- input type="hidden" name="visible" value="{{company.key.id}}" -->
+          <img src="" width="16" height="16"> Overig
+        </label>
+      </li>
+    </ul>
+  </div>
+  <div id="selected" class="selector selection">
+    <h2>Overzicht</h2>
+    <ul>
+      {% for creditor in user.creditors %}
+        <li>
+            <img src="{{creditor.creditor.icon}}" width="16" height="16"> {{ creditor.creditor.display_name }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+<div class="submit">
+  <div>
+    <input type="submit" value="ga door &raquo;">
+  </div>
+</div>
+</form>

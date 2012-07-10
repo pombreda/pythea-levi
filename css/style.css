@@ -1,0 +1,820 @@
+/* Colors ------------------------------------------------------------------ */
+/* Sizes ------------------------------------------------------------------- */
+/* General ----------------------------------------------------------------- */
+* {
+  /* apply a natural box layout model to all elements */
+
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  /* set the base font */
+
+  font-size: 99%;
+  font-family: Arial, Verdana, Helvetica, sans-serif;
+}
+html, body {
+  height: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+input[type=text],
+input[type=submit],
+input[type=password],
+textarea {
+  border: none;
+  border-radius: .2em;
+  background-color: #f0fbfb;
+  position: relative;
+  padding: .2em;
+}
+
+input[type=text].currency  {
+  text-align: right;
+}
+input[type=text].currency:before {
+  content: "€";
+  color: #003339;
+  display: block;
+  position: absolute;
+  left: .5em;
+}
+input[type=text].date {
+  background-image: url(/images/icon-date.png);
+  background-position: 98% 50%;
+  background-repeat: no-repeat;
+  text-align: center;
+}
+input[type=submit],
+input[type=button],
+button {
+  color: #003339;
+  background-color: #f0fbfb;
+  border: none;
+  border-radius: .3em;
+  text-transform: uppercase;
+  padding: .5em;
+}
+/*input {
+	-webkit-appearance: none;
+}*/
+body {
+  background-color: #233272;
+  padding: 0;
+  margin: 0;
+}
+body > .wrapper {
+  width: 88.671875%;
+  /* 980/1024*100 */
+
+  max-width: 980px;
+  margin: 0 auto;
+  padding: .5em 0 0 0;
+
+  /* This adds a positioning wrapper */
+  position: relative;
+
+  /* Stretch to full height */
+  height: 100%;
+  height: auto !important;
+  min-height: 100%;
+}
+/* Scrollbars -------------------------------------------------------------- */
+::-webkit-scrollbar {
+    width: 16px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #CAE7E6;
+    border: solid 3px #B5D5D3;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #F0FBFB;
+    border-style: solid;
+    border-width: 2px 3px;
+    border-color: #B5D5D3;
+}
+/* Header ------------------------------------------------------------------ */
+header {
+  overflow: auto;
+  color: #fff;
+  margin: 0 0 1.1em 0;
+}
+header p {
+  margin: 0;
+  padding: .2em 0;
+  font-size: .8em;
+}
+header > nav {
+  float: right;
+}
+header > nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+header > nav li {
+  float: left;
+}
+header > nav li > a {
+  font-size: 1.1em;
+  display: block;
+  color: #bfeef6;
+  /*font-weight: bold;*/
+
+  text-decoration: none;
+  border-left: solid 2px #bfeef6;
+  padding: 0 .5em;
+}
+header > nav li:first-child > a {
+  border-left: none;
+  padding-left: 0;
+}
+header > nav li > a:hover {
+  text-decoration: underline;
+}
+header > form {
+  float: left;
+}
+header > form label {
+  display: none;
+}
+header > form input {
+  border-radius: 5px;
+  border: none;
+  padding: .25em .5em;
+  width: 208px;
+  -webkit-box-shadow: inset 3px -3px 9px 0px #b9b7ba;
+  -moz-box-shadow: inset 3px -3px 9px 0px #b9b7ba;
+  box-shadow: inset 3px -3px 9px 0px #b9b7ba;
+}
+/* Alternative header */
+header.alt nav {
+  float: left;
+}
+header.alt form {
+  float: right;
+}
+header.alt form label {
+  display: inline-block;
+  width: 8em;
+  text-align: right;
+}
+header.alt form input[type=submit] {
+  float: right;
+}
+
+header.alt p#login {
+  float: right;
+}
+/* Intro -------------------------------------------------------------------- */
+.intro-flow {
+  display: block;
+  margin: 0 auto;
+}
+/* Contents ----------------------------------------------------------------- */
+#message {
+  display: none;
+}
+
+.content {
+  color: #003339;
+  width: 100%;
+
+  /* This is a hack */
+  /* Right now, .content-wrapper expands beyond the bottom of .content.
+   * I do not know why that is, but it is approximately for the size of
+   * the tabs.
+   * Maybe we should set relative and absolute positioning somewhat
+   * lower in the hierarchy.
+   */
+  overflow: hidden;
+
+  /* A few scribbles as test for Hans */
+  position: absolute; /* absolute in .wrapper */
+  top: 6.7em;          /* room for the header */
+  bottom: 0;          /* stretch to the bottom */
+  z-index: 50;        /* push it behind the front tab */
+
+}
+.content-wrapper {
+  margin: 0;
+  padding: .6em .5em 0px .5em;
+  width: 100%;
+  background-color: #d6f2ef;
+  border-radius: .5em .5em 0em 0em;
+  -webkit-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
+
+  /* Stretch to full height */
+  height: 100%;
+  height: auto !important;
+  min-height: 100%;
+
+  /* Make sure content is stretched HTH Removed */
+/*  position: absolute; /* absolute in .wrapper */
+/*  top: 95px;          /* room for the header */
+/*  bottom: 0;          /* stretch to the bottom */
+/*  z-index: 50;        /* push it behind the front tab */
+
+}
+.content-inner {
+  background-color: #d1ebea;
+  border: solid 1px #e2f4f6;
+/*  border: solid 1px yellow; */
+  border-radius: 0.5em 0.5em 0em 0em;
+  padding: 1em;
+  -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  /* min-height: 500px; */
+
+  position: absolute;
+  top: 2.7em;
+  bottom: 0;
+  right: .5em;
+  left: .5em;
+}
+.content-inner {
+  min-height: 100%;
+}
+#content {
+  position: relative;
+  margin: 0px;
+  /* border: 1px solid red; */
+  /* make sure the content does not stretch below the bottom of content-inner */
+  /* and add a scrollbar */
+  height: 86%;
+  overflow: auto;
+}
+/* Tabs -------------------------------------------------------------------- */
+.tabs {
+  list-style: none;
+  padding: 0 0 0 .25em;
+  margin: 0;
+  overflow: auto;
+}
+.tabs li {
+  float: left;
+  padding: .5em 0;
+  margin: 0 .25em;
+  width: 165px;
+  text-align: center;
+  background-color: #97d0e3;
+  border-radius: 0.5em 0.5em 0 0;
+}
+.tabs li.active {
+  position: relative;
+  background-color: #d6f2ef;
+  z-index: 100;
+}
+.tabs li a {
+  font-weight: bold;
+  text-decoration: none;
+  color: #003339;
+}
+/* Online help ------------------------------------------------------------- */
+.online-help {
+  background-color: #d6f2ef;
+  color: #fff;
+  display: block;
+  border-radius: 50%;
+  width: 8.979591836735%;
+  /* 88/980*100 */
+
+  height: 0;
+  padding-bottom: 7.979591836735%;
+  padding-top: 1%;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+  -moz-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
+  -webkit-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
+  -o-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
+  -ms-transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
+  transform: scale(1) rotate(90deg) translate(0px, 0px) skew(0deg, 0deg);
+  position: fixed;
+  right: 2.27421875%;
+  /* (1024-980)/4/1024*100 */
+
+  top: 12em;
+}
+/* Popup ------------------------------------------------------------------- */
+.popup {
+  display: none;
+}
+.popup.active {
+  position: fixed;
+  display: block;
+  z-index: 200;
+}
+
+.popup.active #admin_plus {
+  display: none;
+}
+
+
+.popup .overlay {
+  background-color: rgba(64, 64, 64, 0.5);
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.popup .popup-wrapper {
+  position: fixed;
+  width: auto;
+  top: 1em;
+  left: 50%;
+  margin: 0;
+  padding: .5em;
+  background-color: white;
+  border-radius: .2em;
+  max-width: 940px;
+  z-index: 300;
+}
+
+.popup .popup-close {
+/*
+  display: block;
+  width: 29px;
+  height: 29px;
+*/
+  background: transparent url(../images/close-button.png) center no-repeat;
+  z-index: 300;
+/*  position: fixed;
+  top: 1em;
+  right: 50%;
+*/
+  /* Code below is a bit of a hack to hide the text from the anchor */
+  display: inline-block;
+  overflow: hidden;
+  width: 0;
+  height: 29px;
+  padding-left: 29px;
+  float: right;
+}
+/* Application status ------------------------------------------------------ */
+.appstatus {
+  margin: .3em 0 .7em 0;
+  /* try to remove the space at the bottom but this makes it uglyier */
+  /* margin: .3em 0 0 0; */
+  color: #b5373d;
+  padding: .5em;
+  background-color: #f0fbfb;
+  border-radius: .2em;
+}
+
+/* Generiek formulier -------------------------------------------------------*/
+.form-generiek th {
+  text-align: right;
+}
+
+.form-generiek td {
+}
+
+.form-generiek input:not([type=submit]) {
+  padding: 3px;
+  margin: 1px;
+}
+
+.form-generiek ul.errorlist + input {
+  background-color: pink;
+}
+
+/* margin and padding must be the same as for the text input fields */
+.form-generiek ul.errorlist {
+  float: right;
+  list-style-type: none;
+  padding: 3px;
+  margin: 1px;
+}
+/* clientdebtsview tabel + formulier */
+.client-debts-form {
+  position: relative;
+}
+.client-debts-form label {
+  display: inline-block;
+  min-width: 10em;
+}
+.client-debts-form.collector label {
+  min-width: 14em;
+}
+.client-debts-form input[type=submit] {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: #B5373D;
+}
+.client-debts-form + .debts-listing {
+  border-top: solid 1px #003339;
+  margin-top: 1em;
+  padding-top: 1em;
+  width: 100%;
+  position: absolute;
+  top: 11em;
+  bottom: 0;
+  overflow: auto;
+}
+.client-debts-form + .debts-listing table {
+  width: 100%;
+}
+.client-debts-form + .debts-listing th {
+  text-align: left;
+}
+.client-debts-form + .debts-listing th,
+.client-debts-form + .debts-listing td {
+  padding: .2em .5em;
+}
+.client-debts-form input[name=creditor_dossier_number],
+.client-debts-form input[name=collector_dossier_number] {
+  text-align: right;
+}
+
+/* Form - Collector Selection ---------------------------------------------- */
+.file-setup {
+  display: table;
+  width: 100%;
+  clear: both;
+}
+.file-setup .selector-container {
+  display: table-row;
+}
+.file-setup .selector-container > div.selector {
+  display: table-cell;
+  border-right: solid 1px #003339;
+  width: 33.3333333333333%;
+  padding: 0 1em 0 1em;
+}
+
+.file-setup .selector-container > div.selector ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.file-setup .selector-container > div.selector ul > li {
+  padding: 0;
+  margin: 0;
+}
+.file-setup .selector-container > div.selector input[type="checkbox"] {
+  display: none;
+}
+.file-setup .selector-container > div.selector input[type="checkbox"] + .custom-indicator {
+  border: solid 1px #003339;
+  background-color: transparent;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: .5em;
+}
+.file-setup .selector-container > div.selector input[type="checkbox"]:checked + .custom-indicator {
+  background-color: #003333;
+}
+.file-setup .selector-container > div.selector.categories li > a {
+  text-decoration: none;
+}
+.file-setup .selector-container > div.selector.categories li.active > a {
+  font-weight: bold;
+}
+/* HTH: removed after discussion with Jeremine
+.file-setup .selector-container > div.selector.selection li:before {
+  content: "- ";
+}
+*/
+.file-setup .selector-container > div.selector:nth-child(3) {
+  border: none;
+}
+.file-setup > div.submit {
+  display: table-row;
+  position: relative;
+  text-align: right;
+}
+.file-setup > div.submit > div {
+  position: absolute;
+  right: 0;
+}
+.file-setup .creditor-details {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 50%;
+  min-height: 400px;
+  background-color: #f0fbfb;
+  border-radius: .5em;
+  padding-left: 1em;
+  padding-right: 1em;
+  margin-top: .3em;
+}
+.file-setup .creditor-details .name {
+  color: #B5373D;
+}
+.file-setup .creditor-details p {
+  vertical-align: bottom;
+}
+.file-setup .creditor-details p .label {
+  font-weight: bold;
+}
+.file-setup .creditor-details .action {
+  display: inline-block;
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.file-setup .creditor-details .action.preview {
+  width: 19px;
+  height: 14px;
+  background-image: url(/images/sturen.png);
+}
+.file-setup .creditor-details .action.response {
+  width: 25px;
+  height: 22px;
+  background-image: url(/images/ontvangen.png);
+  position: absolute;
+  right: .5em;
+}
+.file-setup .creditor-details .add-annotation {
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  border-color: #003339;
+  margin-bottom: 1em;
+  overflow: auto;
+}
+.file-setup .creditor-details .add-annotation textarea {
+  margin-top: .5em;
+  padding: .2em;
+  width: 100%;
+  height: 5em;
+  border-radius: 0;
+  padding-top: .5em;
+}
+
+.file-setup .creditor-details .add-annotation textarea:focus {
+  outline: none;
+}
+.file-setup .creditor-details .add-annotation input[type=submit] {
+  float: right;
+}
+.file-setup .creditor-details .annotations {
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  border-color: #003339;
+}
+.file-setup .creditor-overview {
+  padding: 0;
+  margin: 0;
+  position: relative;
+  width: 50%;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.file-setup .creditor-overview .creditor.new .status > span,
+.creditor-legenda .new .status > span {
+  width: 20px;
+  background: #dc6060;
+  background: -moz-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #dc6060), color-stop(100%, #b00f23));
+  background: -webkit-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: -o-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: -ms-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+}
+.file-setup .creditor-overview .creditor.waiting .status > span,
+.creditor-legenda .waiting .status > span {
+  width: 40px;
+  background: #f0b28b;
+  background: -moz-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #f0b28b), color-stop(100%, #f68743));
+  background: -webkit-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: -o-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: -ms-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+}
+.file-setup .creditor-overview .creditor.in_collection .status > span,
+.file-setup .creditor-overview .creditor.complete .status > span,
+.creditor-legenda .complete .status > span {
+  width: 60px;
+  background: #8fbb83;
+  background: -moz-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #8fbb83), color-stop(100%, #499d38));
+  background: -webkit-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: -o-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: -ms-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+}
+.file-setup .creditor-overview .creditor {
+  margin: 0;
+  padding: .2em .5em;
+}
+.file-setup .creditor-overview .creditor a {
+  text-decoration: none;
+  display: block;
+  position: relative;
+}
+.file-setup .creditor-overview .creditor .status,
+.creditor-legenda .status {
+  width: 65px;
+  height: 15px;
+  display: inline-block;
+  position: relative;
+  -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
+  box-shadow: minset 0 0 9px rgba(0, 0, 0, 0.2);
+  margin-top: 2px; /* FIXME: this is a hack, the children of this list element should be properly aligned */
+}
+.file-setup .creditor-overview .creditor .hide {
+  display: none;
+}
+.file-setup .creditor-overview .creditor .status > span,
+.creditor-legenda .status > span {
+  display: block;
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  height: 10px;
+  background-color: red;
+  border-radius: 5px;
+}
+.file-setup .creditor-overview .creditor:nth-child(odd) {
+  background-color: #c0dddc;
+}
+
+.debt-entry table {
+}
+.debt-entry td, tr {
+    padding: 0px;
+    margin: 0px;
+}
+.debt-entry input {
+    margin: 1px;
+    margin-left: 1em;
+}
+.creditor-legenda {
+  border: solid 1px #B5373D;
+  border-radius: .5em;
+  width: 50%;
+  margin-top: 1em;
+}
+.creditor-legenda .title {
+  color: #B5373D;
+}
+.creditor-legenda td:first-child {
+  text-align: center;
+}
+.creditor-legenda td[colspan] {
+  text-align: left;
+}
+/* As discussed with Jeremine
+.debt-entry td:first-child:before {
+  content: "- ";
+}
+*/
+/* addcontact.html --------------------------------------------------------- */
+ul.contact-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul.contact-list li {
+  display: inline-block;
+  margin: 0;
+}
+
+ul.contact-list div {
+  text-align: center;
+  padding: 3px;
+  cursor: pointer;
+}
+
+ul.contact-list img {
+  float: left;
+  width: 124px;
+  height: 155px;
+}
+
+ul.contact-list span {
+  width: 100%;
+  float: left;
+  clear: both;
+  text-align: center;
+}
+ul.contact-list input {
+  display: none;
+}
+
+/* Client - Intro ---------------------------------------------------------- */
+.client-intro {
+  position: relative;
+  background: transparent url(/images/dossier.png) center top no-repeat;
+  min-height: 553px;
+  overflow: hidden;
+}
+
+.client-intro .intro-txt {
+  position: absolute;
+  top: 0;
+  right: 150px;
+  width: 400px;
+}
+
+.client-intro .action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 350px;
+  left: 110px;
+  font-size: 1.2em;
+}
+
+.client-intro .action-list li {
+  margin-bottom: .5em;
+}
+
+.client-intro .action-list li > span {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    background-color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 1.5em;
+    margin-right: .5em;
+}
+
+.client-intro .action-list li {
+  color: #9C0006;
+}
+
+/* Admin - Plus ------------------------------------------------------------ */
+#admin_plus {
+  /* display: none; /* FIXME */
+  position: absolute;
+  top: .5em;
+  right: .5em;
+}
+
+#session-info {
+  display: none;
+}
+
+/* Alternative look switcher */
+.style-switches {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #fff;
+}
+
+/* Datepicker */
+.ui-datepicker {
+  background-color: #F0FBFB;
+  border-radius: .3em;
+}
+.ui-datepicker-calendar {
+  margin: .5em;
+}
+.ui-datepicker th,
+.ui-datepicker td {
+  padding: .2em;
+}
+.ui-datepicker td {
+  text-align: right;
+}
+.ui-datepicker td a {
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  text-decoration: none;
+}
+.ui-datepicker-header {
+  position: relative;
+}
+.ui-datepicker-prev,
+.ui-datepicker-next {
+  position: absolute;
+  top: 0;
+}
+.ui-datepicker-prev {
+  left: .5em;
+}
+.ui-datepicker-next {
+  right: .5em;
+}
+.ui-datepicker-title {
+  text-align: center;
+}
+.ui-datepicker .ui-state-highlight {
+  font-weight: bold;
+}
