@@ -663,8 +663,8 @@ header.alt p#login {
 .creditor-legenda {
   border: solid 1px #B5373D;
   border-radius: .5em;
-  width: 50%;
-  margin-top: 1em;
+  width: 100%;
+  margin: 1em 0;
 }
 .creditor-legenda .title {
   color: #B5373D;
