@@ -1,14 +1,11 @@
 <div id="message">
     U kunt nu de antwoorden van uw schuldeisers verwerken.
-</div>
+</div>    
 <div class="file-setup debt-overview">
-  <h2>Schuldeisers</h2>
-  {% ifnotequal client.status.status "COMPLETE" %}
-      <span class="client-status">{{client.status.status}}</span>
-  {% endifnotequal %}
+  <h2>Schuldeisers {{client.status.status}} </h2>
   <table class="creditor-overview">
   {% for cred in client.creditors %}
-    <tr class="creditor {{cred.status|lower}}">
+    <tr class="creditor {{cred.status|lower}} {%if creditor.key == cred.key%}active{%endif%}">
       <td>
         <a href="{{base_url}}/creditor/{{cred.key.id}}">
           <img src="{{ cred.creditor.icon}}" alt="" width="16" height="16">&nbsp;{{ cred.creditor.display_name }}
@@ -34,54 +31,7 @@
     </tr>
   {% endfor %}
   </table>
-  {% ifequal client.status.status "COMPLETE" %}
-     <a href="{{base_url}}/close">[afsluiten]</a>
-     <a href="{{base_url}}/print" target="_popup">[print dossier]</a>
-  {% endifequal %}
-  {% comment %}
-  <table class="creditor-legenda">
-    <tr>
-      <td class="title" colspan="2">Vraag schuldbewijzen aan bij alle schuldeisers:</td>
-    </tr>
-    <tr>
-      <td class="new">
-        <span class="status">
-          <span></span>
-        </span>
-      </td>
-      <td>= Nog geen schuldbewijs aangevraagd.</td>
-    </tr>
-    <tr>
-      <td class="waiting">
-        <span class="status">
-          <span></span>
-        </span>
-      </td>
-      <td>= Brief/fax/e-mail naar schuldeiser verstuurd.</td>
-    </tr>
-    <tr>
-      <td class="complete">
-        <span class="status">
-          <span></span>
-        </span>
-      </td>
-      <td>= Definitieve brief van schuldeiser binnen.</td>
-    </tr>
-    <tr>
-      <td colspan="2" class="title">Kies een schuldeiser en voer een actie uit:</td>
-    </tr>
-    <tr>
-      <td><img src="/images/sturen.png"></td>
-      <td>= Verstuur brief/fax/e-mail naar schuldeiser.</td>
-    </tr>
-    <tr>
-      <td><img src="/images/ontvangen.png"></td>
-      <td>= Schuldbewijs binnen!</td>
-    </tr>
-  </table>
-  {% endcomment %}
   <div class="creditor-details" id="creditor-details">
-      {% include "clientdebtscreditoractions.html" %}
+      {% include screen %}
   </div>
 </div>
-
