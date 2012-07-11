@@ -372,6 +372,18 @@ header.alt p#login {
   background-color: #f0fbfb;
   border-radius: .2em;
 }
+/* Application buttons ----------------------------------------------------- */
+.appbuttons {
+  position: absolute;
+  top: 1.3em;
+  right: 1.1em;
+}
+.appbuttons button {
+  margin: 0;
+}
+input.app-control-set {
+  display: none;
+}
 
 /* Generiek formulier -------------------------------------------------------*/
 .form-generiek th {
