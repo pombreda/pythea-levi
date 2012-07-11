@@ -131,6 +131,7 @@ $(document).ready(function(){
 				} else if ($("#"+target)) {
 					$("#"+target).html(data);
                     setAppStatus();
+                    setAppButtons();
 					//$.address.value(location);
 					appLoading(false);
 				}
@@ -182,6 +183,7 @@ $(document).ready(function(){
 			$("#"+state.target).load(state.url,function(){
 				appLoading(false);
 				setAppStatus();
+                setAppButtons();
 			});
 		} else {
 			$.address.value(state.url);
@@ -245,6 +247,7 @@ $(document).ready(function(){
                 // FIXME: should only reload the result part of the screen
                 $('#content').html(html);
                 setAppStatus();
+                setAppButtons();
                 document.body.style.cursor = "default";
                 prepareForms();
             });
@@ -286,6 +289,8 @@ $(document).ready(function(){
                 }
                 $('#content').html(html);
                 setAppStatus();
+                setAppButtons();
+
                 document.body.style.cursor = "default";
                 prepareForms();
             },
@@ -441,4 +446,30 @@ function setAppStatus(status) {
 	}
     $("#tabs").html($("#session-tabs").html());
     // alert($("#session-tabs").html());
+}
+
+function setAppButtons() {
+    var $appButtons = $("#appbuttons"),
+        $appControls = $(".app-control");
+
+    $appButtons.empty();
+    if ($appControls.length > 0) {
+        $appControls.each(function(i,e){
+            var $origButton = $(this),
+                $appbuttons = $("#appbuttons"),
+                id = $origButton.attr("id"),
+                name = $origButton.attr("name"),
+                value = $origButton.attr("value"),
+                ctrlId = "ctrl-"+(id || name),
+                newButton = "<button id=\""+ctrlId+"\">"+value+"</button>";
+
+            $appbuttons.append(newButton);
+            $("button:last-child",$appbuttons).click(function(){
+                $origButton.trigger("click");
+            });
+
+            $origButton.addClass("app-control-set");
+
+        });
+    }
 }
