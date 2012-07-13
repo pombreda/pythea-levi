@@ -2,15 +2,19 @@
 <form method="post" action="{{self.request.path}}" class="client-debts-form">
     <p>
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
-        <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
-        {% if not selected %}
-        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" target="_popup">Ja</a><br>
+        {% if creditor.creditor.is_collector %}
+        <label>Deze schuld wordt ge&iuml;nd voor een ander bedrijf:</label>
         {% else %}
-        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}" target="_popup">{{selected.display_name}}</a><br>
+        <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
+        {% endif %}
+        {% if not selected %}
+        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">Ja</a><br>
+        {% else %}
+        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">{{selected.display_name}}</a><br>
         {% endif %}
         <input type="hidden" name="selected" value="{{selected.key.id}}">
         <label>Openstaand bedrag</label>{{form.amount}} {{form.amount.errors}}<br>
-        <label>Onstaansdatum</label>{{form.original_date}}<br>
+        <label>Datum brief</label>{{form.response_date}}<br>
         <label>Dossiernummer</label>{{form.creditor_dossier_number}}<br>
         <label>Afbetalingsregeling</label>{{form.payment_amount}}
     </p>
@@ -24,15 +28,15 @@
         <tr>
             <th>Deurwaarder</th>
             <th>Openstaand bedrag</th>
-            <th>Ontstaansdatum</th>
-            <th>Dossiernummer Schuldeiser</th>
+            <th>Datum brief</th>
+            <th>Dossiernummer</th>
             <th>Afbetalingsregeling</th>
         </tr>
 {% for debt in creditor.debts %}
         <tr>
             <td>{{debt.collector.display_name|default:"--"}}</td>
             <td class="amount">&euro; {{debt.amount}}</td>
-            <td class="date">{{debt.original_date|date:"d-m-Y"}}</td>
+            <td class="date">{{debt.response_date|date:"d-m-Y"}}</td>
             <td class="dossier">{{debt.creditor_dossier_number}}</td>
             <td class="amount">&euro; {{debt.payment_amount}}</td>
         </tr>
