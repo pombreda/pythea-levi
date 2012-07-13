@@ -224,7 +224,8 @@ $(document).ready(function(){
 		        event.preventDefault();
                 $('#popup .content').empty();
 		        $("#popup").removeClass("active");
-                location.reload(true);
+                // Don't do this!
+                //location.reload(true);
             });
         });
     });

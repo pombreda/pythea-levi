@@ -468,10 +468,7 @@ class ClientDebtsView(BaseHandler):
                  'creditor': creditor,
                  'selected': selected,
                  'form': form }
-        if creditor.creditor.is_collector:
-            self.render(vars, 'clientdebtsview_collector.html')
-        else:
-            self.render(vars, 'clientdebtsview.html')
+        self.render(vars, 'clientdebtsview.html')
 
     def post(self, creditor):
         user = self.get_user()
@@ -500,13 +497,7 @@ class ClientDebtsView(BaseHandler):
                      'creditor': creditor,
                      'selected': selected,
                      'form': form }
-            if creditor.creditor.is_collector:
-                self.render(vars, 'clientdebtsview_collector.html')
-            else:
-                self.render(vars, 'clientdebtsview.html')
-
-            #self.response.out.write(template.render(path, vars))
-
+            self.render(vars, 'clientdebtsview.html')
 
 class ClientDebtsSelectCreditor(BaseHandler):
     """This is used to select a 'deurwaarder' for a debt (or a creditor in case of a 'deurwaarder'"""
@@ -517,10 +508,17 @@ class ClientDebtsSelectCreditor(BaseHandler):
         client = creditor.user
 
         is_collector = self.request.get('is_collector') == 'True'
+        if is_collector:
+            collector_url = self.request.url
+            other_url = self.request.url.replace('is_collector=True', 'is_collector=False')
+        else:
+            other_url = self.request.url
+            collector_url = self.request.url.replace('is_collector=False', 'is_collector=True')
+
         if not selected:
             creditors = models.Creditor.all()
             #creditors.filter('display_name =', 'Woonbron')
-            creditors = creditors.filter('is_collector !=', is_collector)
+            creditors = creditors.filter('is_collector ==', is_collector)
             if user.class_name() == 'Client':
                 base_url = "/client/debts"
             else:
@@ -528,6 +526,9 @@ class ClientDebtsSelectCreditor(BaseHandler):
 
             vars = { 'user': user,
                      'client': client,
+                     'base_url': base_url,
+                     'collector_url': collector_url,
+                     'other_url': other_url,
                      'base_url': base_url,
                      'come_from': come_from,
                      'is_collector': is_collector,
@@ -945,10 +946,7 @@ class EmployeeViewCaseDetails(BaseHandler):
                  'creditor': creditor,
                  'selected': selected,
                  'form': form }
-        if creditor.creditor.is_collector:
-            self.render(vars, 'clientdebtsview_collector.html')
-        else:
-            self.render(vars, 'clientdebtsview.html')
+        self.render(vars, 'clientdebtsview.html')
 
     def post(self, client, creditor):
         user = self.get_user()
@@ -976,10 +974,7 @@ class EmployeeViewCaseDetails(BaseHandler):
                      'creditor': creditor,
                      'selected': selected,
                      'form': form }
-            if creditor.creditor.is_collector:
-                self.render(vars, 'clientdebtsview_collector.html')
-            else:
-                self.render(vars, 'clientdebtsview.html')
+            self.render(vars, 'clientdebtsview.html')
 
 
 class EmployeeViewCaseCreditorActions(BaseHandler):

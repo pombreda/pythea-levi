@@ -556,13 +556,15 @@ input.app-control-set {
   right: .5em;
 }
 .file-setup .creditor-details .add-annotation {
-  border-style: solid;
+  /* border-style: solid;
   border-width: 1px 0 0 0;
-  border-color: #003339;
+  border-color: #003339; */
   margin-bottom: 1em;
   overflow: auto;
 }
 .file-setup .creditor-details .add-annotation textarea {
+  border-top: solid 1px #003333;
+  border-bottom: solid 1px #003333;
   margin-top: .5em;
   padding: .2em;
   width: 100%;
@@ -576,11 +578,6 @@ input.app-control-set {
 }
 .file-setup .creditor-details .add-annotation input[type=submit] {
   float: right;
-}
-.file-setup .creditor-details .annotations {
-  border-style: solid;
-  border-width: 1px 0 0 0;
-  border-color: #003339;
 }
 .file-setup .creditor-overview {
   padding: 0;
