@@ -263,6 +263,23 @@ class ClientAddCreditor(BaseHandler):
             vars = { 'forms': [form] }
             self.render(vars, 'form.html')
 
+class ClientDeleteCreditor(BaseHandler):
+    def get(self, creditor):
+        """Remove a creditor link"""
+        #FIXME: Vraag om een bevestiging voordat we dit echt gaan doen!
+        creditor = models.CreditorLink.get(creditor)
+        creditor.delete()
+        self.redirect(self.request.get('base_url'))
+
+    def post(self, creditor):
+        """Remove a creditor link"""
+        if self.request.get('action') == 'delete':
+            creditor = models.CreditorLink.get(creditor)
+            creditor.delete()
+        else:
+            # GOTO main screen
+            return
+
 class ClientPrintCreditorLetters(BaseHandler):
     def get(self):
         logging.info('printcreditorletters')
@@ -308,12 +325,13 @@ class ClientValidate(BaseHandler):
                     letter = creditor.generate_letter()
                     if method in ['EMAIL', 'FAX']:
                         logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
+                        p = re.compile(r'<.*?>')
+                        letter = p.sub('', letter)
                         creditor.send_message("Verzoek schuldbewijs", letter)
                         creditor.status = method
                     elif method == 'POST':
                         logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
-                        # FIXME: generate a letter
                         letters.append(letter)
             """
             for key in self.request.arguments():
@@ -354,7 +372,6 @@ class ClientValidate(BaseHandler):
             self.redirect('/client/debts')
         else:
             self.redirect('/client/creditors')
-
 
 class ClientSubmitted(BaseHandler):
     def get(self):
@@ -879,6 +896,26 @@ class Session(BaseHandler):
         #self.response.out.write(template.render(path, vars))
         self.render(vars, 'session.html')
 
+class EmployeeEditCreditor(BaseHandler):
+    def get(self, client, creditor):
+        creditor = models.Creditor.get_by_id(int(creditor))
+
+        form = forms.CreditorForm(instance=creditor)
+        vars = {'forms': [form]}
+        self.render(vars, "form.html")
+
+    def post(self, client, creditor):
+        creditor = models.Creditor.get_by_id(int(creditor))
+        form = forms.CreditorForm(self.request.POST, instance=creditor)
+        if form.is_valid():
+            creditor = form.save(commit=True)
+            link = client.hasCreditor(creditor)
+            self.redirect('/employee/cases/view/%s/creditor/%s' % (client, link.key().id()))
+        else:
+            form = forms.CreditorForm(instance=creditor)
+            vars = {'forms': [form]}
+            self.render(vars, "form.html")
+
 class EmployeeCreditorsList(BaseHandler):
     def get(self):
         creditors = models.Creditor.all()
@@ -892,7 +929,7 @@ class EmployeeCreditorsApprove(BaseHandler):
         form = forms.CreditorForm(instance=creditor)
         is_generic = "checked" if creditor.private_for is None else ""
         logging.info("is_generic in GET: %s" % is_generic)
-        logging.info("pirvate_for in GET: %s" % creditor.private_for)
+        logging.info("private_for in GET: %s" % creditor.private_for)
         vars = { 'form': form,
                  'is_generic': is_generic
                }
@@ -902,7 +939,6 @@ class EmployeeCreditorsApprove(BaseHandler):
         instance = models.Creditor.get(creditor)
         form = forms.CreditorForm(self.request.POST, instance=instance)
         if form.is_valid():
-            logging.info("Is valid")
             creditor = form.save(commit=False)
             is_generic = self.request.get("is_generic")
             logging.info("is_generic: %s" % is_generic)
@@ -911,7 +947,7 @@ class EmployeeCreditorsApprove(BaseHandler):
                 creditor.private_for = None
             creditor.approved = True
             creditor.put()
-            self.redirect(self.request.path)
+            self.redirect('/employee/creditors/new')
         else:
             vars = { 'form': form }
             self.render(vars, 'employeeapprovecreditor.html')
@@ -1283,6 +1319,7 @@ class TaskInitialize(BaseHandler):
                 else:
                      categories = []
                 q = db.Query(models.Organisation, keys_only = True)
+                display_name = display_name.strip()
                 q.filter('display_name =', display_name)
                 org = q.fetch(1)
                 if org:
@@ -1350,6 +1387,7 @@ application = webapp.WSGIApplication([
   (r'/client/info', ClientEdit),
   (r'/client/register/contact', ClientContact),
   (r'/client/creditors/category/(.*)/new', ClientAddCreditor),
+  (r'/client/creditors/delete/(.*)', ClientDeleteCreditor),
   (r'/client/creditors', ClientSelectCreditors),
   (r'/client/creditors/category/(.*)', ClientSelectCreditors),
   (r'/client/creditors/validate', ClientValidate),
@@ -1385,8 +1423,9 @@ application = webapp.WSGIApplication([
 # The shared screens between client and employee
   (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
   (r'/employee/cases/view/(.*)/print', ClientDebtsPrintDossier), # => /client/debts/print
-  (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),
+  (r'/employee/cases/view/(.*)/creditor/(.*)/edit', EmployeeEditCreditor),
   (r'/employee/cases/view/(.*)/creditor/(.*)/actions', EmployeeViewCaseCreditorActions),
+  (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),
   (r'/employee/cases/view/(.*)', EmployeeViewCase), # => /client/debts
 #  (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
 #  (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
