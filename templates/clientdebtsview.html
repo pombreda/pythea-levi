@@ -8,7 +8,7 @@
         <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
         {% endif %}
         {% if not selected %}
-        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">Ja</a><br>
+        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">Ja<input type="hidden" name="selected" value=""></a><br>
         {% else %}
         <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">{{selected.display_name}}</a><br>
         {% endif %}
