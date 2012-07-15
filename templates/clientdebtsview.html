@@ -35,10 +35,10 @@
 {% for debt in creditor.debts %}
         <tr>
             <td>{{debt.collector.display_name|default:"--"}}</td>
-            <td class="amount">&euro; {{debt.amount}}</td>
+            <td class="amount">&euro; {{debt.amount|default:""}}</td>
             <td class="date">{{debt.response_date|date:"d-m-Y"}}</td>
-            <td class="dossier">{{debt.creditor_dossier_number}}</td>
-            <td class="amount">&euro; {{debt.payment_amount}}</td>
+            <td class="dossier">{{debt.creditor_dossier_number|default:""}}</td>
+            <td class="amount">&euro; {{debt.payment_amount|default:""}}</td>
         </tr>
 {% endfor %}
     </table>
