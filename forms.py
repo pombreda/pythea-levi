@@ -16,7 +16,7 @@ class ClientForm(df.ModelForm):
     class Meta:
         model = models.Client
         #exclude = ['display_name', '_class', 'password', 'username', 'is_active', 'is_staff', 'is_superuser']
-        fields = ['first_name', 'last_name', 'username', 'email', 'address', 'zipcode', 'city', 'phone', 'mobile']
+        fields = ['first_name', 'last_name', 'username', 'email', 'address', 'zipcode', 'city', 'phone', 'mobile', 'birthdate', 'ssn']
 
     def clean(self):
         if self.instance:

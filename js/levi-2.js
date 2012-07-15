@@ -197,6 +197,7 @@ $(document).ready(function(){
 		event.preventDefault();
         var anchor = $(this);
 		var url = anchor.attr("href");
+        var hidden = anchor.children("input[type=hidden]");
         appLoading(true);
         $("#popup .popup-content").load(url,function(){
             $('#popup').addClass("active");
@@ -214,9 +215,9 @@ $(document).ready(function(){
 	        $("#popup a.popup-select").click(function(event) {
 		        event.preventDefault();
                 var target = $(event.currentTarget);
-                var text = target.html();
+                var text = target.html().trim();
                 var selection = target.attr("href").split('=')[1];
-                anchor.html(text);
+                anchor.html(text+"<input type='hidden' name='selected' value='"+selection+"'>");
                 $('input[name=selected]').val(selection);
 		        $("#popup").removeClass("active");
             });
@@ -224,8 +225,6 @@ $(document).ready(function(){
 		        event.preventDefault();
                 $('#popup .content').empty();
 		        $("#popup").removeClass("active");
-                // Don't do this!
-                //location.reload(true);
             });
         });
     });

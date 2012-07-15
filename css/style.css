@@ -317,7 +317,6 @@ header.alt p#login {
   display: none;
 }
 
-
 .popup .overlay {
   background-color: rgba(64, 64, 64, 0.5);
   position: fixed;
@@ -333,6 +332,7 @@ header.alt p#login {
   position: fixed;
   width: auto;
   top: 1em;
+  bottom: 1em;
   left: 50%;
   margin: 0;
   padding: .5em;
