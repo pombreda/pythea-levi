@@ -173,6 +173,7 @@ class SocialWorker(User):
     def tabs(self):
         logging.error("tabs for the SocialWorkers")
         return (("/employee/cases", "Open dossiers"),
+                ("/employee/creditors/new", "Schuldeisers"),
                 ("/organisation/employees", "Medewerkers"))
 
     def start_page(self):
@@ -184,6 +185,8 @@ class Client(User):
     city = db.StringProperty(verbose_name='Woonplaats')
     mobile = db.PhoneNumberProperty(verbose_name='Mobiele telefoon')
     phone = db.PhoneNumberProperty(verbose_name='Vaste telefoon')
+    ssn = db.StringProperty(verbose_name='BSN nummer')
+    birthdate = db.DateProperty(verbose_name='Geboortedatum')
     state = db.StringProperty(default="NEW") # One of NEW, COMPLETED, APPROVED, DONE
     completion_date = db.DateProperty()
     approval_date = db.DateProperty()
