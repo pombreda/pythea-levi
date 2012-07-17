@@ -156,7 +156,7 @@ class ClientEdit(BaseHandler):
         else:
             form = forms.ClientForm(self.request.POST)
         if form.is_valid():
-            logging.info("user okay")  #FIXME: need to make sure users are not overwritten if they have an existing name
+            logging.info("user okay")
             new_user = form.save(commit=False)
             if form.cleaned_data['password1']:
                 new_user.set_password(form.cleaned_data['password1'])
@@ -282,7 +282,6 @@ class ClientDeleteCreditor(BaseHandler):
 
 class ClientPrintCreditorLetters(BaseHandler):
     def get(self):
-        logging.info('printcreditorletters')
         client = self.user
         letters = []
         for creditor in client.creditors:
@@ -300,6 +299,15 @@ class ClientPrintCreditorLetters(BaseHandler):
         logging.info(html)
         self.response.out.write(html)
 
+class ClientEmailCreditor(BaseHandler):
+    def get(self, creditor):
+        client = self.user
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        letter = creditor.generate_letter()
+        p = re.compile(r'<.*?>')
+        letter = p.sub('', letter)
+        creditor.send_message('Verzoek schuldbewijs', letter)
+        self.response.out.write("Email verstuurd.")
 
 class ClientValidate(BaseHandler):
     def get(self):
@@ -1391,8 +1399,9 @@ application = webapp.WSGIApplication([
   (r'/client/creditors', ClientSelectCreditors),
   (r'/client/creditors/category/(.*)', ClientSelectCreditors),
   (r'/client/creditors/validate', ClientValidate),
-  (r'/client/register/previewletter/(.*)', ClientRegisterPreviewLetter),
-  (r'/client/register/printletter/(.*)', ClientRegisterPrintLetter),
+  (r'/client/previewletter/(.*)', ClientRegisterPreviewLetter),
+  (r'/client/printletter/(.*)', ClientRegisterPrintLetter),
+  (r'/client/email/(.*)', ClientEmailCreditor),
   (r'/client/register/submitted', ClientSubmitted), # FIXME: this is more of a confirmation message than a
                                            # real GET/POST
 # The register organisation use case

@@ -1,13 +1,16 @@
 {% if preview %}
-<a target="_blank" href="/client/register/printletter/{{key}}">PRINT</a><br><br>
+<a target="_blank" href="/client/printletter/{{key}}">[PRINT]</a>
+   {% if creditor.email %}
+      <a target="_close" href="/client/email/{{key}}">[MAIL]</a>
+   {% endif %}
 {% endif %}
+<br><br>
 
 <p>
 {{creditor.display_name}}<br>
-{{creditor.address}}<br>
-{{creditor.zipcode}}<br>
-{{creditor.city}}<br>
-
+{{creditor.address|default:""}}<br>
+{{creditor.zipcode|default:""}}<br>
+{{creditor.city|default:""}}<br>
 </p>
 
 <p>{{client.city}}, {{today}}</p>
@@ -42,5 +45,6 @@ Hoogachtend,
 {{client.address}}<br>
 {{client.zipcode}}<br>
 {{client.city}}<br>
-{{client.date_of_birth}}<br>
+{{client.birthdate|default:""}}<br>
+{{client.ssn|default:""}}<br>
 </p>

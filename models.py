@@ -395,7 +395,6 @@ class CreditorLink(db.Model):
         vars['today'] = datetime.date.today().strftime("%d-%m-%Y")
         return template.render(path, vars)
 
-
     def approve(self):
         self.approved = True
 

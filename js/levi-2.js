@@ -190,6 +190,22 @@ $(document).ready(function(){
 		}
 	});
 
+	$("#popup a[target=_close]").live("click",function(event) {
+		event.preventDefault();
+        $('#popup .content').empty();
+        $("#popup").removeClass("active");
+        var anchor = $(this);
+		var url = anchor.attr("href");
+        $.get(url, {},
+            function( html ) {
+                setAppStatus(html);
+        });
+    });
+	$("#popup a[target=_blank]").live("click",function(event) {
+        $('#popup .content').empty();
+        $("#popup").removeClass("active");
+    });
+    /*
     /*
      * Load a link into the popup screen
      */
