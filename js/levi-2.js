@@ -3,28 +3,6 @@ String.prototype.repeat = function( num )
 	return new Array( num + 1 ).join( this );
 }
 
-/** HTH: FIXME: does not appear to be used.
- * Renders the tabs necessary for the logged in user type
- *
- * @param {string} type The desired tabset type
- * @return void
-function setTabs(type) {
-	var $currentTabs = $("#tabs"),
-		tabHtml;
-
-	switch(type) {
-		case "client":
-			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/client/creditors">Schuldendossier</a></li><li><a href="/client/register">Mijn gegevens</a></li></ul>';
-			break;
-		case "organisation":
-			tabHtml = '<ul class="tabs" id="tabs"><li class="active"><a href="/employee/cases/list">Dossiers</a></li></ul>';
-			break;
-		default:
-			tabHtml = "";
-	}
-}
-*/
-
 /**
  * Enable or disable app waiting state on AJAX calls
  *
@@ -41,7 +19,6 @@ function appLoading(loading) {
 }
 
 $(document).ready(function(){
-
 	// Set up automated validation for login form
 	$("#login").validate();
 
@@ -75,28 +52,13 @@ $(document).ready(function(){
 			redirected = false
 			;
 
-        // HTH: this does not appear to be used.
-		// If validation marked any errors, stop processing.
-		if ($this.find("input.error").length > 0) {
-			return;
-		}
-
 		$.ajax({
 			url: url,
 			type: method.toUpperCase(),
 			data: $this.serialize(),
 			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
 			context: context,
-/* HTH: This does not appear to be used?
-			beforeSend: function(jqXHR, settings) {
-				appLoading(true);
-			},
-			complete: function(jqXHR, textStatus) {
-				if (!redirected) {
-					appLoading(false);
-				}
-			},
-*/
+
 			success: function(data, textStatus, jqXHR) {
 				var location = jqXHR.getResponseHeader("Location");
 
@@ -110,13 +72,6 @@ $(document).ready(function(){
 					}
 
 					redirected = true;
-					/* HTH: This does not appear to be necessary anymore
-					// Check where we're being redirected, and set tabs accordingly
-					if (location.indexOf("/client") > -1) {
-						setTabs("client");
-						checkLogin();
-					}
-					*/
 					checkLogin();
                     if(target == '_popup') {
                         loadPopup(location);
@@ -260,8 +215,7 @@ $(document).ready(function(){
         document.body.style.cursor = "wait";
         $.post(url, { checked: checked, creditor: creditor },
             function( html ) {
-                // FIXME: should only reload the result part of the screen
-                $('#content').html(html);
+                $('#selected ul').html(html);
                 setAppStatus();
                 setAppButtons();
                 document.body.style.cursor = "default";
