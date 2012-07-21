@@ -55,7 +55,7 @@ def decode_b36(number):
     return int(number,36)
 
 class User(polymodel.PolyModel):
-    username = db.StringProperty('Gebruikers id')
+    username = db.StringProperty('Gebruikers Id')
     first_name = db.StringProperty('Voornaam')
     last_name= db.StringProperty('Achternaam')
     email = db.EmailProperty('E-mail adres')
@@ -131,15 +131,15 @@ lowermask = '0000AA'
 uppermask = '9999ZZ'
 
 class Organisation(polymodel.PolyModel):
-    display_name = db.StringProperty()
-    address = db.StringProperty()
-    zipcode = db.StringProperty()
-    city = db.StringProperty()
-    icon = db.LinkProperty()
-    website = db.LinkProperty()
-    email = db.EmailProperty()
-    phone = db.PhoneNumberProperty()
-    fax = db.PhoneNumberProperty()
+    display_name = db.StringProperty(verbose_name="Bedrijfsnaam")
+    address = db.StringProperty(verbose_name="Adres")
+    zipcode = db.StringProperty(verbose_name="Postcode")
+    city = db.StringProperty(verbose_name="Stad")
+    icon = db.LinkProperty(verbose_name="Logo")
+    website = db.LinkProperty(verbose_name="Website")
+    email = db.EmailProperty(verbose_name="Email adres")
+    phone = db.PhoneNumberProperty(verbose_name="Telefoon")
+    fax = db.PhoneNumberProperty(verbose_name="Fax")
 
 class SocialWork(Organisation):
     zipcodes = db.StringListProperty()
@@ -171,7 +171,6 @@ class SocialWorker(User):
             worker.sysadmin = flag
 
     def tabs(self):
-        logging.error("tabs for the SocialWorkers")
         return (("/employee/cases", "Open dossiers"),
                 ("/employee/creditors/new", "Schuldeisers"),
                 ("/organisation/employees", "Medewerkers"))
@@ -368,6 +367,7 @@ class CreditorLink(db.Model):
         faxkey = "abcde"
         client = self.user
         sender = "%s@pythea-levi.appspotmail.com" % client.username
+        #sender = "%s@schuldendossier.nl" % client.username
         if client.email:
             reply_to = client.email
         else:
