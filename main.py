@@ -236,7 +236,9 @@ class ClientSelectCreditors(BaseHandler):
             user.addCreditor(cred)
         else:
             user.removeCreditor(cred)
-        self.redirect(self.request.url)
+        vars = { 'user': user }
+        self.render(vars, 'clientlistselectedcreditors.html')
+        #self.redirect(self.request.url)
 
 
 class ClientAddCreditor(BaseHandler):
@@ -704,9 +706,9 @@ class OrganisationEditEmployee(BaseHandler):
             form = forms.SocialWorkerForm(instance=employee)
         else:
             form = forms.SocialWorkerForm()
+        form.title = "Vul de gegevens van uw medewerker in"
         vars = { 'forms': [form] }
 
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'form.html')
         self.render(vars, 'form.html')
 
 
@@ -719,7 +721,6 @@ class OrganisationEditEmployee(BaseHandler):
             form = forms.SocialWorkerForm(self.request.POST, instance=instance)
         else:
             form = forms.SocialWorkerForm(self.request.POST)
-
         photo = self.request.get('photo')
         if form.is_valid():
             employee = form.save(commit=False)
@@ -729,6 +730,9 @@ class OrganisationEditEmployee(BaseHandler):
             if photo:
                 image = images.Image(image_data=photo)
                 employee.photo = db.Blob(photo)
+                logging.info('We have a photo')
+            else:
+                logging.info('No photo')
             employee.put()
             self.redirect('/organisation/employees')
             """
@@ -871,8 +875,9 @@ class Logout(BaseHandler):
 
 class Login(BaseHandler):
     def get(self):
-    	vars = { 'user': self.user }
-        self.render(vars, 'login.html')
+        form = forms.LoginForm()
+    	vars = { 'forms': [form] }
+        self.render(vars, 'form.html')
 
     def post(self):
         userid = self.request.get('userid')
@@ -884,8 +889,8 @@ class Login(BaseHandler):
             user = models.User.get_by_key_name(userid)
             if user and user.authenticate(passwd):
                 session['user'] = user
-                #self.redirect(user.start_page())
-                self.redirect("/#"+user.start_page())
+                self.redirect(user.start_page())
+                #self.redirect("/"+user.start_page())
             else:
                 #vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
                 #self.render(vars, 'login.html')
@@ -1257,7 +1262,10 @@ class Test(BaseHandler):
     def get(self, args = "http://www.ing.nl"):
         """Show the test response"""
 
-        self.render({}, 'test.html')
+        from google.appengine.api import app_identity
+        id = app_identity.get_service_account_name()
+        self.response.out.write(id)
+        #self.render({}, 'test.html')
 
 
     def post(self):
@@ -1425,6 +1433,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
+  (r'/client/debts/creditor/(.*)/edit', ClientDebts),
   (r'/client/debts/creditor/(.*)', ClientDebts),
 
 # Several employee use cases
