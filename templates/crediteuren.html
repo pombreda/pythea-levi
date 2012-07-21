@@ -37,6 +37,8 @@
   </div>
   <div id="selected" class="selector selection">
     <h2>Overzicht</h2>
+    {% include "clientlistselectedcreditors.html" %}
+    {% comment %}
     <ul>
       {% for creditor in user.creditors %}
         <li>
@@ -44,6 +46,7 @@
         </li>
       {% endfor %}
     </ul>
+    {% endcomment %}
   </div>
 </div>
 <div class="submit">
