@@ -11,6 +11,7 @@ import models
 class ClientForm(df.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord')
     password2 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord controle')
+    ssn = forms.CharField(label="Burger Service Nummer")
 
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:
@@ -84,8 +85,8 @@ class SocialWorkForm(df.ModelForm):
         exclude = ['display', '_class', 'icon', 'zipcodes']
 
 class SocialWorkerForm(df.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
+    password1 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord')
+    password2 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord controle')
 
     class Meta:
         model = models.SocialWorker
@@ -117,4 +118,8 @@ class DebtForm(df.ModelForm):
     class Meta:
         model = models.Debt
         fields = ['response_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']
+
+class LoginForm(forms.Form):
+    userid = forms.CharField(label='Gebruikersnaam')
+    password = forms.CharField(widget=forms.PasswordInput, label='Wachtwoord')
 
