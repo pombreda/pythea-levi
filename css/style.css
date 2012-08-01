@@ -195,17 +195,17 @@ header.alt p#login {
 
   /* A few scribbles as test for Hans */
   position: absolute; /* absolute in .wrapper */
-  top: 6.7em;          /* room for the header */
+  top: 5.5em;          /* room for the header */
   bottom: 0;          /* stretch to the bottom */
   z-index: 50;        /* push it behind the front tab */
-
 }
+
 .content-wrapper {
   margin: 0;
   padding: .6em .5em 0px .5em;
   width: 100%;
   background-color: #d6f2ef;
-  border-radius: .5em .5em 0em 0em;
+  border-radius: .5em .5em 0em 0em; 
   -webkit-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
@@ -225,9 +225,10 @@ header.alt p#login {
 .content-inner {
   background-color: #d1ebea;
   border: solid 1px #e2f4f6;
-/*  border: solid 1px yellow; */
+  /* border: solid 1px yellow;  Test */
   border-radius: 0.5em 0.5em 0em 0em;
-  padding: 1em;
+  /*padding: 1em; */
+  padding: 1em 1em 0px 1em;
   -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.2);
@@ -248,8 +249,9 @@ header.alt p#login {
   /* border: 1px solid red; */
   /* make sure the content does not stretch below the bottom of content-inner */
   /* and add a scrollbar */
-  height: 86%;
+  height: 92%;
   overflow: auto;
+  /* border: 1px solid yellow; /* Test */
 }
 /* Tabs -------------------------------------------------------------------- */
 .tabs {
