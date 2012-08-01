@@ -265,6 +265,31 @@ class ClientAddCreditor(BaseHandler):
             vars = { 'forms': [form] }
             self.render(vars, 'form.html')
 
+class ClientEditCreditor(BaseHandler):
+    def get(self, creditor):
+        # FIXME: should find some way to make this form readonly
+        creditor = models.Creditor.get_by_id(int(creditor))
+
+        form = forms.CreditorForm(instance=creditor)
+        if not self.user == creditor.private_for or self.user is None:
+            form.readonly = True
+        vars = {'forms': [form]}
+        self.render(vars, "form.html")
+
+    def post(self, creditor):
+        creditor = models.Creditor.get_by_id(int(creditor))
+        form = forms.CreditorForm(self.request.POST, instance=creditor)
+        if not self.user == creditor.private_for or self.user is None:
+            form.readonly = True
+        if not form.readonly and form.is_valid():
+            creditor = form.save(commit=True)
+            link = client.hasCreditor(creditor)
+            self.redirect('/client/debts/creditor/%s' % (client, link.key().id()))
+        else:
+            form = forms.CreditorForm(instance=creditor)
+            vars = {'forms': [form]}
+            self.render(vars, "form.html")
+
 class ClientDeleteCreditor(BaseHandler):
     def get(self, creditor):
         """Remove a creditor link"""
@@ -476,17 +501,18 @@ class ClientDebts(BaseHandler):
         message = 'U bent klaar'
         vars = { 'user': user,
                  'message': message }
-        #path = os.path.join(os.path.dirname(__file__), 'templates', 'message.html')
-        #self.response.out.write(template.render(path, vars))
         self.render(vars, 'message.html')
 
 
 class ClientDebtsView(BaseHandler):
-    def get(self, creditor):
+    def get(self, creditor, debt=None):
         client = self.user
         creditor = models.CreditorLink.get_by_id(int(creditor))
-        form = forms.DebtForm()
-        ## GETGET
+        if debt:
+            debt = models.Debt.get_by_id(int(debt))
+            form = forms.DebtForm(instance=debt)
+        else:
+            form = forms.DebtForm()
         selected = self.request.get('selected')
         if selected:
             selected = models.Creditor.get_by_id(int(selected))
@@ -494,28 +520,34 @@ class ClientDebtsView(BaseHandler):
         vars = { 'client': client,
                  'creditor': creditor,
                  'selected': selected,
+                 'base_url': '/client/debts/view/%s' % creditor.key().id(),
                  'form': form }
         self.render(vars, 'clientdebtsview.html')
 
-    def post(self, creditor):
+    def post(self, creditor, debt=None):
         user = self.get_user()
-        form = forms.DebtForm(self.request.POST)
+        if debt:
+            debt = models.Debt.get_by_id(int(debt))
+            form = forms.DebtForm(self.request.POST, instance=debt)
+        else:
+            form = forms.DebtForm(self.request.POST)
         creditor = models.CreditorLink.get_by_id(int(creditor))
         selected = self.request.get('selected')
         if selected:
             selected = models.Creditor.get_by_id(int(selected))
         else:
             selected = None
+
         if form.is_valid():
-            new_debt = form.save(commit=False)
-            new_debt.creditor = creditor
+            debt = form.save(commit=False)
+            debt.creditor = creditor
             if creditor.creditor.is_collector:
-                new_debt.collected_for = selected
+                debt.collected_for = selected
             else:
-                new_debt.collector = selected
+                debt.collector = selected
                 if selected and not user.hasCreditor(selected):
                     user.addCreditor(selected)
-            new_debt.put()
+            debt.put()
             url = urlparse.urlsplit(self.request.url)
             self.redirect(url.path)
         else:
@@ -1264,7 +1296,11 @@ class Test(BaseHandler):
 
         from google.appengine.api import app_identity
         id = app_identity.get_service_account_name()
-        self.response.out.write(id)
+        scope = 'https://apps-apis.google.com/a/feeds/user/'
+        token, expires = app_identity.get_access_token(scope)
+        self.response.out.write(token + '<br>\n')
+        self.response.out.write(str(expires) + '<br>\n')
+
         #self.render({}, 'test.html')
 
 
@@ -1427,13 +1463,14 @@ application = webapp.WSGIApplication([
   (r'/client/debts', ClientDebts),
   (r'/client/debts/list', ClientDebts),
   (r'/client/debts/printcreditorletters', ClientPrintCreditorLetters),
+  (r'/client/debts/view/(.*)/debt/(.*)', ClientDebtsView),
   (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/print', ClientDebtsPrintDossier),
   (r'/client/debts/close', ClientDebtsCloseDossier),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
-  (r'/client/debts/creditor/(.*)/edit', ClientDebts),
+  (r'/client/debts/creditor/(.*)/edit', ClientEditCreditor),
   (r'/client/debts/creditor/(.*)', ClientDebts),
 
 # Several employee use cases

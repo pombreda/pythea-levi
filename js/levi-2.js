@@ -55,9 +55,15 @@ $(document).ready(function(){
 		$.ajax({
 			url: url,
 			type: method.toUpperCase(),
-			data: $this.serialize(),
+            // Used to be:
+            // data: this.serialize(),
+			data: new FormData($this[0]),
 			headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
 			context: context,
+            // Required to handle form data
+            cache: false,
+            contentType: false,
+            processData: false,
 
 			success: function(data, textStatus, jqXHR) {
 				var location = jqXHR.getResponseHeader("Location");
