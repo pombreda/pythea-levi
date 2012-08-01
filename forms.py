@@ -11,7 +11,7 @@ import models
 class ClientForm(df.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord')
     password2 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord controle')
-    ssn = forms.CharField(label="Burger Service Nummer")
+    ssn = forms.CharField(label="Burger Service Nummer", required=False)
 
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:
@@ -49,9 +49,11 @@ class ClientForm(df.ModelForm):
         except Exception, e:
             user_by_email = False
 
-        if user:
+        if user and not self.instance:
             self._errors['username'] = self.error_class(['Er bestaat al een gebruiker met deze naam'])
-        elif user_by_email:
+        elif self.instance and self.instance.username != username:
+            self._error['username'] = self.error_class(['Kan een bestaande username niet veranderen.'])
+        elif (not self.instance and user_by_email) or (self.instance and self.instance.key() != user_by_email.key()):
             self._errors['email'] = self.error_class(['Dit e-mail adres is reeds in gebruik'])
         elif phone:
             m = self.phone_p.match(phone)
@@ -62,7 +64,7 @@ class ClientForm(df.ModelForm):
                 data['mobile'] = '+31' + m.group(2)
             if not m:
                 self._errors['phone'] = self.error_class(['Geen geldig telefoonnummer'])
-            elif phone_exists:
+            elif (not self.instance and phone_exists) or (self.instance and self.instance.key() != phone_exists.key()):
                 self._errors['phone'] = self.error_class(['Dit nummer is reeds in gebruik'])
         if mobile:
             m = self.phone_p.match(mobile)
@@ -71,7 +73,9 @@ class ClientForm(df.ModelForm):
             elif m:
                 data['mobile'] = '+31' + m.group(2)
                 mobile_exists = models.Client.gql("WHERE mobile = :1",data['mobile']).get()
-                if mobile_exists:
+                #logging.error(mobile_exists.key())
+                #logging.error(self.instance.key())
+                if (not self.instance and mobile_exists) or (self.instance and self.instance.key() != mobile_exists.key()):
                     self._errors['mobile'] = self.error_class(['Dit nummer is reeds in gebruik'])
         if not self.instance and not password1:
             self._errors['password1'] = self.error_class(['Wachtwoord is verplicht'])
