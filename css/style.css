@@ -386,6 +386,14 @@ header.alt p#login {
   padding: .5em;
   background-color: #f0fbfb;
   border-radius: .2em;
+
+  -webkit-transition: all 500ms;
+  -moz-transition: all 500ms;
+  -o-transition: all 500ms;
+  transition: all 500ms;
+}
+.appstatus.update {
+  background-color: #FFF8BF;
 }
 /* Application buttons ----------------------------------------------------- */
 .appbuttons {
