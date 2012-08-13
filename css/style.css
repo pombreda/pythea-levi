@@ -57,6 +57,9 @@ button {
   text-transform: uppercase;
   padding: .5em;
 }
+input[readonly] {
+  opacity: .7;
+}
 /*input {
 	-webkit-appearance: none;
 }*/
@@ -136,6 +139,29 @@ header > nav li:first-child > a {
 header > nav li > a:hover {
   text-decoration: underline;
 }
+header > .login a {
+  font-size: 1.1em;
+  color: #bfeef6;
+  text-decoration: none;
+}
+header > .login a:hover {
+  text-decoration: underline;
+}
+header > .login.session-active .panel-login {
+  display: none;
+}
+header > .login .panel-session {
+  display: none;
+}
+header > .login.session-active .panel-session {
+  display: inline;
+}
+header > .login.session-active .panel-session span {
+  font-weight: bold;
+}
+header > .login.session-active .panel-session .logout {
+  padding-left: 1em;
+}
 header > form {
   float: left;
 }
@@ -195,7 +221,7 @@ header.alt p#login {
 
   /* A few scribbles as test for Hans */
   position: absolute; /* absolute in .wrapper */
-  top: 5.5em;          /* room for the header */
+  top: 3.5em;          /* room for the header */
   bottom: 0;          /* stretch to the bottom */
   z-index: 50;        /* push it behind the front tab */
 }
@@ -205,7 +231,7 @@ header.alt p#login {
   padding: .6em .5em 0px .5em;
   width: 100%;
   background-color: #d6f2ef;
-  border-radius: .5em .5em 0em 0em; 
+  border-radius: .5em .5em 0em 0em;
   -webkit-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
@@ -363,6 +389,16 @@ header.alt p#login {
   height: 29px;
   padding-left: 29px;
   float: right;
+
+  position: absolute;
+  right: .5em;
+  top: .5em;
+}
+
+.popup .popup-content {
+  overflow-y: auto;
+  max-height: 100%;
+  width: 100%;
 }
 /* Application status ------------------------------------------------------ */
 .appstatus {
@@ -373,6 +409,14 @@ header.alt p#login {
   padding: .5em;
   background-color: #f0fbfb;
   border-radius: .2em;
+
+  -webkit-transition: all 500ms;
+  -moz-transition: all 500ms;
+  -o-transition: all 500ms;
+  transition: all 500ms;
+}
+.appstatus.update {
+  background-color: #FFF8BF;
 }
 /* Application buttons ----------------------------------------------------- */
 .appbuttons {
@@ -555,14 +599,22 @@ input.app-control-set {
   height: 22px;
   background-image: url(/images/ontvangen.png);
   position: absolute;
-  right: .5em;
+  right: 38px;
 }
+.file-setup .creditor-details .action.delete {
+  width: 22px;
+  height: 22px;
+  background-image: url(/images/icon-delete.png);
+  position: absolute;
+  right: 8px;
+}
+
 .file-setup .creditor-details .add-annotation {
   /* border-style: solid;
   border-width: 1px 0 0 0;
   border-color: #003339; */
   margin-bottom: 1em;
-  overflow: auto;
+  overflow: hidden;
 }
 .file-setup .creditor-details .add-annotation textarea {
   border-top: solid 1px #003333;
@@ -581,11 +633,18 @@ input.app-control-set {
 .file-setup .creditor-details .add-annotation input[type=submit] {
   float: right;
 }
+.file-setup .creditor-listing-wrapper {
+  width: 50%;
+  overflow: auto;
+  position: absolute;
+  top: 3em;
+  bottom: 2.5em;
+}
 .file-setup .creditor-overview {
   padding: 0;
   margin: 0;
   position: relative;
-  width: 50%;
+  width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
 }
