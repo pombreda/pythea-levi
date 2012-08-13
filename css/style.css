@@ -205,7 +205,7 @@ header.alt p#login {
   padding: .6em .5em 0px .5em;
   width: 100%;
   background-color: #d6f2ef;
-  border-radius: .5em .5em 0em 0em; 
+  border-radius: .5em .5em 0em 0em;
   -webkit-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
   box-shadow: 3px 0px 9px 0px rgba(0, 0, 0, 0.2);
@@ -555,14 +555,22 @@ input.app-control-set {
   height: 22px;
   background-image: url(/images/ontvangen.png);
   position: absolute;
-  right: .5em;
+  right: 38px;
 }
+.file-setup .creditor-details .action.delete {
+  width: 22px;
+  height: 22px;
+  background-image: url(/images/icon-delete.png);
+  position: absolute;
+  right: 8px;
+}
+
 .file-setup .creditor-details .add-annotation {
   /* border-style: solid;
   border-width: 1px 0 0 0;
   border-color: #003339; */
   margin-bottom: 1em;
-  overflow: auto;
+  overflow: hidden;
 }
 .file-setup .creditor-details .add-annotation textarea {
   border-top: solid 1px #003333;
