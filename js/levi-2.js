@@ -19,8 +19,6 @@ function appLoading(loading) {
 }
 
 $(document).ready(function(){
-    // Set up automated validation for login form
-    $("#login").validate();
 
     // Make sure that clicking outside the popup content will close the popup
     $(".popup .overlay").click(function(){
@@ -83,7 +81,6 @@ $(document).ready(function(){
                     }
 
                     redirected = true;
-                    checkLogin();
                     if(target == '_popup') {
                         loadPopup(location);
                     } else {
@@ -101,6 +98,7 @@ $(document).ready(function(){
                     //$.address.value(location);
                     appLoading(false);
                 }
+                checkLogin();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#'+target).html(textStatus + ' ' + jqXHR.responseText);
@@ -274,6 +272,7 @@ $(document).ready(function(){
 
                 document.body.style.cursor = "default";
                 prepareForms();
+                checkLogin();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#content').empty().append(textStatus + ' ' + jqXHR.responseText);
@@ -368,24 +367,14 @@ function handleUsername() {
  *  HTH: This does not appear to be used.
  */
 function checkLogin() {
-    // This does not work, as the cookie is set to HttpOnly
-    //alert( $.cookie('DgU00') );
-/**
-    $.ajax({
-        url: "/login",
-        type: "GET",
-    //    headers: {"Accept":"x-text/html-fragment"},
-        success: function(data, textStatus, jqXHR) {
-            if (data.match("U bent ingelogd")) {
-                $("#login").replaceWith('<p id="login">' + data + "</p>");
-                setTabs("client");
-            }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            appLoading(false);
-        }
-    });
-*/
+    var $login = $(".login"),
+        $userIdElement = $("#user-id",$login),
+        userId = $("#session-user").html();
+
+    if (!$login.hasClass("session-active") && !userId.match(/^\s*$/)) {
+        $userIdElement.html(userId);
+        $login.addClass("session-active");
+    }
 }
 
 /*
