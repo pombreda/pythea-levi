@@ -363,6 +363,16 @@ header.alt p#login {
   height: 29px;
   padding-left: 29px;
   float: right;
+
+  position: absolute;
+  right: .5em;
+  top: .5em;
+}
+
+.popup .popup-content {
+  overflow-y: auto;
+  max-height: 100%;
+  width: 100%;
 }
 /* Application status ------------------------------------------------------ */
 .appstatus {
