@@ -1,0 +1,16 @@
+Hoi {{self.user.first_name}},
+
+Je hebt een verzoek ingediend voor het opnieuw instellen van je wachtwoord. Om je verzoek te voltooien, klik je op deze link:
+
+{{self.request.host_url}}/reset/confirm?token={{token}}&userid={{self.user.username}}
+
+Als alternatief kan de volgende code direct invullen om je paswoord opnieuw in te stellen:
+
+{{token}}
+
+*Niet om deze wijziging gevraagd?*
+Als je geen nieuw wachtwoord hebt aangevraagd, kunt u dit bericht verder negeren.
+
+Bedankt,
+Schuldendossier.nl
+

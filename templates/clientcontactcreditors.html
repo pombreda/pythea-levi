@@ -1,0 +1,19 @@
+<div id="message">Met de volgende schuldeisers wordt contact opgenomen</div>
+<form method="post" action="{{self.request.path}}" class="file-setup debt-entry">
+  <table>
+  {% for creditor in user.creditors %}
+    <tr>
+      <td><img src="{{creditor.creditor.icon}}" alt="" width="16" height="16"></td>
+      <td>{{ creditor.creditor.display_name }}</td>
+      <td>{{ creditor.creditor.contact_method }} </td>
+      <td>{{ creditor.last_email_date|default:"Nog geen contact gehad"}} </td>
+    </tr>
+  {% endfor %}
+  </table>
+<div class="submit">
+  <div>
+    <input type="submit" value="&laquo; ga terug" data-set-value="action=go back">
+    <input type="submit" value="ga verder &raquo;" data-set-value="action=correct">
+</div>
+</div>
+</form>

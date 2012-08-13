@@ -1,0 +1,10 @@
+<div id="session-info">
+  <span id="session-user">{{user.first_name}} {{user.last_name}}</span>
+  <span id="session-tabs">
+      <ul class="tabs" id="tabs">
+         {% for tab in self.tabs %}
+         <li {% if tab.0 in self.request.path %} class="active" {%endif%}><a href="{{tab.0}}">{{tab.1}}</a></li>
+         {% endfor %}
+      </ul>
+  </span>
+</div>
