@@ -1,5 +1,14 @@
 <div id="message">Als u een overzicht heeft ontvangen van uw schuldeiser, kunt u dit hieronder invullen</div>
 <form method="post" action="{{self.request.path}}" class="client-debts-form">
+    <div style="float:right">
+{% if self.user.class_name == 'Client' %}
+  <a href="/client/debts/creditor/{{creditor.key}}/response">
+{%else %}
+  <a href="/employee/cases/view/{{client.key}}/creditor/{{creditor.key.id}}/approve?base_url={{base_url}}" class="action approve">
+{% endif %}
+        <img alt="Schuldbewijs" src="/client/debts/creditor/{{creditor.key}}/responseletter" width="115px" height="155px"></img>
+        </a>
+    </div>
     <p>
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         {% if creditor.creditor.is_collector %}

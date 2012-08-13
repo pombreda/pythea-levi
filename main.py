@@ -241,6 +241,13 @@ class ClientSelectCreditors(BaseHandler):
         #self.redirect(self.request.url)
 
 
+class ClientCreditorsStatus(BaseHandler):
+    def get(self):
+        """"Show all creditors and their status"""
+        user = self.user
+        vars = { 'client': user }
+        self.render(vars, 'clientcreditorsstatus.html')
+
 class ClientAddCreditor(BaseHandler):
     def get(self, category):
         """Add a new creditor that is specific to this client"""
@@ -335,6 +342,39 @@ class ClientEmailCreditor(BaseHandler):
         letter = p.sub('', letter)
         creditor.send_message('Verzoek schuldbewijs', letter)
         self.response.out.write("Email verstuurd.")
+
+class ClientCreditorResponse(BaseHandler):
+    def get(self, creditor):
+        """Show an upload form for the scanned response letter from the creditor"""
+        creditor = models.CreditorLink.get(creditor)
+        vars = { 'creditor': creditor }
+        self.render(vars, "clientcreditorresponse.html")
+
+    def post(self, creditor):
+        """Show an upload form for the scanned response letter from the creditor"""
+        creditor = models.CreditorLink.get(creditor)
+        upload = self.request.get('upload')
+        if upload:
+            # TODO: should resize the image
+            image = images.Image(image_data=upload)
+            creditor.scan = db.Blob(upload)
+            creditor.put()
+            self.redirect(self.request.url)
+        else:
+            self.redirect(self.request.url)
+        vars = { 'creditor': creditor }
+        self.render(vars, "clientcreditorresponse.html")
+
+class ClientCreditorResponseLetter(BaseHandler):
+    def get(self, creditor):
+        """Show the scanned letter for this creditor"""
+        creditor = models.CreditorLink.get(creditor)
+        if (creditor and creditor.scan):
+            self.response.headers['Content-Type'] = 'image/jpeg'
+            self.response.out.write(creditor.scan)
+        else:
+            # TODO:
+            self.response.out.write("Nothing found")
 
 class ClientValidate(BaseHandler):
     def get(self):
@@ -961,6 +1001,12 @@ class EmployeeEditCreditor(BaseHandler):
             vars = {'forms': [form]}
             self.render(vars, "form.html")
 
+class EmployeeViewCaseCreditorApproveResponse(BaseHandler):
+    def get(self, client, creditor):
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        vars = { 'creditor': creditor }
+        self.render(vars, "employeeapprovecreditorresponse.html")
+
 class EmployeeCreditorsList(BaseHandler):
     def get(self):
         creditors = models.Creditor.all()
@@ -1440,6 +1486,7 @@ application = webapp.WSGIApplication([
   (r'/client/register/contact', ClientContact),
   (r'/client/creditors/category/(.*)/new', ClientAddCreditor),
   (r'/client/creditors/delete/(.*)', ClientDeleteCreditor),
+  (r'/client/creditors/status', ClientCreditorsStatus),
   (r'/client/creditors', ClientSelectCreditors),
   (r'/client/creditors/category/(.*)', ClientSelectCreditors),
   (r'/client/creditors/validate', ClientValidate),
@@ -1471,6 +1518,8 @@ application = webapp.WSGIApplication([
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
   (r'/client/debts/creditor/(.*)/edit', ClientEditCreditor),
+  (r'/client/debts/creditor/(.*)/response', ClientCreditorResponse),
+  (r'/client/debts/creditor/(.*)/responseletter', ClientCreditorResponseLetter),
   (r'/client/debts/creditor/(.*)', ClientDebts),
 
 # Several employee use cases
@@ -1478,6 +1527,7 @@ application = webapp.WSGIApplication([
 # The shared screens between client and employee
   (r'/employee/cases/view/(.*)/view/(.*)', EmployeeViewCaseDetails), # => /client/debts/view
   (r'/employee/cases/view/(.*)/print', ClientDebtsPrintDossier), # => /client/debts/print
+  (r'/employee/cases/view/(.*)/creditor/(.*)/approve', EmployeeViewCaseCreditorApproveResponse),
   (r'/employee/cases/view/(.*)/creditor/(.*)/edit', EmployeeEditCreditor),
   (r'/employee/cases/view/(.*)/creditor/(.*)/actions', EmployeeViewCaseCreditorActions),
   (r'/employee/cases/view/(.*)/creditor/(.*)', EmployeeViewCase),

@@ -354,10 +354,17 @@ class CreditorLink(db.Model):
     creditor = db.ReferenceProperty(Creditor)
     user = db.ReferenceProperty(Client, collection_name='creditors')
     estimated_amount = DecimalProperty(default=decimal.Decimal('0.00'))
-    approved = db.BooleanProperty()
+
+    approved = db.BooleanProperty() # True => approved, False => Not approved
+    approved_by = db.ReferenceProperty(SocialWorker)
+    approval_date = db.DateTimeProperty()
+
+    scan = db.BlobProperty()
+
     last_email_date = db.DateProperty()
     last_print_date = db.DateProperty()
     contacted_by = db.StringProperty()
+
     complete = db.BooleanProperty()
     registration_date = db.DateProperty(auto_now_add=True)
     last_changed_date = db.DateProperty(auto_now=True)
