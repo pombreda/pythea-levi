@@ -406,6 +406,7 @@ class CreditorLink(db.Model):
         self.approved = True
 
     def status(self):
+        """Old version see below for new and improved"""
         if not self.cached_state:
             status = self.calc_status()
             self.cached_state = status.serialize()
@@ -413,6 +414,14 @@ class CreditorLink(db.Model):
         status, action, description = self.cached_state.split(':',2)
         s = Status(status, action, description)
         return s
+
+    def status(self):
+        if self.approved:
+            return Status("COMPLETE")
+        elif not self.last_email_date:
+            return Status("NEW")
+        else:
+            return Status("WAITING")
 
     def calc_status(self):
         count = 0

@@ -1,5 +1,5 @@
 <div id="session-info">
-  <span id="session-user">{{user.first_name}} {{user.last_name}}</span>
+  <span id="session-user">{{self.user.first_name}} {{self.user.last_name}}</span>
   <span id="session-tabs">
       <ul class="tabs" id="tabs">
          {% for tab in self.tabs %}

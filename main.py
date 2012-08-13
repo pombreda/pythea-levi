@@ -398,53 +398,19 @@ class ClientValidate(BaseHandler):
                 if not creditor.last_email_date:
                     method = creditor.creditor.contact_method()
                     letter = creditor.generate_letter()
-                    if method in ['EMAIL', 'FAX']:
+                    """ if method in ['EMAIL', 'FAX']:
                         logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         p = re.compile(r'<.*?>')
                         letter = p.sub('', letter)
                         creditor.send_message("Verzoek schuldbewijs", letter)
                         creditor.status = method
-                    elif method == 'POST':
+                    """
+                    if method in ['POST','FAX', 'EMAIL']:
                         logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
                         letters.append(letter)
-            """
-            for key in self.request.arguments():
-                letters = []
-                if key.startswith("creditor-"):
-                    id = int(key.split("-")[1])
-                    creditor = models.CreditorLink.get_by_id(id)
-                    method = creditor.creditor.contact_method()
-                    letter = creditor.generate_letter()
-                    if method in ['EMAIL', 'FAX']:
-                        logging.info("Sending letter to %s by %s" % creditor.creditor.display_name, method)
-                        creditor.send_message("Verzoek schuldbewijs", letter)
-                        creditor.status = method
-                    elif method == 'POST':
-                        logging.info("Sending letter to %s by %s" % creditor.creditor.display_name, method)
-                        creditor.status = method
-                        # FIXME: generate a letter
-                        letters.append(letter)
-
-                    estimated_amount = self.request.get(key)
-                    try:
-                        estimated_amount = decimal.Decimal(str(float(estimated_amount)))
-                    except ValueError:
-                        try:
-                            estimated_amount = estimated_amount.replace(".", "").replace(",", ".")
-                            logging.error(estimated_amount)
-                            estimated_amount = decimal.Decimal(estimated_amount)
-                        except decimal.InvalidOperation, e:
-                            estimated_amount = decimal.Decimal('0.00')
-                    except decimal.InvalidOperation, e:
-                        estimated_amount = decimal.Decimal('0.00')
-                    creditor = models.CreditorLink.get_by_id(id)
-                    if creditor.estimated_amount != estimated_amount:
-                        creditor.estimated_amount = estimated_amount
-                        creditor.put()
-            """
-
-            self.redirect('/client/debts')
+            html = '<br style="page-break-after:always">'.join(letters)
+            self.response.out.write(html)
         else:
             self.redirect('/client/creditors')
 
@@ -664,6 +630,14 @@ class ClientDebtsCreditorActions(BaseHandler):
         logging.info(come_from)
         self.redirect(come_from)
 
+class ClientDebtsDeleteAnnotation(BaseHandler):
+    """Show details for a CreditorLink"""
+    def get(self, annotation):
+        come_from = self.request.get('come_from')
+        annotation = models.Annotation.get(annotation)
+        annotation.delete()
+        self.redirect(come_from)
+
 class ClientDebtsPrintDossier(BaseHandler):
     """Show all debts for a creditor"""
     def get(self, client=None):
@@ -711,7 +685,6 @@ class OrganisationNew(BaseHandler):
             # Size should be approximately 80x80 pixels
 
             if photo:
-                # Resize the image
                 image = images.Image(image_data=photo)
                 the_user.photo = db.Blob(photo)
 
@@ -847,8 +820,6 @@ class OrganisationEmployeeResize(BaseHandler):
         worker.put()
         self.redirect('/organisation/employees')
 
-        #self.dump()
-
 class OrganisationZipcodes(BaseHandler):
     """TODO:"""
     def get(self):
@@ -966,7 +937,10 @@ class Login(BaseHandler):
             else:
                 #vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
                 #self.render(vars, 'login.html')
-                self.redirect("/?message=Gebruikersnaam of wachtwoord is ongeldig")
+                #self.redirect("/?message=Gebruikersnaam of wachtwoord is ongeldig")
+                form = forms.LoginForm()
+                vars = { 'forms': [form], 'message': 'Gebruikersnaam of wachtwoord ongeldig' }
+                self.render(vars, 'form.html')
         except Exception, e:
             logging.info("Error, probably user not found.")
             self.response.out.write(e)
@@ -1006,6 +980,9 @@ class EmployeeViewCaseCreditorApproveResponse(BaseHandler):
         creditor = models.CreditorLink.get_by_id(int(creditor))
         vars = { 'creditor': creditor }
         self.render(vars, "employeeapprovecreditorresponse.html")
+
+    def post(self, client, creditor):
+        self.dump()
 
 class EmployeeCreditorsList(BaseHandler):
     def get(self):
@@ -1514,6 +1491,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/view/(.*)', ClientDebtsView),
   (r'/client/debts/print', ClientDebtsPrintDossier),
   (r'/client/debts/close', ClientDebtsCloseDossier),
+  (r'/client/debts/annotations/(.*)/delete', ClientDebtsDeleteAnnotation),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
