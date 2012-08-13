@@ -22,6 +22,11 @@ $(document).ready(function(){
 	// Set up automated validation for login form
 	$("#login").validate();
 
+    // Make sure that clicking outside the popup content will close the popup
+    $(".popup .overlay").click(function(){
+        $("#popup a.popup-close").trigger("click");
+    });
+
 	// Make sure submit button values are included in AJAX calls
 	$("input[type=submit]").live("click",function(e){
 		var $this = $(this),
