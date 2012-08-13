@@ -352,7 +352,7 @@ function handleUsername() {
             // Since username is inmutable here, we can assume that an empty field equals a new username
             // Set up a listener to auto-populate with first_name.last_name
             if ($username.val() == "" && $username.attr("readonly")) {
-                $form.find("input[name=first_name],input[name=last_name]").live("blur",function(event) {
+                $form.find("input[name=first_name],input[name=last_name]").live("change",function(event) {
                     var username = $("#id_first_name").val().toLowerCase().replace(/\s+/,"_");
                         username += '.';
                         username += $("#id_last_name").val().toLowerCase().replace(/\s+/,"_");
