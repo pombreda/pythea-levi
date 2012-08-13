@@ -139,6 +139,29 @@ header > nav li:first-child > a {
 header > nav li > a:hover {
   text-decoration: underline;
 }
+header > .login a {
+  font-size: 1.1em;
+  color: #bfeef6;
+  text-decoration: none;
+}
+header > .login a:hover {
+  text-decoration: underline;
+}
+header > .login.session-active .panel-login {
+  display: none;
+}
+header > .login .panel-session {
+  display: none;
+}
+header > .login.session-active .panel-session {
+  display: inline;
+}
+header > .login.session-active .panel-session span {
+  font-weight: bold;
+}
+header > .login.session-active .panel-session .logout {
+  padding-left: 1em;
+}
 header > form {
   float: left;
 }
