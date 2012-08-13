@@ -198,7 +198,7 @@ header.alt p#login {
 
   /* A few scribbles as test for Hans */
   position: absolute; /* absolute in .wrapper */
-  top: 5.5em;          /* room for the header */
+  top: 3.5em;          /* room for the header */
   bottom: 0;          /* stretch to the bottom */
   z-index: 50;        /* push it behind the front tab */
 }
