@@ -589,11 +589,18 @@ input.app-control-set {
 .file-setup .creditor-details .add-annotation input[type=submit] {
   float: right;
 }
+.file-setup .creditor-listing-wrapper {
+  width: 50%;
+  overflow: auto;
+  position: absolute;
+  top: 3em;
+  bottom: 2.5em;
+}
 .file-setup .creditor-overview {
   padding: 0;
   margin: 0;
   position: relative;
-  width: 50%;
+  width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
 }
