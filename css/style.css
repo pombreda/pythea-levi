@@ -57,6 +57,9 @@ button {
   text-transform: uppercase;
   padding: .5em;
 }
+input[readonly] {
+  opacity: .7;
+}
 /*input {
 	-webkit-appearance: none;
 }*/
