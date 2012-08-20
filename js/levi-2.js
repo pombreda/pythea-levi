@@ -424,8 +424,11 @@ function setAppStatus(status) {
     } else {
         $("#content").parent().prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
     }
-    $("#tabs").html($("#session-tabs").html());
-    // alert($("#session-tabs").html());
+    //alert($("#session-tabs").html());
+    if( $("#session-tabs").html() != null ) {
+        $("#tabs").html($("#session-tabs").html());
+    } else {
+    }
 }
 
 function setAppButtons() {
