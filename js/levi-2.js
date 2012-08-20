@@ -339,12 +339,13 @@ On the registration and user info forms, prevent the username from being changed
 function handleUsername() {
     // Find elements
     var $form = $("form[action='/client/register'],form[action='/client/info']"),
-        $tbody = $form.find("tbody[class]"),
-        $username = $form.find("input[name=username]");
+        $username = $form.find("input[name=username]"),
+        $tbody = $username.parents("tbody[class]");
 
     // Only operate if all necessary elements are pesent
-    if ($form && $username && $tbody) {
-        if (!$username.attr("readonly") && ($tbody.hasClass("unposted") || $tbody.hasClass("instance"))) {
+    if ($form.length > 0 && $username.length > 0 && $tbody.length > 0) {
+        if (!$username.attr("readonly") && ($tbody.hasClass("unposted") || $tbody.hasClass("free") || $tbody.hasClass("instance"))) {
+
             // Form is either new or an existing instance. The username cannot be changed
             $username.attr("readonly","readonly");
 
