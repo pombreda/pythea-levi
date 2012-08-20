@@ -12,6 +12,7 @@ class ClientForm(df.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord')
     password2 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord controle')
     ssn = forms.CharField(label="Burger Service Nummer", required=False)
+    birthdate = forms.DateField(localize=True, widget=forms.TextInput(attrs={'class':'date'}))
 
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:
@@ -20,16 +21,14 @@ class ClientForm(df.ModelForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'address', 'zipcode', 'city', 'phone', 'mobile', 'birthdate', 'ssn']
 
     def clean(self):
-        if self.instance:
-           logging.info("We have an instance")
-
         data = self.cleaned_data
         password1 = data.get('password1')
         password2 = data.get('password2')
         first_name = data.get('first_name')
         last_name = data.get('last_name')
         username = data.get('username')
-        data['key_name'] = username
+        if not self.instance:
+            data['key_name'] = username
         #username = "%s.%s" % (first_name.lower(), last_name.lower())
         #data['username'] = username
         # FIXME: we should check if the username already exists in the database
@@ -73,8 +72,6 @@ class ClientForm(df.ModelForm):
             elif m:
                 data['mobile'] = '+31' + m.group(2)
                 mobile_exists = models.Client.gql("WHERE mobile = :1",data['mobile']).get()
-                #logging.error(mobile_exists.key())
-                #logging.error(self.instance.key())
                 if (not self.instance and mobile_exists) or (self.instance and self.instance.key() != mobile_exists.key()):
                     self._errors['mobile'] = self.error_class(['Dit nummer is reeds in gebruik'])
         if not self.instance and not password1:
@@ -98,7 +95,11 @@ class SocialWorkerForm(df.ModelForm):
 
     def clean(self):
         data = self.cleaned_data
-        data['key_name'] = data['email']
+        if not self.instance:
+            data['key_name'] = data['email']
+        else:
+            if self.instance.email != data['email']:
+                self._errors['email'] = self.error_class(['Kan het email adres niet veranderen'])
         password1 = data.get('password1')
         password2 = data.get('password2')
         if password1 != password2:
@@ -115,7 +116,6 @@ class CreditorForm(df.ModelForm):
         exclude = ['_class', 'icon', 'tags', 'categories', 'approved', 'private_for']
 
 class DebtForm(df.ModelForm):
-    #creditor_or_collector = forms.CharField()
     response_date = forms.DateField(localize=True, widget=forms.TextInput(attrs={'class':'date'}))
     amount = forms.DecimalField(localize=True, required=False, widget=forms.TextInput(attrs={'class':'currency'}))
     payment_amount = forms.DecimalField(localize=True, required=False, widget=forms.TextInput(attrs={'class':'currency'}))
