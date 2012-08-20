@@ -831,6 +831,7 @@ ul.contact-list input {
 #admin_plus {
   /* display: none; /* FIXME */
   position: absolute;
+  z-index:1000;
   top: .5em;
   right: .5em;
 }
