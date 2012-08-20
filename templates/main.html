@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<!--[if IE ]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+	<meta name="robots" content="index, follow">
+	<title>Schuldendossier</title>
+	<link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/print.css" media="print">
+	<script src="js/jquery-1.7.2.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/jquery.ui.datepicker-nl.js"></script>
+	<script src="js/jquery.validate.min.js"></script>
+	<script src="js/jquery.address-1.4.min.js"></script>
+	<script src="js/jquery.tinyscrollbar.js"></script>
+	<script src="js/levi-2.js"></script>
+</head>
+<body>
+	<div class="wrapper">
+		<header>
+		    <nav>
+				<p>Informatie over <strong>schuldendossier.nl</strong> voor:</p>
+				<ul>
+					<li><a href="/info/clienten.html">Cliënten</a></li><!-- link to info page -->
+					<li><a href="/info/maatschappelijkwerk.html">Hulpverleners</a></li><!-- link to info page -->
+					<li><a href="/info/gemeenten.html">Gemeenten</a></li><!-- link to info page -->
+					<li><a href="#">Schuldeisers</a></li><!-- link to info page -->
+				</ul>
+			</nav>
+        <div class="login{% if self.user %} session-active{% endif %}">
+            <span class="panel-session">
+                U bent ingelogd als: <span id="user-id">{{self.user.first_name}} {{ self.user.last_name}}</span>
+                <a class="logout" href="/logout" target="_top">Log uit</a>
+            </span>
+            <span class="panel-login">
+                <a class="login" href="/login">Log in</a>
+            </span>
+
+        </div>
+		</header>
+
+		<section class="content">
+        {% if self.user %}
+        <ul class="tabs" id="tabs">
+            {% for tab in self.user.tabs %}
+            <li><a href="{{tab.0}}">{{tab.1}}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <ul class="tabs" id="tabs">
+            <li><a href="/info/clienten.html">Info</a></li>
+            <li><a href="/info/werkwijze.html">Werkwijze</a></li>
+            <li><a href="/client/register">Aanmelden</a></li>
+        </ul>
+        {% endif %}
+			<div class="content-wrapper">
+				<div class="content-inner">
+                    <p id="appstatus" class="appstatus">{{message|default:"&nbsp;"}}</p>
+                    <div id="appbuttons" class="appbuttons">Buttons</div>
+					<div id="content">
+                    </div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div id="popup" class="popup">
+      <div class="popup-wrapper">
+		<a href="#" class="popup-close">[close]</a>
+		<div class="popup-content">My content</div>
+      </div>
+	  <div class="overlay"></div>
+	</div>
+</body>
+</html>

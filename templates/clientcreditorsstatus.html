@@ -1,0 +1,9 @@
+{{client.status.status}}
+<ul>
+  {% for creditor in client.creditors %}
+    <li>
+        <img src="{{creditor.creditor.icon}}" width="16" height="16"> {{ creditor.creditor.display_name }} {{creditor.status.status}}
+    </li>
+  {% endfor %}
+</ul>
+

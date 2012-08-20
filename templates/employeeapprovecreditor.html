@@ -1,0 +1,11 @@
+<div id="message">Gegevens van de schuldeiser</div>
+<form method="post" class="form-generiek" action="{{self.request.path}}" enctype="multipart/form-data">
+<table>
+{{ form.as_table }}
+<tr><th><label for="id_is_generic">Is generiek:</label></th><td><input type="checkbox" name="is_generic" id="id_is_generic" {{is_generic}}></td></tr>
+</table>
+<input type="submit" value="Opslaan"> 
+</form>
+
+
+
