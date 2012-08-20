@@ -12,7 +12,7 @@
     <p>
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         {% if creditor.creditor.is_collector %}
-        <label>Deze schuld wordt ge&iuml;nd voor een ander bedrijf:</label>
+        <label>Oorspronkelijke schuldeiser:</label>
         {% else %}
         <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
         {% endif %}
@@ -28,14 +28,14 @@
         <label>Afbetalingsregeling</label>{{form.payment_amount}}
     </p>
     <p class="submit">
-        <input type="submit" value="&gt;&gt;&gt; Toevoegen aan dossier" class="app-control">
+        <input type="submit" value="&gt;&gt;&gt; Toevoegen aan dossier">
     </p>
 
 </form>
 <div class="debts-listing">
     <table>
         <tr>
-            <th>Id</th>
+            <th>ID</th>
             <th>Deurwaarder</th>
             <th>Openstaand bedrag</th>
             <th>Datum brief</th>
@@ -55,64 +55,3 @@
     </table>
 </div>
 
-
-
-
-
-
-
-{% comment %}
-<form method="post" action="{{self.request.path}}" class="client-debts-form">
-{% if self.user.class_name == 'Client' %}
-<a href="/client/debts">[&lt;]</a>
-{% else %}
-<a href="/employee/cases/view/{{creditor.user.key}}">[&lt;]</a>
-{% endif %}
-
-{{ creditor.creditor.display_name }}
-<input type="hidden" name="creditor" value="{{creditor.key.id}}">
-<table>
- <tr><th>Deurwaarder</th><th>Ontstaansdatum</th><th>Dossiernummer Schuldeiser</th><th>Openstaand bedrag</th><th>Afbetalingsregeling</th>
- </tr>
-{% for debt in creditor.debts %}
- <tr>
-		  <td>{{debt.collector.display_name}}</td>
-		  <td class="date">{{debt.original_date|date:"d-m-Y"}}</td>
-		  <td class="dossier">{{debt.creditor_dossier_number}}</td>
-		  <td class="amount">{{debt.amount}}</td>
-          <td class="amount">{{debt.payment_amount}}</td>
- </tr>
-{% endfor %}
-{% for field in form %}
-  <tr>
-	<td colspan="5" class="error">
-		  {{ field.errors }}
-	</td>
-  </tr>
-{% endfor %}
-{% if form.non_field_errors %}
-  <tr>
-	<td colspan="5" class="error">
-		  {{ form.non_field_errors }}<br>
-	</td>
-  </tr>
-{% endif %}
-  <tr>
-	{% if not selected %}
-    <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}"
-           target="_popup">Zoek</a>
-        <input type="hidden" name="selected" value="{{selected.key.id}}"></td>
-	{% else %}
-    <td><a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector}}&come_from={{creditor.key.id}}"
-           target="_popup">{{selected.display_name}}</a>
-        <input type="hidden" name="selected" value="{{selected.key.id}}"></td>
-	{% endif %}
-	<td>{{form.original_date}}</td>
-	<td>{{form.creditor_dossier_number}}</td>
-	<td>{{form.amount}}</td>
-	<td>{{form.payment_amount}}</td>
- </tr>
- <tr><td colspan="5"><input type="submit" value="Opslaan"></td></tr>
-</table>
-</form>
-{% endcomment %}
