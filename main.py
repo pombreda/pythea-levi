@@ -274,27 +274,36 @@ class ClientAddCreditor(BaseHandler):
 
 class ClientEditCreditor(BaseHandler):
     def get(self, creditor):
-        # FIXME: should find some way to make this form readonly
+        # FIXME: This is a mess, look at logic of the POST method.
         creditor = models.Creditor.get_by_id(int(creditor))
 
         form = forms.CreditorForm(instance=creditor)
+        vars = {'forms': [form]}
         if not self.user == creditor.private_for or self.user is None:
             form.readonly = True
-        vars = {'forms': [form]}
+            form.title = 'De gegevens van deze schuldeiser. U kunt deze niet aanpassen.'
+            vars['submit'] = 'terug'
         self.render(vars, "form.html")
 
     def post(self, creditor):
+        # FIXME: This is a mess, try to follow the logic.
         creditor = models.Creditor.get_by_id(int(creditor))
+        client = self.user
+        link = client.hasCreditor(creditor)
         form = forms.CreditorForm(self.request.POST, instance=creditor)
+        vars = {'forms': [form]}
         if not self.user == creditor.private_for or self.user is None:
             form.readonly = True
-        if not form.readonly and form.is_valid():
+            self.redirect('/client/debts/creditor/%s' % (link.key().id()))
+        elif not form.readonly and form.is_valid():
             creditor = form.save(commit=True)
-            link = client.hasCreditor(creditor)
-            self.redirect('/client/debts/creditor/%s' % (client, link.key().id()))
+            self.redirect('/client/debts/creditor/%s' % (link.key().id()))
         else:
             form = forms.CreditorForm(instance=creditor)
-            vars = {'forms': [form]}
+            if not self.user == creditor.private_for or self.user is None:
+                form.readonly = True
+                form.title = 'De gegevens van deze schuldeiser. U kunt deze niet aanpassen.'
+                vars['submit'] = 'terug'
             self.render(vars, "form.html")
 
 class ClientDeleteCreditor(BaseHandler):
@@ -1315,7 +1324,7 @@ class Test2(BaseHandler):
 class Test(BaseHandler):
     """I use this to test new code"""
     def get(self, args = "http://www.ing.nl"):
-        """Show the test response"""
+        """Show the test response
 
         from google.appengine.api import app_identity
         id = app_identity.get_service_account_name()
@@ -1323,6 +1332,11 @@ class Test(BaseHandler):
         token, expires = app_identity.get_access_token(scope)
         self.response.out.write(token + '<br>\n')
         self.response.out.write(str(expires) + '<br>\n')
+        """
+
+        from google.appengine.api import namespace_manager
+        namespace = namespace_manager.get_namespace()
+        self.response.out.write(`namespace` + '\n')
 
         #self.render({}, 'test.html')
 
