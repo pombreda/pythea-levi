@@ -25,6 +25,20 @@ $(document).ready(function(){
         $("#popup a.popup-close").trigger("click");
     });
 
+    // Letter print handler
+    $(".letter-preview a.print").live("click",function(e){
+        var href = $(this).attr("href"),
+            id = href.replace(/^.*\//,'');
+
+        e.preventDefault();
+        e.stopPropagation();
+        window.print();
+        $.ajax($(this).attr("href"));
+        $("#creditor-overview-"+id).removeClass("new").addClass("waiting");
+
+        return false;
+    });
+
     // Make sure submit button values are included in AJAX calls
     $("input[type=submit]").live("click",function(e){
         var $this = $(this),
