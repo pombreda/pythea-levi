@@ -430,7 +430,8 @@ function setAppStatus(status) {
 
 function setAppButtons() {
     var $appButtons = $("#appbuttons"),
-        $appControls = $(".app-control");
+        //$appControls = $(".app-control");
+        $appControls = $(".submit input[type='submit']");
 
     $appButtons.empty();
     if ($appControls.length > 0) {
