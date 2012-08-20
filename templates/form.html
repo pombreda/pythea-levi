@@ -4,9 +4,7 @@
 <table>
 {% for form in forms %}
 <tr><td colspan=2><div id="message">{% firstof message form.title %}</div></td></tr>
-    <tbody class="{{form.is_bound|yesno:'posted,unposted'}}
-                  {{form.instance|yesno:'instance,free'}}
-                  {{form.readonly|yesno:'readonly,'}}">
+    <tbody class="{{form.is_bound|yesno:'posted,unposted'}} {{form.instance|yesno:'instance,free'}} {{form.readonly|yesno:'readonly,'}}">
     {{ form.as_table }}
     </tbody>
 {% endfor %}

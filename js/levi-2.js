@@ -25,6 +25,20 @@ $(document).ready(function(){
         $("#popup a.popup-close").trigger("click");
     });
 
+    // Letter print handler
+    $(".letter-preview a.print").live("click",function(e){
+        var href = $(this).attr("href"),
+            id = href.replace(/^.*\//,'');
+
+        e.preventDefault();
+        e.stopPropagation();
+        window.print();
+        $.ajax($(this).attr("href"));
+        $("#creditor-overview-"+id).removeClass("new").addClass("waiting");
+
+        return false;
+    });
+
     // Make sure submit button values are included in AJAX calls
     $("input[type=submit]").live("click",function(e){
         var $this = $(this),
@@ -339,12 +353,13 @@ On the registration and user info forms, prevent the username from being changed
 function handleUsername() {
     // Find elements
     var $form = $("form[action='/client/register'],form[action='/client/info']"),
-        $tbody = $form.find("tbody[class]"),
-        $username = $form.find("input[name=username]");
+        $username = $form.find("input[name=username]"),
+        $tbody = $username.parents("tbody[class]");
 
     // Only operate if all necessary elements are pesent
-    if ($form && $username && $tbody) {
-        if (!$username.attr("readonly") && ($tbody.hasClass("unposted") || $tbody.hasClass("instance"))) {
+    if ($form.length > 0 && $username.length > 0 && $tbody.length > 0) {
+        if (!$username.attr("readonly") && ($tbody.hasClass("unposted") || $tbody.hasClass("free") || $tbody.hasClass("instance"))) {
+
             // Form is either new or an existing instance. The username cannot be changed
             $username.attr("readonly","readonly");
 
