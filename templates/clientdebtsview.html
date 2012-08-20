@@ -22,11 +22,26 @@
         <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">{{selected.display_name}}</a><br>
         {% endif %}
         <input type="hidden" name="selected" value="{{selected.key.id}}">
-        <label>Openstaand bedrag</label>{{form.amount}} {{form.amount.errors}}<br>
-        <label>Datum brief</label>{{form.response_date}}<br>
-        <label>Dossiernummer</label>{{form.creditor_dossier_number}}<br>
-        <label>Afbetalingsregeling</label>{{form.payment_amount}}
     </p>
+        <table>
+            <tr>
+                <td><label>Openstaand bedrag</label></td>
+                <td>{{form.amount}}</td>
+                <td>{{form.amount.errors}}</td>
+            </tr>
+            <tr>
+                <td><label>Datum brief</label></td>
+                <td>{{form.response_date}}</td>
+            </tr>
+            <tr>
+                <td><label>Dossiernummer</label></td>
+                <td>{{form.creditor_dossier_number}}</td>
+            </tr>
+            <tr>
+                <td><label>Afbetalingsregeling</label></td>
+                <td>{{form.payment_amount}}</td>
+            </tr>
+        </table>
     <p class="submit">
         <input type="submit" value="&gt;&gt;&gt; Toevoegen aan dossier" class="app-control">
     </p>
