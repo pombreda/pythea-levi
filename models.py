@@ -402,8 +402,11 @@ class CreditorLink(db.Model):
         vars['today'] = datetime.date.today().strftime("%d-%m-%Y")
         return template.render(path, vars)
 
-    def approve(self):
-        self.approved = True
+    def approve(self, approved, user):
+        self.approved = approved
+        self.approved_by = user
+        self.approval_date = datetime.datetime.now()
+        self.put()
 
     def status(self):
         """Old version see below for new and improved"""
