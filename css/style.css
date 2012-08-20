@@ -455,6 +455,10 @@ input.app-control-set {
   padding: 3px;
   margin: 1px;
 }
+
+.form-generiek tbody.readonly input[type=text] {
+  background-color: transparent;
+}
 /* clientdebtsview tabel + formulier */
 .client-debts-form {
   position: relative;
@@ -466,10 +470,12 @@ input.app-control-set {
 .client-debts-form.collector label {
   min-width: 14em;
 }
+.client-debts-form p.submit {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 .client-debts-form input[type=submit] {
-  position: absolute;
-  right: 0;
-  bottom: 0;
   color: #B5373D;
 }
 .client-debts-form + .debts-listing {
@@ -478,7 +484,7 @@ input.app-control-set {
   padding-top: 1em;
   width: 100%;
   position: absolute;
-  top: 11.5em;
+  top: 14em;
   bottom: 0;
   overflow: auto;
 }
@@ -583,6 +589,9 @@ input.app-control-set {
 }
 .file-setup .creditor-details .name {
   color: #B5373D;
+}
+.file-setup .creditor-details .name a {
+  text-decoration: none;
 }
 .file-setup .creditor-details p {
   vertical-align: bottom;
@@ -897,4 +906,9 @@ ul.contact-list input {
 }
 .ui-datepicker .ui-state-highlight {
   font-weight: bold;
+}
+
+/* Letter preview */
+.letter-preview {
+  margin: 0 2cm;
 }

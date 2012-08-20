@@ -1,7 +1,8 @@
+<div class="letter-preview">
 {% if preview %}
-<a target="_blank" href="/client/printletter/{{key}}">[PRINT]</a>
+<a target="_blank" href="/client/printletter/{{key}}" class="print">[PRINT]</a>
 <!-- <a target="_blank" href="javascript:window.print()">[PRINT]</a> -->
-   {% if creditor.email %}
+   {% if creditor.email and false %}
       <a target="_close" href="/client/email/{{key}}">[MAIL]</a>
    {% endif %}
 {% endif %}
@@ -49,3 +50,4 @@ Hoogachtend,
 {{client.birthdate|default:""}}<br>
 {{client.ssn|default:""}}<br>
 </p>
+</div>
