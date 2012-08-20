@@ -991,7 +991,14 @@ class EmployeeViewCaseCreditorApproveResponse(BaseHandler):
         self.render(vars, "employeeapprovecreditorresponse.html")
 
     def post(self, client, creditor):
-        self.dump()
+        creditor = models.CreditorLink.get_by_id(int(creditor))
+        comment = self.request.get('comment').strip()
+        if comment:
+            annotation = models.Annotation(subject=creditor, author=self.user, text=comment)
+            annotation.put()
+        approved = self.request.get('action') == 'keur goed'
+        creditor.approve(approved, self.user)
+        self.redirect('/employee/cases/view/%s/creditor/%d' % (client, creditor.key().id()))
 
 class EmployeeCreditorsList(BaseHandler):
     def get(self):
