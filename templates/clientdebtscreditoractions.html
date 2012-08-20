@@ -23,7 +23,7 @@
   {% if note.author.key != self.user.key %}
   <em>{{note.author.first_name}} {{note.author.last_name}}</em><br>
   {% endif %}
-  <span>{{note.text}} <a href="{{base_url}}/annotations/{{note.key}}/delete?come_from={{self.request.url}}">[x]</a></span>
+  <span>{{note.text}} <a href="/client/debts/annotations/{{note.key}}/delete?come_from={{self.request.url}}">[x]</a></span>
 </p>
 {% empty %}
 Geen commentaar
