@@ -18,7 +18,7 @@ header {
 }
 .popup .popup-wrapper {
     margin: 0 !important;
-    padding: 2cm;
+    padding: 0;
     position: relative;
     left: 0;
     display: inline-block;

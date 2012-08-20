@@ -6,7 +6,7 @@
   <div class="creditor-listing-wrapper">
     <table class="creditor-overview">
   {% for cred in client.creditors %}
-      <tr class="creditor {{cred.status|lower}} {%if creditor.key == cred.key%}active{%endif%}">
+      <tr class="creditor {{cred.status|lower}} {%if creditor.key == cred.key%}active{%endif%}" id="creditor-overview-{{cred.key.id}}">
         <td>
           <a href="{{base_url}}/creditor/{{cred.key.id}}">
             <img src="{{ cred.creditor.icon}}" alt="" width="16" height="16">&nbsp;{{ cred.creditor.display_name }}
