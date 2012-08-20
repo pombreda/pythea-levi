@@ -1,0 +1,16 @@
+<ul>
+<li> <a href="{{collector_url}}" target="_popup">Deurwaarders</a>
+<li> <a href="{{other_url}}" target="_popup">Overige</a>
+</li>
+</ul>
+
+<ul class="client-select-creditors">
+{% for company in creditors %}
+ <li>
+		  <img src="{{company.icon}}" width="16" height="16">
+          <a href="{{base_url}}/view/{{come_from}}?selected={{company.key.id}}" class="popup-select">
+			  {{company.display_name}}
+		  </a>
+	 </li>
+{% endfor %}
+</ul>

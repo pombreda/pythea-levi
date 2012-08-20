@@ -1,0 +1,6 @@
+<div id="message"> Deze schuldeisers moeten nog goedgekeurd worden </div>
+<ul>
+{% for creditor in creditors %}
+  <li> <a href='/employee/creditors/approve/{{creditor.key}}'>{{ creditor.display_name }}</a></li>
+{% endfor %}
+</ul>

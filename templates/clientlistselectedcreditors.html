@@ -1,0 +1,8 @@
+<ul>
+  {% for creditor in user.creditors %}
+    <li>
+        <img src="{{creditor.creditor.icon}}" width="16" height="16"> {{ creditor.creditor.display_name }}
+    </li>
+  {% endfor %}
+</ul>
+

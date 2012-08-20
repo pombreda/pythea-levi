@@ -1,0 +1,41 @@
+<div id="message">
+    U kunt nu de antwoorden van uw schuldeisers verwerken.
+</div>
+<div class="file-setup debt-overview">
+  <h2>Schuldeisers {{client.status.status}} </h2>
+  <div class="creditor-listing-wrapper">
+    <table class="creditor-overview">
+  {% for cred in client.creditors %}
+      <tr class="creditor {{cred.status|lower}} {%if creditor.key == cred.key%}active{%endif%}">
+        <td>
+          <a href="{{base_url}}/creditor/{{cred.key.id}}">
+            <img src="{{ cred.creditor.icon}}" alt="" width="16" height="16">&nbsp;{{ cred.creditor.display_name }}
+          </a>
+        </td>
+        <td>
+          <a href="{{base_url}}/creditor/{{cred.key.id}}">
+            <span class="status">
+              <span></span>
+            </span>
+          </a>
+        </td>
+        <td>
+          <span class="action hide {{cred.status.action}}">
+            <span class="status-text">{{cred.status.action}}</span>
+          </span>
+        </td>
+        <td>
+          <span class="status hide {{cred.status}}">
+            <span>
+              <span class="status-text">{{cred.status}}</span>
+            </span>
+          </span>
+        </td>
+      </tr>
+  {% endfor %}
+    </table>
+  </div>
+  <div class="creditor-details" id="creditor-details">
+      {% include screen %}
+  </div>
+</div>

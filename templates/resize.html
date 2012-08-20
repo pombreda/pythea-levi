@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Jubilee</title> 
+    <link rel="stylesheet" type="text/css" href="/css/snn.css">
+      <script src="/js/jquery.min.js"></script>
+      <script src="/js/jquery.Jcrop.min.js"></script>
+      <script language="javascript">
+         $(function(){
+           $('#jcrop_target').Jcrop({
+             onChange: showCoords,
+             onSelect: showCoords,
+             aspectRatio: 3/4
+           });
+         });
+         function showCoords(c)
+         {
+           $('#x').val(c.x);
+           $('#y').val(c.y);
+           $('#x2').val(c.x2);
+           $('#y2').val(c.y2);
+           $('#w').val(c.w);
+           $('#h').val(c.h);
+         };
+      </script>
+  </head> 
+  <body id="body">
+    <table><tr>
+    <td><img src="/employee/photo/{{worker.key}}/original" id="jcrop_target"></td>
+    <td><img src="/employee/photo/{{worker.key}}"></td>
+    </tr>
+    </table>
+<form method="post" action="{{self.request.url}}">
+    <label>X1 <input type="text" size="4" id="x" name="x" /></label>
+    <label>Y1 <input type="text" size="4" id="y" name="y" /></label>
+    <label>X2 <input type="text" size="4" id="x2" name="x2" /></label>
+
+    <label>Y2 <input type="text" size="4" id="y2" name="y2" /></label>
+    <label>W <input type="text" size="4" id="w" name="w" /></label>
+    <label>H <input type="text" size="4" id="h" name="h" /></label>
+    <input type="submit">
+</form>
+  </body>
+</html>

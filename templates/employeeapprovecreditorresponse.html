@@ -1,0 +1,11 @@
+<div id="message">De gebruiker heeft het volgende schuldbewijs toegevoegd</div>
+<img src="/client/debts/creditor/{{creditor.key}}/responseletter" alt="Geen schuldbewijs aanwezig"> 
+<form method="post" action="{{self.request.path}}">
+<div class="submit">
+  <textarea name="comment"></textarea>
+  <div>
+    <input type="submit" value="Keur goed" data-set-value="action=keur goed">
+    <input type="submit" value="Keur af" data-set-value="action=keur af">
+  </div>
+</div>
+</form>
