@@ -529,13 +529,17 @@ class ClientDebtsView(BaseHandler):
             form = forms.DebtForm(instance=debt)
         else:
             form = forms.DebtForm()
-        selected = self.request.get('selected')
-        if selected:
-            selected = models.Creditor.get_by_id(int(selected))
+        collector = self.request.get('collector')
+        if collector:
+            collector = models.Creditor.get_by_id(int(collector))
+        collected_for = self.request.get('collected_for')
+        if collected_for:
+            collected_for = models.Creditor.get_by_id(int(collected_for))
 
         vars = { 'client': client,
                  'creditor': creditor,
-                 'selected': selected,
+                 'collector': collector,
+                 'collected_for': collected_for,
                  'base_url': '/client/debts/view/%s' % creditor.key().id(),
                  'form': form }
         self.render(vars, 'clientdebtsview.html')
@@ -548,21 +552,21 @@ class ClientDebtsView(BaseHandler):
         else:
             form = forms.DebtForm(self.request.POST)
         creditor = models.CreditorLink.get_by_id(int(creditor))
-        selected = self.request.get('selected')
-        if selected:
-            selected = models.Creditor.get_by_id(int(selected))
-        else:
-            selected = None
+
+        collector = self.request.get('collector')
+        if collector:
+            collector = models.Creditor.get_by_id(int(collector))
+        collected_for = self.request.get('collected_for')
+        if collected_for:
+            collected_for = models.Creditor.get_by_id(int(collected_for))
 
         if form.is_valid():
             debt = form.save(commit=False)
             debt.creditor = creditor
-            if creditor.creditor.is_collector:
-                debt.collected_for = selected
-            else:
-                debt.collector = selected
-                if selected and not user.hasCreditor(selected):
-                    user.addCreditor(selected)
+            debt.collected_for = collected_for if collected_for else None
+            debt.collector = collector if collector else None
+            if collector and not user.hasCreditor(collector):
+                user.addCreditor(collector)
             debt.put()
             url = urlparse.urlsplit(self.request.url)
             self.redirect(url.path)
@@ -570,47 +574,36 @@ class ClientDebtsView(BaseHandler):
             vars = { 'user': user,
                      'client': user,
                      'creditor': creditor,
-                     'selected': selected,
+                     'collector': collector,
+                     'collected_for': collected_for,
                      'form': form }
             self.render(vars, 'clientdebtsview.html')
 
 class ClientDebtsSelectCreditor(BaseHandler):
     """This is used to select a 'deurwaarder' for a debt (or a creditor in case of a 'deurwaarder'"""
-    def get(self, selected=None):
+    def get(self, type=None):
         user = self.get_user()
-        come_from = self.request.get('come_from') # Dit is het id van de CreditorLink
-        creditor = models.CreditorLink.get_by_id(int(come_from))
-        client = creditor.user
+        #logging.error(selected)
+        #come_from = self.request.get('come_from') # Dit is het id van de CreditorLink
+        #creditor = models.CreditorLink.get_by_id(int(come_from))
+        #client = creditor.user
 
-        is_collector = self.request.get('is_collector') == 'True'
-        if is_collector:
-            collector_url = self.request.url
-            other_url = self.request.url.replace('is_collector=True', 'is_collector=False')
+        is_collector = type =='collector'
+
+        creditors = models.Creditor.all()
+        #creditors.filter('display_name =', 'Woonbron')
+        creditors = creditors.filter('is_collector ==', is_collector)
+        if user.class_name() == 'Client':
+            base_url = "/client/debts"
         else:
-            other_url = self.request.url
-            collector_url = self.request.url.replace('is_collector=False', 'is_collector=True')
+            base_url = "/employee/cases/view/%s" % client.key()
 
-        if not selected:
-            creditors = models.Creditor.all()
-            #creditors.filter('display_name =', 'Woonbron')
-            creditors = creditors.filter('is_collector ==', is_collector)
-            if user.class_name() == 'Client':
-                base_url = "/client/debts"
-            else:
-                base_url = "/employee/cases/view/%s" % client.key()
-
-            vars = { 'user': user,
-                     'client': client,
-                     'base_url': base_url,
-                     'collector_url': collector_url,
-                     'other_url': other_url,
-                     'base_url': base_url,
-                     'come_from': come_from,
-                     'is_collector': is_collector,
-                     'creditors': creditors }
-            self.render(vars, 'clientdebtsselectcreditor.html')
-        else:
-            self.redirect("%s/view/%s?selected=%s" % (base_url, urllib.unquote(come_from), selected))
+        vars = { 'user': user,
+                 'base_url': base_url,
+                 'base_url': base_url,
+                 'is_collector': is_collector,
+                 'creditors': creditors }
+        self.render(vars, 'clientdebtsselectcreditor.html')
 
     def post(self, *args, **kwargs):
         self.get(*args, **kwargs)

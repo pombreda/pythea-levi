@@ -17,15 +17,11 @@
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         {% if creditor.creditor.is_collector %}
         <label>Oorspronkelijke schuldeiser:</label>
-        {% else %}
+        <a href="/client/debts/creditor/select" target="_popup">{{collector.display_name|default:'Ja'}}<input type="hidden" name="collected_for" value="{{collected_for.key.id}}"></a>
+        <br>
+        {% endif %}
         <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
-        {% endif %}
-        {% if not selected %}
-        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">Ja<input type="hidden" name="selected" value=""></a><br>
-        {% else %}
-        <a href="/client/debts/creditor/select?is_collector={{creditor.creditor.is_collector|yesno:"False,True"}}&come_from={{creditor.key.id}}" target="_popup">{{selected.display_name}}</a><br>
-        {% endif %}
-        <input type="hidden" name="selected" value="{{selected.key.id}}">
+        <a href="/client/debts/creditor/select" target="_popup">{{collector.display_name|default:'Ja'}}<input type="hidden" name="collector" value="{{collector.key.id}}"></a><br>
     </p>
         <table>
             <tr>
