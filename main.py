@@ -205,15 +205,16 @@ class ClientSelectCreditors(BaseHandler):
         if not category:
             category = 'Banken'
         user = self.user
-        #FIXME: we should cache this
+        #FIXME: we should memcache this
         creditors = models.Creditor.all()
         categories = models.Category.all()
+        selected = list(user.creditors)
 
         creditors.filter('categories =', category)
         creditors_2 = []
         for creditor in creditors:
             if creditor.private_for == None or creditor.private_for.key() == user.key():
-                creditor.selected = user.hasCreditor(creditor)
+                creditor.selected = [c for c in selected if c.creditor.key() == creditor.key()]
                 creditors_2.append(creditor)
 
         vars = { 'categories': categories,
@@ -368,11 +369,11 @@ class ClientCreditorResponse(BaseHandler):
             image = images.Image(image_data=upload)
             creditor.scan = db.Blob(upload)
             creditor.put()
-            self.redirect(self.request.url)
+            self.redirect('/client/debts/view/%d' % creditor.key().id())
         else:
-            self.redirect(self.request.url)
-        vars = { 'creditor': creditor }
-        self.render(vars, "clientcreditorresponse.html")
+            self.redirect('/client/debts/view/%d' % creditor.key().id())
+        # vars = { 'creditor': creditor }
+        # self.render(vars, "clientcreditorresponse.html")
 
 class ClientCreditorResponseLetter(BaseHandler):
     def get(self, creditor):
@@ -383,7 +384,7 @@ class ClientCreditorResponseLetter(BaseHandler):
             self.response.out.write(creditor.scan)
         else:
             # TODO:
-            self.response.out.write("Nothing found")
+            self.error(404)
 
 class ClientValidate(BaseHandler):
     def get(self):
