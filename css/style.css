@@ -628,6 +628,14 @@ input.app-control-set {
   right: 8px;
 }
 
+.file-setup .creditor-details .action.approve {
+  width: 22px;
+  height: 22px;
+  background-image: url(/images/icon-approve.png);
+  position: absolute;
+  right: 72px;
+}
+
 .file-setup .creditor-details .add-annotation {
   /* border-style: solid;
   border-width: 1px 0 0 0;
@@ -650,6 +658,9 @@ input.app-control-set {
   outline: none;
 }
 .file-setup .creditor-details .add-annotation input[type=submit] {
+  float: right;
+}
+.file-setup .creditor-details .delete-annotation {
   float: right;
 }
 .file-setup .creditor-listing-wrapper {
