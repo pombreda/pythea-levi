@@ -6,7 +6,11 @@
 {%else %}
   <a href="/employee/cases/view/{{client.key}}/creditor/{{creditor.key.id}}/approve?base_url={{base_url}}" class="action approve">
 {% endif %}
+        {% if creditor.scan %}
         <img alt="Schuldbewijs" src="/client/debts/creditor/{{creditor.key}}/responseletter" width="115px" height="155px"></img>
+        {% else %}
+        Voeg een schuldbewijs toe.
+        {% endif %}
         </a>
     </div>
     <p>
@@ -43,8 +47,8 @@
             </tr>
         </table>
     <p class="submit">
-        <input type="submit" value="&gt;&gt;&gt; Toevoegen aan dossier">
-        <input type="button" value="&lt;&lt; Terug naar crediteur" class="app-control" onclick="$.address.value($.address.value().replace('/view','/creditor'));">
+        <input type="button" value="&lt;&lt; Terug" class="app-control" onclick="$.address.value($.address.value().replace('/view','/creditor'));">
+        <input type="submit" value="Toevoegen &gt;&gt;">
     </p>
 
 </form>
