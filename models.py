@@ -367,6 +367,8 @@ class CreditorLink(db.Model):
     last_print_date = db.DateProperty()
     contacted_by = db.StringProperty()
 
+    has_debts = db.BooleanProperty(default=False)
+
     complete = db.BooleanProperty()
     registration_date = db.DateProperty(auto_now_add=True)
     last_changed_date = db.DateProperty(auto_now=True)
@@ -478,8 +480,9 @@ class Debt(db.Model):
         return self.collector_dossier_number if self.collector_dossier_number else self.creditor_dossier_number
 
     def put(self):
-        self.creditor.cached_state = None
-        self.creditor.put()
+        if self.creditor.has_debts == False:
+            self.creditor.has_debts = True
+            self.creditor.put()
         db.Model.put(self)
 
 class Annotation(db.Model):
