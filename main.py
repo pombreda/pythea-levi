@@ -922,7 +922,8 @@ class Logout(BaseHandler):
 class Login(BaseHandler):
     def get(self):
         form = forms.LoginForm()
-    	vars = { 'forms': [form] }
+        message = "Login"
+    	vars = { 'forms': [form], 'message': message }
         self.render(vars, 'form.html')
 
     def post(self):
