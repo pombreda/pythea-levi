@@ -210,12 +210,14 @@ class Client(User):
                )
 
     def hasCreditor(self, creditor):
+        # FIXME: use a filter on this query
         for link in self.creditors:
             if link.creditor.key().id() == creditor.key().id():
                 return link
         return False
 
     def addCreditor(self, creditor, amount=None):
+        # FIXME: use a filter on this query
         if not self.hasCreditor(creditor):
             link = CreditorLink(creditor=creditor, user=self, estimated_amount=amount)
             link.put()
@@ -223,10 +225,10 @@ class Client(User):
             self.put()
 
     def removeCreditor(self, creditor):
+        # FIXME: use a filter on this query
         for link in self.creditors:
             if link.creditor.key().id() == creditor.key().id():
                 link.delete()
-                #FIXME: also needs to delete the associated debts and annotations?
                 self.state = None
                 self.put()
 
