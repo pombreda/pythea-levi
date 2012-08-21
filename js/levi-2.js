@@ -193,7 +193,8 @@ $(document).ready(function(){
         var url = anchor.attr("href");
         var hidden = anchor.children("input[type=hidden]");
         appLoading(true);
-        $("#popup .popup-content").load(url,function(){
+
+        function load_in_popup() {
             $('#popup').addClass("active");
             appLoading(false);
 
@@ -202,7 +203,6 @@ $(document).ready(function(){
             $popupCloser = $("#popup .close");
             $popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
             prepareForms();
-
             /*
              * And close it again when something is selected.
              */
@@ -211,8 +211,10 @@ $(document).ready(function(){
                 var target = $(event.currentTarget);
                 var text = target.html().trim();
                 var selection = target.attr("href").split('=')[1];
-                anchor.html(text+"<input type='hidden' name='selected' value='"+selection+"'>");
-                $('input[name=selected]').val(selection);
+                //hidden[0].value = selection
+                hidden.val(selection);
+                // I'd like to use hidden.html() here, but that fails.
+                anchor.html(text + hidden[0].outerHTML);
                 $("#popup").removeClass("active");
             });
             $("#popup a.popup-close").click(function(event) {
@@ -220,7 +222,14 @@ $(document).ready(function(){
                 $('#popup .content').empty();
                 $("#popup").removeClass("active");
             });
-        });
+            $("#popup a[target=_this]").click(function(event) {
+                event.preventDefault();
+                var target = $(event.currentTarget);
+                var url = target.attr("href");
+                $("#popup .popup-content").load(url, load_in_popup);
+            });
+        };
+        $("#popup .popup-content").load(url, load_in_popup);
     });
 
     /*
