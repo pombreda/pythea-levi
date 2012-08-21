@@ -20,6 +20,16 @@
           </a>
         </td>
         <td>
+            {% if cred.scan %}
+              !
+            {% endif %}
+        </td>
+        <td>
+            {% if cred.has_debts %}
+              #
+            {% endif %}
+        </td>
+        <td>
           <span class="action hide {{cred.status.action}}">
             <span class="status-text">{{cred.status.action}}</span>
           </span>
