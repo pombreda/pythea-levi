@@ -1,6 +1,8 @@
 <div id="message">Voeg een scan of foto toe van uw schuldbewijs</div>
+{% if creditor.scan %}
 <img src="/client/debts/creditor/{{creditor.key}}/responseletter" alt="Geen schuldbewijs aanwezig" 
 width="124px" height="155px">
+{% endif %}
 <form method="post" action="{{self.request.path}}">
    <input id="upload" name="upload" type="file"></input>
 <div class="submit">
