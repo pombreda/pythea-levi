@@ -31,7 +31,6 @@ class ClientForm(df.ModelForm):
             data['key_name'] = username
         #username = "%s.%s" % (first_name.lower(), last_name.lower())
         #data['username'] = username
-        # FIXME: we should check if the username already exists in the database
         phone = data.get('phone')
         mobile = data.get('mobile')
         email = data.get('email')
