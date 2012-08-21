@@ -27,6 +27,9 @@ handlers:
   script: main.py
   login: admin
 
+- url: /stats.*
+  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+
 - url: /.*
   script: main.py
 
@@ -34,3 +37,7 @@ builtins:
 - deferred: on
 - remote_api: on
 
+admin_console:
+ pages:
+ - name: Appstats
+   url: /stats
