@@ -1,4 +1,4 @@
-       <div id="content"> 
+       <div id="content">
             <form method="post" action="{{self.request.path}}">
             {{ organisation.display_name }}<br>
             <div id="message">Overzicht van medewerkers</div>
@@ -6,7 +6,7 @@
             {% for employee in employees %}
 	         <tr>
                       <td><input type="checkbox" name="selected" value="{{employee.key.id_or_name}}"></td>
-                      <td><a href="/organisation/employees/edit/{{employee.key}}">{{ employee.first_name }} {{ employee.last_name }}</a></td> 
+                      <td><a href="/organisation/employees/edit/{{employee.key}}">{{ employee.first_name }} {{ employee.last_name }}</a></td>
                       <td>
                           {% if employee.photo %} <a href="/organisation/employees/resize/{{employee.key}}">
                             <img src="/employee/photo/{{employee.key}}" width="124px" height="155px">
@@ -14,13 +14,13 @@
                           {% else %}
                             <img src="/employee/photo/{{employee.key}}" width="124px" height="155px">
                           {% endif %}
-                      </td> 
+                      </td>
                  </tr>
             {% empty %}
                  Empty
             {% endfor %}
             </table>
-            <input type="submit" name="action" value="Create">
-            <input type="submit" name="action" value="Delete">
+            <input type="submit" name="action" value="Create" class="app-control">
+            <input type="submit" name="action" value="Delete" class="app-control">
             </form>
         </div>
