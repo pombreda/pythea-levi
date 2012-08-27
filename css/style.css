@@ -278,6 +278,14 @@ header.alt p#login {
   height: 92%;
   overflow: auto;
   /* border: 1px solid yellow; /* Test */
+
+  /* attempt to fix the content flowing off the screen. might break stuff */
+  height: auto;
+  position: absolute;
+  top: 4em;
+  left: 1em;
+  right: 1em;
+  bottom: 3em;
 }
 /* Tabs -------------------------------------------------------------------- */
 .tabs {
