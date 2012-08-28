@@ -1,0 +1,7 @@
+syntax: glob
+scribbles/*
+*.pyc
+gaesessions/__init__.pyc
+*.orig
+templates/old_screens/*
+.DS_Store

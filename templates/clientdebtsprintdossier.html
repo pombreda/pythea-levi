@@ -1,0 +1,26 @@
+<div id="message">
+    Overzicht van uw dossier
+</div>    
+{{client.first_name}} {{client.last_name}}
+<table>
+{% for creditor in client.creditors %}
+  {% for debt in creditor.debts %}
+  {% if not debt.collector %}
+    <tr>
+      <td>{{creditor.creditor.display_name}}</td>
+      <td>{{debt.original_date}}</td>
+      <td>{{debt.dossier_number}}</td>
+      {% if debt.collected_for %}
+      <td>{{debt.collected_for.display_name}}</td>
+      <td>{{debt.creditor_dossier_number}}</td>
+      {% else %}
+        <td colspan="2"></td>
+      {% endif %}
+      <td>{{debt.amount}}</td>
+      <td>{{debt.payment_amount}}</td>
+    </tr>
+  {% endif %}
+  {% endfor %}
+{% endfor %}
+</table>
+

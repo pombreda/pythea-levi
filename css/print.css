@@ -1,0 +1,36 @@
+body > .wrapper {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+header {
+    display: none;
+}
+.popup.active {
+    position: absolute;
+    display: inline-block;
+    width: 100%;
+    min-height: 100%;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+}
+.popup .popup-wrapper {
+    margin: 0 !important;
+    padding: 0;
+    position: relative;
+    left: 0;
+    display: inline-block;
+    width: 100% !important;
+}
+
+.popup-content {
+    width: 100%;
+    overflow: visible;
+    overflow-y: visible;
+}
+
+.popup-content a {
+    display: none;
+}
