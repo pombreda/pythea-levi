@@ -1,0 +1,29 @@
+
+<div id="message">Met wie heeft u gesproken</div>
+<form method="post" action="{{self.request.path}}">
+{% comment %}
+<table>
+   {% for o in organisations %}
+      {% for c in o.employees %}
+          <tr><td><input type="checkbox" value="{{c.key}}" name="selected"></td>
+              <td><img src="/employee/photo/{{c.key}}" width="124px" height="155px"></td>
+              <td>{{ c.first_name }} {{c.last_name}}</td></tr>
+      {% endfor %}
+   {% endfor %}
+</table>
+<p class="submit"><input type="submit" value="Submit" /></p>
+{% endcomment %}
+   <ul class="contact-list">
+   {% for o in organisations %}
+      {% for c in o.employees %}
+          <li><label for="{{c.key}}">
+          <div><input type="radio" value="{{c.key}}" id="{{c.key}}" name="selected">
+          <img src="/employee/photo/{{c.key}}">
+          <span>{{ c.first_name }} {{c.last_name}}</span></div></label></li>
+      {% endfor %}
+   {% endfor %}
+   </ul>
+</form>
+
+
+        </div>

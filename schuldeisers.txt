@@ -1,0 +1,47 @@
+www.woonbron.nl 		Woonbron	[Wonen]		 
+www.woonstad.nl			Woonstad 	[Wonen]
+www.havensteder.nl		Havensteder 	[Wonen]
+www.eneco.nl			Eneco 		[Energie]
+www.upc.nl			UPC 		[Internet]
+www.wehkamp.nl			Wehkamp		[Postorderbedrijven] 
+www.kpn.nl			KPN		[Telefoon, Internet]
+www.telfort.nl			Telfort 	[Telefoon, Internet]
+www.t-mobile.nl			T-mobile 	[Telefoon]
+www.vodafone.nl			Vodavone 	[Telefoon]
+www.achmea.nl			Zilveren Kruis Achmea 	[Verzekeringen]
+>www.agisweb.nl			Agis			[Verzekeringen] 
+>www.flanderijn.nl		Flanderijn 	
+>www.vanes.nl			Van Es 	
+>www.bazuin.nl			Bazuin & Partners 
+>www.ggn.nl			Maasdelta 
+>www.lindorff.nl			Lindorff
+>www.groenewegen.com		Groenewegen & Partners
+>www.blume-cs.nl			BSR incasso & Gerechtsdeurwaardes
+>www.ram-vismans.nl		R.A.M Vismans
+>www.mgdejong.com		M.G de Jong
+>www.intrum.com			Intrum Justitia
+>www.vanarkelincasso.nl		Arkel Gerechtsdeurwaarders
+www.cjib.nl			Centraal Justitieel Incasso Bureau	[Boetes]
+www.cvz.nl			CVZ Ziektekostenverzering		[Verzekeringen]
+www.belastingdienst.nl		Belastingdienst 			[Overheid]
+www.evides.nl			Evides					[Energie]
+www.stedin.net			Stedin					[Energie]
+www.schielandendekrimpenerwaard.nl	Hoogheemraadsschap		[Overheid]
+>www.graydon.nl			Graydon incasso				
+>www.wouters-incasso.nl		Wouters Gerechtsdeurwaarder & Incasso's 
+>www.das.nl			Das Incasso
+www.otto.nl			Otto 					[Postorderbedrijven]
+www.hm.com			H&M 					[Postorderbedrijven]
+www.disck.nl			DISCK kinderopvang			[Overig] 
+www.ib-groep.nl			Dienst Uitvoerend Onderwijs 		[Overheid]
+>www.vestingfinance.nl		Vesting Finance - Incasso en Debiteurenbeheer
+www.santander.nl		Comfort Card Santander 			[Banken]
+>www.lavg.nl			LAVG deurwaarders
+www.tele2.nl			Tele 2					[Internet, Telefoon]
+www.sizz.nl			SIZZ(telefoonabonnmenten)		[Telefoon]
+www.ben.nl			Ben(telefonie)
+>www.famed.nl			Fa-med (Medisch incassobureau)		[Verzekeringen,Overig]
+www.rotterdam.nl		Sociale Dienst				[Overheid]
+www.rotterdam.nl		dienst gemeentelijke belastingen : OZB/ Reinigingsrecht.	[Overheid]
+www.abnamro.nl			ABN AMRO 				[Banken]
+www.ing.nl			ING 					[Banken]
