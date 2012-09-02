@@ -1,10 +1,11 @@
 <div id="message">Voeg een scan of foto toe van uw schuldbewijs</div>
-{% if creditor.scan %}
-<img src="/client/debts/creditor/{{creditor.key}}/responseletter" alt="Geen schuldbewijs aanwezig" 
-width="124px" height="155px">
-{% endif %}
-<form method="post" action="{{self.request.path}}">
-   <input id="upload" name="upload" type="file"></input>
+<ul>
+{% for attachment in creditor.attachments %}
+  <li> <a href="/client/attachment/embedded/{{attachment.item.key}}">{{attachment.item.filename}}</a></li>
+{% endfor %}
+</ul>
+<form method="post" action="{{upload_url}}" target="_other" enctype="multipart/form-data">
+   <input id="upload" name="upload" type="file" multiple="true"></input>
 <div class="submit">
   <div>
     <input type="submit" value="Sla op">

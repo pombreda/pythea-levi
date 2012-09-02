@@ -7,6 +7,7 @@ import crypt
 import decimal
 
 from google.appengine.ext import db
+from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import template
 from google.appengine.api import mail
 from google.appengine.ext.db import polymodel
@@ -352,6 +353,7 @@ class Status():
         return ':'.join([self.status, self.action, self.description])
 
 
+
 class CreditorLink(db.Model):
     creditor = db.ReferenceProperty(Creditor)
     user = db.ReferenceProperty(Client, collection_name='creditors')
@@ -361,13 +363,12 @@ class CreditorLink(db.Model):
     approved_by = db.ReferenceProperty(SocialWorker)
     approval_date = db.DateTimeProperty()
 
-    scan = db.BlobProperty()
-
     last_email_date = db.DateProperty()
     last_print_date = db.DateProperty()
     contacted_by = db.StringProperty()
 
     has_debts = db.BooleanProperty(default=False)
+    has_attachments = db.BooleanProperty(default=False)
 
     complete = db.BooleanProperty()
     registration_date = db.DateProperty(auto_now_add=True)
@@ -482,6 +483,18 @@ class Debt(db.Model):
     def put(self):
         if self.creditor.has_debts == False:
             self.creditor.has_debts = True
+            self.creditor.put()
+        db.Model.put(self)
+
+class Attachment(db.Model):
+    client = db.ReferenceProperty(Client, collection_name='attachments')
+    creditor = db.ReferenceProperty(CreditorLink, collection_name='attachments')
+    item = blobstore.BlobReferenceProperty()
+    date = db.DateProperty(auto_now_add=True)
+
+    def put(self):
+        if self.creditor and self.creditor.has_attachments == False:
+            self.creditor.has_attachments = True
             self.creditor.put()
         db.Model.put(self)
 

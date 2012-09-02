@@ -6,8 +6,8 @@
 {%else %}
   <a href="/employee/cases/view/{{client.key}}/creditor/{{creditor.key.id}}/approve?base_url={{base_url}}" class="action approve">
 {% endif %}
-        {% if creditor.scan %}
-        <img alt="Schuldbewijs" src="/client/debts/creditor/{{creditor.key}}/responseletter" width="115px" height="155px"></img>
+        {% if creditor.has_attachments %}
+        Ik heb al een schuldbewijs
         {% else %}
         Voeg een schuldbewijs toe.
         {% endif %}
@@ -27,6 +27,10 @@
             <tr>
                 <td><label>Datum brief</label></td>
                 <td>{{form.response_date}}</td>
+            </tr>
+            <tr>
+                <td><label>Ontstaansdatum</label></td>
+                <td>{{form.original_date}}</td>
             </tr>
             <tr>
                 <td><label>Dossiernummer</label></td>
