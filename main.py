@@ -18,11 +18,13 @@ import re
 #from google.appengine.ext.db import polymodel
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.ext.webapp import blobstore_handlers
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.urlfetch import fetch
 from google.appengine.api import mail
 from google.appengine.ext import db
+from google.appengine.ext import blobstore
 from google.appengine.api import images
 from google.appengine.api import taskqueue
 
@@ -356,35 +358,37 @@ class ClientEmailCreditor(BaseHandler):
 class ClientCreditorResponse(BaseHandler):
     def get(self, creditor):
         """Show an upload form for the scanned response letter from the creditor"""
+        upload_url = blobstore.create_upload_url('/client/debts/creditor/%s/responseupload' % creditor)
         creditor = models.CreditorLink.get(creditor)
-        vars = { 'creditor': creditor }
+        vars = { 'creditor': creditor,
+                 'upload_url': upload_url }
         self.render(vars, "clientcreditorresponse.html")
 
+class ClientCreditorResponseHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self, creditor):
-        """Show an upload form for the scanned response letter from the creditor"""
         creditor = models.CreditorLink.get(creditor)
-        upload = self.request.get('upload')
-        if upload:
-            # TODO: should resize the image
-            image = images.Image(image_data=upload)
-            creditor.scan = db.Blob(upload)
-            creditor.put()
-            self.redirect('/client/debts/view/%d' % creditor.key().id())
-        else:
-            self.redirect('/client/debts/view/%d' % creditor.key().id())
-        # vars = { 'creditor': creditor }
-        # self.render(vars, "clientcreditorresponse.html")
+        client = creditor.user
+        upload_files = self.get_uploads('upload')  # 'file' is file upload field in the form
+        for item in upload_files:
+            logging.info("have a blob info %s", dir(item))
+            attachment = models.Attachment(client=client, creditor=creditor, item=item)
+            attachment.put()
+        self.response.set_status(200)
+        self.response.headers['Location'] = '/client/debts/view/%d' % creditor.key().id()
+        self.response.headers['Content-Type'] = 'text/plain'
 
-class ClientCreditorResponseLetter(BaseHandler):
-    def get(self, creditor):
-        """Show the scanned letter for this creditor"""
-        creditor = models.CreditorLink.get(creditor)
-        if (creditor and creditor.scan):
-            self.response.headers['Content-Type'] = 'image/jpeg'
-            self.response.out.write(creditor.scan)
-        else:
-            # TODO:
+class ClientAttachment(blobstore_handlers.BlobstoreDownloadHandler):
+    def get(self, action, key):
+        """Show the attachment"""
+        key = str(urllib.unquote(key))
+        if not blobstore.get(key):
+            logging.info("key not found %s", key)
             self.error(404)
+        else:
+            if action == 'raw':
+                self.send_blob(key)
+            else:
+                self.response.out.write('<img src="/client/attachment/raw/%s" alt="no image"></img>' % urllib.quote(key))
 
 class ClientValidate(BaseHandler):
     def get(self):
@@ -1516,7 +1520,8 @@ application = webapp.WSGIApplication([
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
   (r'/client/debts/creditor/(.*)/edit', ClientEditCreditor),
   (r'/client/debts/creditor/(.*)/response', ClientCreditorResponse),
-  (r'/client/debts/creditor/(.*)/responseletter', ClientCreditorResponseLetter),
+  (r'/client/debts/creditor/(.*)/responseupload', ClientCreditorResponseHandler),
+  (r'/client/attachment/(.*)/(.*)', ClientAttachment),
   (r'/client/debts/creditor/(.*)', ClientDebts),
 
 # Several employee use cases
