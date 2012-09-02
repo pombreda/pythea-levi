@@ -105,9 +105,6 @@ $(document).ready(function(){
                         prepareForms();
                     }
                 } else if ($("#"+target)) {
-                    setAppStatus();
-                    setAppButtons();
-                    appLoading(false);
                     if (target == "_popup") {
                         $("#popup .popup-content").html(data);
                         var $popup = $("#popup");
@@ -118,7 +115,10 @@ $(document).ready(function(){
                         $popup.addClass("active");
                     } else {
                         $("#"+target).html(data);
+                        setAppStatus();
+                        setAppButtons();
                     }
+                    appLoading(false);
                 }
                 checkLogin();
             },
