@@ -84,7 +84,6 @@ $(document).ready(function(){
 
             success: function(data, textStatus, jqXHR) {
                 var location = jqXHR.getResponseHeader("Location");
-
                 if (location) {
                     if (location.match(/^https?\:\/\//)) {
                         location = location.replace(/https?\:\/\/[^\/]+/,"");
@@ -106,11 +105,20 @@ $(document).ready(function(){
                         prepareForms();
                     }
                 } else if ($("#"+target)) {
-                    $("#"+target).html(data);
                     setAppStatus();
                     setAppButtons();
-                    //$.address.value(location);
                     appLoading(false);
+                    if (target == "_popup") {
+                        $("#popup .popup-content").html(data);
+                        var $popup = $("#popup");
+                        var $popupContent = $("#popup .popup-wrapper");
+                        $popupContent.css("margin-left","-" + Math.min($popupContent.width()/2, 470) + "px");
+                        var $popupCloser = $("#popup .close");
+                        $popupCloser.css("margin-right","-" + ($popupContent.width() / 2) + "px");
+                        $popup.addClass("active");
+                    } else {
+                        $("#"+target).html(data);
+                    }
                 }
                 checkLogin();
             },
@@ -166,6 +174,12 @@ $(document).ready(function(){
         } else {
             $.address.value(state.url);
         }
+    });
+
+    $("#popup a.popup-close").live("click", function(event) {
+        event.preventDefault();
+        $('#popup .content').empty();
+        $("#popup").removeClass("active");
     });
 
     $("#popup a[target=_close]").live("click",function(event) {
@@ -401,13 +415,10 @@ function checkLogin() {
     }
 }
 
-/*
- *  HTH: This does not appear to be used.
- *  */
 function loadPopup(url) {
     $('#popup').addClass("active");
     appLoading(true);
-    $("#popup .popup-content").load(url,function(){
+    $("#popup .popup-content").load(url,function() {
         var $popup = $("#popup"),
             $popupContent = $(".content",$popup),
             $popupCloser = $(".close",$popup);
