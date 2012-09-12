@@ -416,10 +416,13 @@ class ClientValidate(BaseHandler):
                         creditor.status = method
                     """
                     if method in ['POST','FAX', 'EMAIL']:
-                        logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
+                        #logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
                         letters.append(letter)
-            html = '<br style="page-break-after:always">'.join(letters)
+            html = '<style type="text/css">div.letter-preview {page-break-after:always;} </style>'
+            self.response.out.write(html)
+            #html = '<br style="page-break-after:always">'.join(letters)
+            html = '\n'.join(letters)
             self.response.out.write(html)
         else:
             self.redirect('/client/creditors')
