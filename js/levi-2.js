@@ -57,10 +57,6 @@ $(document).ready(function(){
 
     // Catch all form execution and pass it through AJAX calls
     $("#content form").live("submit",function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        appLoading(true);
         var $this = $(this),
             url = $this.attr("action"),
             method = $this.attr("method") ? $this.attr("method").toLowerCase() : "get"
@@ -68,12 +64,19 @@ $(document).ready(function(){
             context = this,
             redirected = false
             ;
+        // Okay I admit, this is a terrible hack.
+        if(target == '_print') {
+           $.address.value('/client/debts');
+           return;
+        }
+
+        appLoading(true);
+        event.preventDefault();
+        event.stopPropagation();
 
         $.ajax({
             url: url,
             type: method.toUpperCase(),
-            // Used to be:
-            // data: this.serialize(),
             data: new FormData($this[0]),
             headers: {"Accept":"x-text/html-fragment", "Accept-Language":"nl"},
             context: context,
