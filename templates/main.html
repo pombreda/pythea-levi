@@ -58,7 +58,80 @@
 				<div class="content-inner">
                     <p id="appstatus" class="appstatus">{{message|default:"&nbsp;"}}</p>
                     <div id="appbuttons" class="appbuttons"></div>
+                    <style>
+                        #front-page {
+                            overflow: auto;
+                            margin: 0 6%;
+                            display: none;
+                        }
+                        #front-page.active {
+                            display: block;
+                        }
+                        .site-title {
+                            font-size: 4.8em;
+                            font-weight: lighter;
+                            padding: 0;
+                            margin: 0;
+                            color: #94D2E3;
+                            text-transform: uppercase;
+                        }
+                        .intro-flow {
+                            width: 100%;
+                            max-width: 813px;
+                        }
+                        .intro-text {
+                            width: 48%;
+                            -webkit-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.4);
+                            -moz-box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.4);
+                            box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.4);
+                            background-color: #E8F9F9;
+                            border-radius: .5em;
+                            float: left;
+                            margin: 0;
+                            padding: 1em;
+                        }
+                        .intro-text.first {
+                            float: left;
+                        }
+                        .intro-text.second {
+                            float: right;
+                        }
+                        .intro-text h2,
+                        .intro-text p {
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .intro-cta,
+                        .intro-cta * {
+                            color: #942937;
+                        }
+                        .intro-cta {
+                            float: left;
+                            clear: both;
+                        }
+                    </style>
 					<div id="content">
+                        <div id="front-page">
+                            <h1 class="site-title">SCHULDENDOSSIER.NL</h1>
+                            <img src="images/voorpagina.png" class="intro-flow">
+                            <div class="intro-text first">
+                                <h2>Maak eenvoudig een dossier aan</h2>
+                                <p>Schulden oplossen is hard werken. De eerste stap die mensen moeten maken is het maken van een overzicht van alles schulden. SCHULDENDOSSIER.NL helpt hulpverleners en mensen met schulden bij deze lastige stap.</p>
+                            </div>
+                            <div class="intro-text second">
+                                <h2>Sneller resultaat</h2>
+                                <p>Clienten kunnen zich op de site aanmelden en een overzicht maken van hun schuldeisers en hun openstaande schulden. Hulpverleners krijgen daardoor direct inzicht en kunnen zo sneller aansturen, adviseren en doorverwijzen.</p>
+                            </div>
+                            <p class="intro-cta">
+                                <strong class="cta">Log in of meld je aan!</strong><br>
+                                Voor meer informatie: stuur een e-mail naar <a href="mailto:info@schuldendossier.nl">info@schuldendossier.nl</a>
+                            </p>
+                        </div>
+                        <script>
+                            if (window.location.hash === "") {
+                                $("#front-page").addClass("active");
+                            }
+                        </script>
                     </div>
 				</div>
 			</div>

@@ -1,9 +1,9 @@
-<ul>
+<ul style="width:22em">
 <li> <a href="/client/debts/creditor/select/collector" target="_this">Deurwaarders</a>
 <li> <a href="/client/debts/creditor/select/creditor" target="_this">Overige</a>
 </li>
 </ul>
-
+<div class="scrollable">
 <ul class="client-select-creditors">
 {% for company in creditors %}
  <li>
@@ -14,3 +14,4 @@
 	 </li>
 {% endfor %}
 </ul>
+</div>

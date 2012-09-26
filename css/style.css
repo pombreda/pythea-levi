@@ -408,6 +408,15 @@ header.alt p#login {
   max-height: 100%;
   width: 100%;
 }
+
+.popup .scrollable {
+  position: absolute;
+  top: 4em;
+  right: .5em;
+  bottom: 1em;
+  left: .5em;
+  overflow: auto;
+}
 /* Application status ------------------------------------------------------ */
 .appstatus {
   margin: .3em 0 .7em 0;

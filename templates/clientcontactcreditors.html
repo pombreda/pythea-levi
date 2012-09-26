@@ -1,5 +1,5 @@
 <div id="message">Met de volgende schuldeisers wordt contact opgenomen</div>
-<form method="post" action="{{self.request.path}}" class="file-setup debt-entry" target="_popup">
+<form method="post" action="{{self.request.path}}" class="file-setup debt-entry" target="_print">
   <table>
   {% for creditor in user.creditors %}
     <tr>
