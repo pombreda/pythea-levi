@@ -548,6 +548,7 @@ class ClientDebtsView(BaseHandler):
                  'collector': collector,
                  'collected_for': collected_for,
                  'base_url': '/client/debts/view/%s' % creditor.key().id(),
+                 'debt': debt,
                  'form': form }
         self.render(vars, 'clientdebtsview.html')
 
@@ -976,11 +977,12 @@ class EmployeeEditCreditor(BaseHandler):
 
     def post(self, client, creditor):
         creditor = models.Creditor.get_by_id(int(creditor))
+        client = models.Client.get(client)
         form = forms.CreditorForm(self.request.POST, instance=creditor)
         if form.is_valid():
             creditor = form.save(commit=True)
             link = client.hasCreditor(creditor)
-            self.redirect('/employee/cases/view/%s/creditor/%s' % (client, link.key().id()))
+            self.redirect('/employee/cases/view/%s/creditor/%s' % (client.key(), link.key().id()))
         else:
             form = forms.CreditorForm(instance=creditor)
             vars = {'forms': [form]}
@@ -994,13 +996,14 @@ class EmployeeViewCaseCreditorApproveResponse(BaseHandler):
 
     def post(self, client, creditor):
         creditor = models.CreditorLink.get_by_id(int(creditor))
+        client = models.Client.get(client)
         comment = self.request.get('comment').strip()
         if comment:
             annotation = models.Annotation(subject=creditor, author=self.user, text=comment)
             annotation.put()
         approved = self.request.get('action') == 'keur goed'
         creditor.approve(approved, self.user)
-        self.redirect('/employee/cases/view/%s/creditor/%d' % (client, creditor.key().id()))
+        self.redirect('/employee/cases/view/%s/creditor/%d' % (client.key(), creditor.key().id()))
 
 class EmployeeCreditorsList(BaseHandler):
     def get(self):
