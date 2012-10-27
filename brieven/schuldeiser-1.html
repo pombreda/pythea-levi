@@ -5,9 +5,8 @@
    {% if creditor.email and false %}
       <a target="_close" href="/client/email/{{key}}">[MAIL]</a>
    {% endif %}
+<br>
 {% endif %}
-<br><br>
-
 <p>
 {{creditor.display_name}}<br>
 {{creditor.address|default:""}}<br>
@@ -17,10 +16,7 @@
 
 <p>{{client.city}}, {{today}}</p>
 
-
-<p>
 <p>Onderwerp : Inventarisatie schulden </p>
-</p>
 
 <p>
 Geachte heer, mevrouw,
@@ -33,9 +29,7 @@ Op dit moment ben ik niet in staat aan mijn financiële verplichtingen te voldoe
 <p>Het kan zijn dat ik u al eerder een brief heb geschreven met het verzoek om informatie over de vordering die u op mij heeft. Mijn dossier is toen niet geaccepteerd bij de schuldhulpverlening, omdat ik niet van alle schuldeisers alle noodzakelijke informatie had ontvangen. Toen ik die eenmaal wel had, waren de eerder ontvangen gegevens niet recent genoeg om in behandeling genomen te worden. Ik schriijf nu al mijn schuldeisers in één keer aan. Ik hoop zo mijn dossier op orde te
 krijgen om in aanmerking te komen voor schuldhulpverlening.</p>
 
-<p>
 Ik verzoek u om mij zo spoedig mogelijk de de volgende gegevens toe te sturen:
-</p>
 
 <ol>
 <li>de hoogte van uw netto vordering(en),</li>
@@ -60,13 +54,10 @@ In afwachting van uw reactie,<br>
 Hoogachtend,
 </p>
 <br>
-
 <p>
 {{client.first_name}} {{client.last_name}}<br>
 {{client.address}}<br>
-{{client.zipcode}}<br>
-{{client.city}}<br>
-{{client.birthdate|default:""}}<br>
-{{client.ssn|default:""}}<br>
+{{client.zipcode}} {{client.city}}<br>
+{{client.birthdate|default:""}} {{client.ssn|default:""}}<br>
 </p>
 </div>
