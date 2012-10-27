@@ -1,9 +1,5 @@
 <div id="message">De gebruiker heeft het volgende schuldbewijs toegevoegd</div>
-<ul>
-{% for attachment in creditor.attachments %}
-  <li> <a href="/client/attachment/embedded/{{attachment.item.key}}">{{attachment.item.filename}}</a></li>
-{% endfor %}
-</ul>
+<img src="/client/debts/creditor/{{creditor.key}}/responseletter" alt="Geen schuldbewijs aanwezig"> 
 <form method="post" action="{{self.request.path}}">
 <div class="submit">
   <textarea name="comment"></textarea>

@@ -6,8 +6,8 @@
 {%else %}
   <a href="/employee/cases/view/{{client.key}}/creditor/{{creditor.key.id}}/approve?base_url={{base_url}}" class="action approve">
 {% endif %}
-        {% if creditor.has_attachments %}
-        Ik heb al een schuldbewijs
+        {% if creditor.scan %}
+        <img alt="Schuldbewijs" src="/client/debts/creditor/{{creditor.key}}/responseletter" width="115px" height="155px"></img>
         {% else %}
         Voeg een schuldbewijs toe.
         {% endif %}
@@ -17,27 +17,20 @@
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         {% if creditor.creditor.is_collector %}
         <label>Oorspronkelijke schuldeiser:</label>
-        <a href="/client/debts/creditor/select" target="_popup">{{debt.collected_for.display_name|default:'Ja'}}<input type="hidden" name="collected_for" value="{{debt.collected_for.key.id}}"></a>
+        <a href="/client/debts/creditor/select" target="_popup">{{collector.display_name|default:'Ja'}}<input type="hidden" name="collected_for" value="{{collected_for.key.id}}"></a>
         <br>
         {% endif %}
         <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
-        <a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'Ja'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a><br>
+        <a href="/client/debts/creditor/select" target="_popup">{{collector.display_name|default:'Ja'}}<input type="hidden" name="collector" value="{{collector.key.id}}"></a><br>
     </p>
         <table>
             <tr>
                 <td><label>Datum brief</label></td>
                 <td>{{form.response_date}}</td>
-                <td>{{form.response_date.errors}}</td>
-            </tr>
-            <tr>
-                <td><label>Ontstaansdatum</label></td>
-                <td>{{form.original_date}}</td>
-                <td>{{form.original_date.errors}}</td>
             </tr>
             <tr>
                 <td><label>Dossiernummer</label></td>
                 <td>{{form.creditor_dossier_number}}</td>
-                <td>{{form.creditor_dossier_number.errors}}</td>
             </tr>
             <tr>
                 <td><label>Openstaand bedrag</label></td>
@@ -47,7 +40,6 @@
             <tr>
                 <td><label>Afbetalingsregeling</label></td>
                 <td>{{form.payment_amount}}</td>
-                <td>{{form.payment_amount.errors}}</td>
             </tr>
         </table>
     <p class="submit">
@@ -61,8 +53,6 @@
         <tr>
             <th>ID</th>
             <th>Deurwaarder</th>
-            <th>Schuldeiser</th>
-            <th>Ontstaansdatum</th>
             <th>Openstaand bedrag</th>
             <th>Datum brief</th>
             <th>Dossiernummer</th>
@@ -72,8 +62,6 @@
         <tr>
             <td><a href="{{base_url}}/debt/{{debt.key.id}}">{{debt.key.id}}</td>
             <td>{{debt.collector.display_name|default:"--"}}</td>
-            <td>{{debt.collected_for.display_name|default:"--"}}</td>
-            <td class="date">{{debt.original_date|date:"d-m-Y"}}</td>
             <td class="amount">&euro; {{debt.amount|default:""}}</td>
             <td class="date">{{debt.response_date|date:"d-m-Y"}}</td>
             <td class="dossier">{{debt.creditor_dossier_number|default:""}}</td>

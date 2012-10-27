@@ -116,12 +116,11 @@ class CreditorForm(df.ModelForm):
 
 class DebtForm(df.ModelForm):
     response_date = forms.DateField(localize=True, widget=forms.TextInput(attrs={'class':'date'}))
-    original_date = forms.DateField(localize=True, widget=forms.TextInput(attrs={'class':'date'}), required=False)
     amount = forms.DecimalField(localize=True, required=False, widget=forms.TextInput(attrs={'class':'currency'}))
     payment_amount = forms.DecimalField(localize=True, required=False, widget=forms.TextInput(attrs={'class':'currency'}))
     class Meta:
         model = models.Debt
-        fields = ['response_date', 'original_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']
+        fields = ['response_date', 'creditor_dossier_number', 'collector_dossier_number', 'amount', 'payment_amount']
 
 class LoginForm(forms.Form):
     userid = forms.CharField(label='Gebruikersnaam')
