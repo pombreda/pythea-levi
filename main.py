@@ -331,9 +331,11 @@ class ClientPrintCreditorLetters(BaseHandler):
         client = self.user
         letters = []
         for creditor in client.creditors:
-            if not creditor.last_email_date:
-                method = creditor.creditor.contact_method()
-                if method == 'POST':
+            #if not creditor.last_email_date:
+            if True:
+                #method = creditor.creditor.contact_method()
+                #if method == 'POST':
+                if True:
                     logging.info('I have an address')
                     logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                     creditor.contacted_by = method
@@ -342,8 +344,8 @@ class ClientPrintCreditorLetters(BaseHandler):
                     letter = creditor.generate_letter()
                     letters.append(letter)
         html = '<br style="page-break-after:always">'.join(letters)
-        logging.info(html)
-        self.response.out.write(html)
+        header = '<!-- test -->'
+        self.response.out.write(header + html)
 
 class ClientEmailCreditor(BaseHandler):
     def get(self, creditor):
@@ -409,16 +411,10 @@ class ClientValidate(BaseHandler):
                            body="Dossier is toegevoegd voor %s %s" % (client.first_name, client.last_name))
             letters = []
             for creditor in client.creditors:
-                if not creditor.last_email_date:
+                #if not creditor.last_email_date:
+                if True:
                     method = creditor.creditor.contact_method()
                     letter = creditor.generate_letter()
-                    """ if method in ['EMAIL', 'FAX']:
-                        logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
-                        p = re.compile(r'<.*?>')
-                        letter = p.sub('', letter)
-                        creditor.send_message("Verzoek schuldbewijs", letter)
-                        creditor.status = method
-                    """
                     if method in ['POST','FAX', 'EMAIL']:
                         #logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
