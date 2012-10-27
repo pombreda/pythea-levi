@@ -14,6 +14,7 @@
 }
 html, body {
   height: 100%;
+  font-size: 100%;
 }
 
 a {
@@ -424,7 +425,6 @@ header.alt p#login {
   /* margin: .3em 0 0 0; */
   color: #b5373d;
   padding: .5em;
-  background-color: #f0fbfb;
   border-radius: .2em;
 
   -webkit-transition: all 500ms;

@@ -18,13 +18,11 @@ import re
 #from google.appengine.ext.db import polymodel
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp import blobstore_handlers
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.urlfetch import fetch
 from google.appengine.api import mail
 from google.appengine.ext import db
-from google.appengine.ext import blobstore
 from google.appengine.api import images
 from google.appengine.api import taskqueue
 
@@ -331,11 +329,9 @@ class ClientPrintCreditorLetters(BaseHandler):
         client = self.user
         letters = []
         for creditor in client.creditors:
-            #if not creditor.last_email_date:
-            if True:
-                #method = creditor.creditor.contact_method()
-                #if method == 'POST':
-                if True:
+            if not creditor.last_email_date:
+                method = creditor.creditor.contact_method()
+                if method == 'POST':
                     logging.info('I have an address')
                     logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                     creditor.contacted_by = method
@@ -344,8 +340,8 @@ class ClientPrintCreditorLetters(BaseHandler):
                     letter = creditor.generate_letter()
                     letters.append(letter)
         html = '<br style="page-break-after:always">'.join(letters)
-        header = '<!-- test -->'
-        self.response.out.write(header + html)
+        logging.info(html)
+        self.response.out.write(html)
 
 class ClientEmailCreditor(BaseHandler):
     def get(self, creditor):
@@ -360,37 +356,35 @@ class ClientEmailCreditor(BaseHandler):
 class ClientCreditorResponse(BaseHandler):
     def get(self, creditor):
         """Show an upload form for the scanned response letter from the creditor"""
-        upload_url = blobstore.create_upload_url('/client/debts/creditor/%s/responseupload' % creditor)
         creditor = models.CreditorLink.get(creditor)
-        vars = { 'creditor': creditor,
-                 'upload_url': upload_url }
+        vars = { 'creditor': creditor }
         self.render(vars, "clientcreditorresponse.html")
 
-class ClientCreditorResponseHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self, creditor):
+        """Show an upload form for the scanned response letter from the creditor"""
         creditor = models.CreditorLink.get(creditor)
-        client = creditor.user
-        upload_files = self.get_uploads('upload')  # 'file' is file upload field in the form
-        for item in upload_files:
-            logging.info("have a blob info %s", dir(item))
-            attachment = models.Attachment(client=client, creditor=creditor, item=item)
-            attachment.put()
-        self.response.set_status(200)
-        self.response.headers['Location'] = '/client/debts/view/%d' % creditor.key().id()
-        self.response.headers['Content-Type'] = 'text/plain'
-
-class ClientAttachment(blobstore_handlers.BlobstoreDownloadHandler):
-    def get(self, action, key):
-        """Show the attachment"""
-        key = str(urllib.unquote(key))
-        if not blobstore.get(key):
-            logging.info("key not found %s", key)
-            self.error(404)
+        upload = self.request.get('upload')
+        if upload:
+            # TODO: should resize the image
+            image = images.Image(image_data=upload)
+            creditor.scan = db.Blob(upload)
+            creditor.put()
+            self.redirect('/client/debts/view/%d' % creditor.key().id())
         else:
-            if action == 'raw':
-                self.send_blob(key)
-            else:
-                self.response.out.write('<img src="/client/attachment/raw/%s" alt="no image"></img>' % urllib.quote(key))
+            self.redirect('/client/debts/view/%d' % creditor.key().id())
+        # vars = { 'creditor': creditor }
+        # self.render(vars, "clientcreditorresponse.html")
+
+class ClientCreditorResponseLetter(BaseHandler):
+    def get(self, creditor):
+        """Show the scanned letter for this creditor"""
+        creditor = models.CreditorLink.get(creditor)
+        if (creditor and creditor.scan):
+            self.response.headers['Content-Type'] = 'image/jpeg'
+            self.response.out.write(creditor.scan)
+        else:
+            # TODO:
+            self.error(404)
 
 class ClientValidate(BaseHandler):
     def get(self):
@@ -411,10 +405,16 @@ class ClientValidate(BaseHandler):
                            body="Dossier is toegevoegd voor %s %s" % (client.first_name, client.last_name))
             letters = []
             for creditor in client.creditors:
-                #if not creditor.last_email_date:
-                if True:
+                if not creditor.last_email_date:
                     method = creditor.creditor.contact_method()
                     letter = creditor.generate_letter()
+                    """ if method in ['EMAIL', 'FAX']:
+                        logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
+                        p = re.compile(r'<.*?>')
+                        letter = p.sub('', letter)
+                        creditor.send_message("Verzoek schuldbewijs", letter)
+                        creditor.status = method
+                    """
                     if method in ['POST','FAX', 'EMAIL']:
                         #logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
@@ -544,7 +544,6 @@ class ClientDebtsView(BaseHandler):
                  'collector': collector,
                  'collected_for': collected_for,
                  'base_url': '/client/debts/view/%s' % creditor.key().id(),
-                 'debt': debt,
                  'form': form }
         self.render(vars, 'clientdebtsview.html')
 
@@ -973,12 +972,11 @@ class EmployeeEditCreditor(BaseHandler):
 
     def post(self, client, creditor):
         creditor = models.Creditor.get_by_id(int(creditor))
-        client = models.Client.get(client)
         form = forms.CreditorForm(self.request.POST, instance=creditor)
         if form.is_valid():
             creditor = form.save(commit=True)
             link = client.hasCreditor(creditor)
-            self.redirect('/employee/cases/view/%s/creditor/%s' % (client.key(), link.key().id()))
+            self.redirect('/employee/cases/view/%s/creditor/%s' % (client, link.key().id()))
         else:
             form = forms.CreditorForm(instance=creditor)
             vars = {'forms': [form]}
@@ -992,14 +990,13 @@ class EmployeeViewCaseCreditorApproveResponse(BaseHandler):
 
     def post(self, client, creditor):
         creditor = models.CreditorLink.get_by_id(int(creditor))
-        client = models.Client.get(client)
         comment = self.request.get('comment').strip()
         if comment:
             annotation = models.Annotation(subject=creditor, author=self.user, text=comment)
             annotation.put()
         approved = self.request.get('action') == 'keur goed'
         creditor.approve(approved, self.user)
-        self.redirect('/employee/cases/view/%s/creditor/%d' % (client.key(), creditor.key().id()))
+        self.redirect('/employee/cases/view/%s/creditor/%d' % (client, creditor.key().id()))
 
 class EmployeeCreditorsList(BaseHandler):
     def get(self):
@@ -1519,8 +1516,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
   (r'/client/debts/creditor/(.*)/edit', ClientEditCreditor),
   (r'/client/debts/creditor/(.*)/response', ClientCreditorResponse),
-  (r'/client/debts/creditor/(.*)/responseupload', ClientCreditorResponseHandler),
-  (r'/client/attachment/(.*)/(.*)', ClientAttachment),
+  (r'/client/debts/creditor/(.*)/responseletter', ClientCreditorResponseLetter),
   (r'/client/debts/creditor/(.*)', ClientDebts),
 
 # Several employee use cases

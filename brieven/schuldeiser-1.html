@@ -5,8 +5,9 @@
    {% if creditor.email and false %}
       <a target="_close" href="/client/email/{{key}}">[MAIL]</a>
    {% endif %}
-<br>
 {% endif %}
+<br><br>
+
 <p>
 {{creditor.display_name}}<br>
 {{creditor.address|default:""}}<br>
@@ -16,37 +17,23 @@
 
 <p>{{client.city}}, {{today}}</p>
 
+
+<p>
 <p>Onderwerp : Inventarisatie schulden </p>
+</p>
 
 <p>
 Geachte heer, mevrouw,
 </p>
 
 <p>
-Op dit moment ben ik niet in staat aan mijn financiële verplichtingen te voldoen. Ik wil hier op zo kort mogelijke termijn verandering in aanbrengen. Hiervoor is het nodig dat ik de exacte omvang en aard van mijn schuldenpakket kan vaststellen.
-</p>
+Op dit moment ben ik niet in staat aan mijn financiele verplichtingen te voldoen. Ik wil hier op zo kort mogelijke termijn verandering in aanbrengen. Hiervoor is het nodig dat ik de exacte omvang en aard van mijn schuldenpakket kan vaststellen.<br>
 
-<p>Het kan zijn dat ik u al eerder een brief heb geschreven met het verzoek om informatie over de vordering die u op mij heeft. Mijn dossier is toen niet geaccepteerd bij de schuldhulpverlening, omdat ik niet van alle schuldeisers alle noodzakelijke informatie had ontvangen. Toen ik die eenmaal wel had, waren de eerder ontvangen gegevens niet recent genoeg om in behandeling genomen te worden. Ik schriijf nu al mijn schuldeisers in één keer aan. Ik hoop zo mijn dossier op orde te
-krijgen om in aanmerking te komen voor schuldhulpverlening.</p>
+Ik verzoek u mij zo snel mogelijk de hoogte van uw netto vordering(en) en de maandelijkse afbetaling(en) door te geven.<br></br>
 
-Ik verzoek u om mij zo spoedig mogelijk de de volgende gegevens toe te sturen:
+In afwachting van de reacties van de schuldeisers verzoek ik u eventuele invorderingsmaatregelen op te schorten en mijn schuldenpakket niet verder te verzwaren met rente en/of kosten. Ook verzoek ik u een eventueel beslag op mijn loon en/of uitkering op te schorten.<br><br>
 
-<ol>
-<li>de hoogte van uw netto vordering(en),</li>
-<li>de datum waarop de betalingsachterstanden voor het eerst zijn ontstaan,</li>
-<li>of de schuld is uitbesteed aan een (andere) deurwaarder en, zo ja welke,</li>
-<li>of de schuld wordt geïd voor een ander bedrijf en, zo ja, welk,</li>
-<li>de maandelijkse afbetaling(en),</li>
-<li>of de vordering juridisch preferent is,</li>
-<li>of er sprake is van een onderpand.</li>
-</ol>
-
-<p>
-In afwachting van de reacties van alle schuldeisers verzoek ik u eventuele invorderingsmaatregelen, afsluitingen of uitzettingen op te schorten en mijn schuldenpakket niet verder te verzwaren met rente en/of kosten. Ook verzoek ik u een eventueel beslag op loon en/of uitkering op te schorten.
-</p>
-
-<p>
-Zodra ik de inventarisatie van mijn schulden heb afgerond, ontvangt u van mij een voorstel tot afbetaling van de vordering(en).
+Zodra ik de inventarisatie van mijn schulden heb afgerond, ontvangt u van mij een voorstel tot afbetaling van de vorderingen.<br>
 </p>
 <p>
 In afwachting van uw reactie,<br>
@@ -54,10 +41,13 @@ In afwachting van uw reactie,<br>
 Hoogachtend,
 </p>
 <br>
+
 <p>
 {{client.first_name}} {{client.last_name}}<br>
 {{client.address}}<br>
-{{client.zipcode}} {{client.city}}<br>
-{{client.birthdate|default:""}} {{client.ssn|default:""}}<br>
+{{client.zipcode}}<br>
+{{client.city}}<br>
+{{client.birthdate|default:""}}<br>
+{{client.ssn|default:""}}<br>
 </p>
 </div>
