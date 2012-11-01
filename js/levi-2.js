@@ -404,9 +404,6 @@ function handleUsername() {
 }
 
 
-/*
- *  HTH: This does not appear to be used.
- */
 function checkLogin() {
     var $login = $(".login"),
         $userIdElement = $("#user-id",$login),
