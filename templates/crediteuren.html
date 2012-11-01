@@ -7,7 +7,7 @@
     <ul>
       {% for category in categories %}
         <li{% if category.label == selected %} class="active"{% endif %}>
-          <a href="/client/creditors/category/{{category.label}}">{{category.label}}</a>
+          <a href="/client/creditors/category/{{category.label}}">{{category.display_label|default:category.label}}</a>
         </li>
       {% endfor %}
     </ul>
