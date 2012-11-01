@@ -4,7 +4,7 @@ Boetes			| Heeft u openstaande boetes?
 Banken			| Heeft u leningen of schulden bij een bank?
 Kredietkaarten		| Heeft u een kredietkaart?
 Internet		| Bij wie heeft u Internet?
-Energie			| Bij wie neemt u gas, licht en water af?
+Energie en water	| Bij wie neemt u gas, licht en water af?
 Telefoon		| Bij wie heeft u een mobiele telefoon?
 Verzekeringen		| Bij wie heeft u verzekeringen lopen?
 Postorderbedrijven	| Heeft u rekeningen bij postorder bedrijven?
