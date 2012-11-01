@@ -279,6 +279,7 @@ class Client(User):
 
 class Category(db.Model):
     label = db.StringProperty()
+    display_label = db.StringProperty()
     question = db.StringProperty()
     new_question = db.StringProperty()
     description = db.StringProperty()
