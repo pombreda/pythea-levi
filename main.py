@@ -402,6 +402,7 @@ class ClientValidate(BaseHandler):
 
     def post(self):
         action = self.request.get('action')
+        logging.info("Generating letters")
         if action != 'go back':
             client = self.user
             client.complete()
@@ -415,6 +416,8 @@ class ClientValidate(BaseHandler):
                 if True:
                     method = creditor.creditor.contact_method()
                     letter = creditor.generate_letter()
+                    creditor.last_email_date = datetime.date.today()
+                    creditor.put()
                     if method in ['POST','FAX', 'EMAIL']:
                         #logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
@@ -887,7 +890,7 @@ class ResetPassword(BaseHandler):
             text = template.render(path, vars)
 
             mail.send_mail(sender="No reply <hans.then@gmail.com>",
-                           to="<h.then@pythea.nl>",
+                           to=user.email,
                            subject="U heeft een nieuw wachtwoord aangevraagd op schuldendossier.nl",
                            body=text)
 
@@ -928,31 +931,23 @@ class Login(BaseHandler):
         form = forms.LoginForm()
         message = "Login"
     	vars = { 'forms': [form], 'message': message }
-        self.render(vars, 'form.html')
+        self.render(vars, 'loginform.html')
 
     def post(self):
-        userid = self.request.get('userid')
-        passwd = self.request.get('password')
-        session = get_current_session()
+        form = forms.LoginForm(self.request.POST)
+        session = self.session
         if session.is_active():
             session.terminate()
-        try:
+        if form.is_valid():
+            logging.info("login form is valid")
+            userid = self.request.get('userid')
             user = models.User.get_by_key_name(userid)
-            if user and user.authenticate(passwd):
-                session['user'] = user
-                self.redirect(user.start_page())
-                #self.redirect("/"+user.start_page())
-            else:
-                #vars = { 'message': 'Gebruikersnaam of wachtwoord is ongeldig.' }
-                #self.render(vars, 'login.html')
-                #self.redirect("/?message=Gebruikersnaam of wachtwoord is ongeldig")
-                form = forms.LoginForm()
-                vars = { 'forms': [form], 'message': 'Gebruikersnaam of wachtwoord ongeldig' }
-                self.render(vars, 'form.html')
-        except Exception, e:
-            logging.info("Error, probably user not found.")
-            self.response.out.write(e)
-
+            session['user'] = user
+            self.redirect(user.start_page())
+        else:
+            logging.info("login form is not valid")
+            vars = { 'forms': [form], 'message': 'Gebruikersnaam of wachtwoord ongeldig' }
+            self.render(vars, 'loginform.html')
 
 class Session(BaseHandler):
     def get(self):
