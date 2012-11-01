@@ -9,10 +9,13 @@ import re
 import models
 
 class ClientForm(df.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord')
-    password2 = forms.CharField(widget=forms.PasswordInput, required=False, label='Wachtwoord controle')
+    password1 = forms.CharField(widget=forms.PasswordInput,
+                                required=False, label='Wachtwoord')
+    password2 = forms.CharField(widget=forms.PasswordInput,
+                                required=False, label='Wachtwoord controle')
     ssn = forms.CharField(label="Burger Service Nummer", required=False)
-    birthdate = forms.DateField(localize=True, widget=forms.TextInput(attrs={'class':'date'}))
+    birthdate = forms.DateField(localize=True, label='Geboortedatum',
+                                widget=forms.TextInput(attrs={'class':'date'}))
 
     phone_p = re.compile(r'(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)')
     class Meta:
@@ -110,6 +113,7 @@ class CategoryForm(df.ModelForm):
         model = models.Category
 
 class CreditorForm(df.ModelForm):
+    is_collector = forms.BooleanField(label="Deurwaarder")
     class Meta:
         model = models.Creditor
         exclude = ['_class', 'icon', 'tags', 'categories', 'approved', 'private_for']
@@ -125,5 +129,12 @@ class DebtForm(df.ModelForm):
 
 class LoginForm(forms.Form):
     userid = forms.CharField(label='Gebruikersnaam')
-    password = forms.CharField(widget=forms.PasswordInput, label='Wachtwoord')
+    passwd = forms.CharField(widget=forms.PasswordInput, label='Wachtwoord')
+
+    def clean(self):
+        data = self.cleaned_data
+        user = models.User.get_by_key_name(data['userid'])
+        if not user or not user.authenticate(data['passwd']):
+            raise forms.ValidationError('Ongeldig userid or password')
+
 
