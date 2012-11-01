@@ -56,7 +56,7 @@
         {% endif %}
 			<div class="content-wrapper">
 				<div class="content-inner">
-                    <p id="appstatus" class="appstatus">{{message|default:"&nbsp;"}}</p>
+<!--                    <p id="appstatus" class="appstatus">{{message|default:"&nbsp;"}}</p>-->
                     <div id="appbuttons" class="appbuttons"></div>
                     <style>
                         #front-page {
@@ -67,13 +67,25 @@
                         #front-page.active {
                             display: block;
                         }
-                        .site-title {
+                        .site-title {/*
                             font-size: 4.8em;
                             font-weight: lighter;
                             padding: 0;
                             margin: 0;
                             color: #94D2E3;
                             text-transform: uppercase;
+                        */
+                            font: 4.8em arial; /* 18px : 16px = 1.2em*/;
+                            margin: 0;
+                            padding: 0;
+                            color: #94D2E3;
+                            text-transform: uppercase;
+                        }
+                        @media(max-width: 480px){
+                            .site-title {
+                                font-size: 2em;
+                            }
+
                         }
                         .intro-flow {
                             width: 100%;
@@ -116,7 +128,7 @@
                             <img src="images/voorpagina.png" class="intro-flow">
                             <div class="intro-text first">
                                 <h2>Maak eenvoudig een dossier aan</h2>
-                                <p>Schulden oplossen is hard werken. De eerste stap die mensen moeten maken is het maken van een overzicht van alles schulden. SCHULDENDOSSIER.NL helpt hulpverleners en mensen met schulden bij deze lastige stap.</p>
+                                <p>Schulden oplossen is hard werken. De eerste stap die mensen moeten zetten is het maken van een overzicht van alle schulden. SCHULDENDOSSIER.NL helpt hulpverleners en mensen met schulden bij deze lastige stap.</p>
                             </div>
                             <div class="intro-text second">
                                 <h2>Sneller resultaat</h2>
