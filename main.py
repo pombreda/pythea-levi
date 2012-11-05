@@ -377,8 +377,9 @@ class ClientCreditorResponseHandler(blobstore_handlers.BlobstoreUploadHandler):
             attachment.put()
         self.response.set_status(200)
         self.response.headers['Location'] = '/client/debts/view/%d' % creditor.key().id()
-        self.response.headers['Content-Type'] = 'text/plain'
-
+	#furqon
+        #self.response.headers['Content-Type'] = 'text/plain'
+	#self.response.headers['Content-Type'] = 'image/jpg'
 class ClientAttachment(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self, action, key):
         """Show the attachment"""

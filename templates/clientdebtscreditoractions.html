@@ -11,7 +11,8 @@
   <a href="{{base_url}}/creditor/{{creditor.key.id}}/approve" class="action approve">Keur goed</a>
   {% endif %}
   <a href="{{base_url}}/view/{{creditor.key.id}}" class="action response">Verwerk reactie</a>
-  <a href="/client/creditors/delete/{{creditor.key}}?base_url={{base_url}}" class="action delete">Delete</a>
+  <!-- furqon -->
+  <!--<a href="/client/creditors/delete/{{creditor.key}}?base_url={{base_url}}" class="action delete">Delete</a> -->
 </p>
 <form method="post" action="/client/debts/creditor/{{creditor.key.id}}/actions" class="add-annotation">
   <input type="hidden" name="come_from" value="{{self.request.path}}">
