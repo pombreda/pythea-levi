@@ -355,7 +355,10 @@ $(document).ready(function(){
     });
 
     // Enable datepicker fields
-    $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+//    $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+    
+    /* furqon : change date format*/
+    $.datepicker.setDefaults({dateFormat: "dd-mm-yy"});
     prepareForms();
 
 });

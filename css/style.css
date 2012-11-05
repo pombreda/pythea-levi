@@ -35,7 +35,7 @@ input[type=text].currency  {
   text-align: right;
 }
 input[type=text].currency:before {
-  content: "€";
+  content: "Ã¢ÂÂ¬";
   color: #003339;
   display: block;
   position: absolute;
@@ -60,8 +60,14 @@ button {
 input[readonly] {
   opacity: .7;
 }
+
+/*furqon*/
+input[readonly]{
+  background-color: #C1C1C1;
+}
+
 /*input {
-	-webkit-appearance: none;
+  -webkit-appearance: none;
 }*/
 body {
   background-color: #233272;
@@ -565,6 +571,8 @@ input.app-control-set {
   width: 1em;
   height: 1em;
   border-radius: .5em;
+  margin-left :-10px;
+  padding: 0px;
 }
 .file-setup .selector-container > div.selector input[type="checkbox"]:checked + .custom-indicator {
   background-color: #003333;
@@ -575,6 +583,20 @@ input.app-control-set {
 .file-setup .selector-container > div.selector.categories li.active > a {
   font-weight: bold;
 }
+
+/* furqon : to make alignment on multiline*/
+#selected.selection li{
+  padding: 3px;
+}
+
+#selected.selection li img{
+ float: left;
+  margin:1px 3px 1px 0;
+  clear: both;
+  display: block;
+
+}
+
 /* HTH: removed after discussion with Jeremine
 .file-setup .selector-container > div.selector.selection li:before {
   content: "- ";
@@ -592,17 +614,20 @@ input.app-control-set {
   position: absolute;
   right: 0;
 }
+/* furqon : right table aligned to left table;*/
 .file-setup .creditor-details {
   position: absolute;
   right: 0;
-  top: 0;
-  width: 50%;
+  top: 10;
+  width: 47%;
   min-height: 400px;
   background-color: #f0fbfb;
   border-radius: .5em;
-  padding-left: 1em;
+  padding-left: .5em;
   padding-right: 1em;
   margin-top: .3em;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 .file-setup .creditor-details .name {
   color: #B5373D;
@@ -685,7 +710,7 @@ input.app-control-set {
   overflow: auto;
   position: absolute;
   top: 3em;
-  bottom: 2.5em;
+  bottom: 1.5em;
 }
 .file-setup .creditor-overview {
   padding: 0;
@@ -797,6 +822,13 @@ input.app-control-set {
   content: "- ";
 }
 */
+
+/* furqon: decrease font size; */
+.annotations{
+  font-size: 10px;    
+}
+
+
 /* addcontact.html --------------------------------------------------------- */
 ul.contact-list {
   list-style-type: none;
@@ -941,3 +973,16 @@ ul.contact-list input {
 .letter-preview {
   margin: 0 2cm;
 }
+
+
+@media print{
+  body{background-color: white; background-image: none; color: #000000;}
+}
+@page{
+  margin: 0;
+}
+
+header .print{
+  display: none;
+}
+
