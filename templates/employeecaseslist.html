@@ -3,7 +3,7 @@
         {% for client in clients %}
         <tr>
             <td><a href="/employee/cases/view/{{client.key}}"> {{ client.first_name }} {{ client.last_name }} </a></td>
-            <td class="status {{client.status}}"> {{client.status}} </td>
+            <td class="status {{client.status}}"><span id="gambar"> {{client.status}}</span> </td>
             <td class="action {{client.status.action}}"> {{client.status.action}} </td>
         </tr>
         {% endfor %}

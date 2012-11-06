@@ -511,6 +511,13 @@ input.app-control-set {
   bottom: 0;
   overflow: auto;
 }
+
+/* furqon */
+.debts-listing{
+  padding-top: 50px !important;
+}
+
+
 .client-debts-form + .debts-listing table {
   width: 100%;
 }
@@ -571,7 +578,7 @@ input.app-control-set {
   width: 1em;
   height: 1em;
   border-radius: .5em;
-  margin-left :-10px;
+  margin-left :-8px;
   padding: 0px;
 }
 .file-setup .selector-container > div.selector input[type="checkbox"]:checked + .custom-indicator {
@@ -986,3 +993,38 @@ header .print{
   display: none;
 }
 
+/* furqon : employeelist*/
+.file-setup .creditor-overview .creditor.new .status > span,
+.creditor-legenda .new .status > span {
+  width: 20px;
+  background: #dc6060;
+  background: -moz-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #dc6060), color-stop(100%, #b00f23));
+  background: -webkit-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: -o-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: -ms-radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+  background: radial-gradient(center, ellipse cover, #dc6060 0%, #b00f23 100%);
+}
+#message .waiting .status > span,
+.creditor-legenda .waiting .status > span {
+  width: 40px;
+  background: #f0b28b;
+  background: -moz-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #f0b28b), color-stop(100%, #f68743));
+  background: -webkit-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: -o-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: -ms-radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+  background: radial-gradient(center, ellipse cover, #f0b28b 0%, #f68743 100%);
+}
+.file-setup .creditor-overview .creditor.in_collection .status > span,
+.file-setup .creditor-overview .creditor.complete .status > span,
+.creditor-legenda .complete .status > span {
+  width: 60px;
+  background: #8fbb83;
+  background: -moz-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #8fbb83), color-stop(100%, #499d38));
+  background: -webkit-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: -o-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: -ms-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+  background: radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
+}
