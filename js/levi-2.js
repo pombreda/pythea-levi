@@ -307,6 +307,9 @@ $(document).ready(function(){
                     return;
                 }
                 $('#content').html(html);
+
+                /* furqon : overide to make home page fill with heading image*/
+                $('#content').css("top","4em");
                 setAppStatus();
                 setAppButtons();
 
