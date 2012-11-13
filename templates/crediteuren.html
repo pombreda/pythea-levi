@@ -21,7 +21,7 @@
           <input type="checkbox" name="selected" class="check" id="company_{{company.key.id}}" value="{{company.key.id}}" {% if company.selected %} checked {% endif %}>&nbsp;
           <span class="custom-indicator"></span>
           <!-- input type="hidden" name="visible" value="{{company.key.id}}" -->
-          <img src="{{company.icon}}" width="16" height="16"><span id="text"> {{ company.display_name }}</span>
+          <img src="{{company.icon}}" width="16" height="16"><span id="text">{{ company.display_name }}</span>
         </label>
       </li>
       {% endfor %}
