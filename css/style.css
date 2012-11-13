@@ -35,7 +35,7 @@ input[type=text].currency  {
   text-align: right;
 }
 input[type=text].currency:before {
-  content: "Ã¢ÂÂ¬";
+  content: "ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¬";
   color: #003339;
   display: block;
   position: absolute;
@@ -592,6 +592,31 @@ input.app-control-set {
 }
 
 /* furqon : to make alignment on multiline*/
+#creditors ul li {
+margin: 8px 0 8px 0 ;
+}
+#creditors ul li .custom-indicator{
+ float: left;
+  margin:0px 5px 0px 0px;
+  clear: both;
+  display: block;
+}
+#creditors ul li #text{
+width: 79%;
+  display: block;
+  float: left;
+}
+
+
+#creditors ul li img{
+ float: left; 
+  margin:0px 0px 1px 0;
+  display: inline;
+}
+
+#creditors ul li{
+clear: both;}
+
 #selected.selection li{
   padding: 3px;
 }
@@ -1028,3 +1053,4 @@ header .print{
   background: -ms-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
   background: radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
 }
+

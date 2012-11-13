@@ -3,8 +3,24 @@
         {% for client in clients %}
         <tr>
             <td><a href="/employee/cases/view/{{client.key}}"> {{ client.first_name }} {{ client.last_name }} </a></td>
-            <td class="status {{client.status}}"><span id="gambar"> {{client.status}}</span> </td>
+            <td class="status {{client.status}}"> <span id="status_client">{{client.status}}</span> </td>
             <td class="action {{client.status.action}}"> {{client.status.action}} </td>
         </tr>
         {% endfor %}
+       
     </table>
+
+    <script>
+    $(document).ready(function(){
+    	var stat = $("#status_client").text();
+    	if(stat === "BUSY"){
+ 			$('#status_client').replaceWith("<img src='images/statusrood.png' />");
+ 		}
+ 		if(stat === "COMPLETE"){
+ 			$('#status_client').replaceWith("<img src='images/statusgroen.png' />");
+ 		}
+ 		if(stat === "WAITING"){
+ 			$('#status_client').replaceWith("<img src='images/statusoranje.png' />");
+ 		}
+    })
+    </script>
