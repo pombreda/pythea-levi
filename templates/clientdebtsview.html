@@ -14,21 +14,33 @@
         </a>
     </div>
     <p>
+         <label>Datum brief</label>
+        {{form.response_date}}
+        {{form.response_date.errors}}
+        <br />
+        <br />
+
+
+
+        <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
+
+        <a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a><br>
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         {% if creditor.creditor.is_collector %}
         <label>Oorspronkelijke schuldeiser:</label>
         <a href="/client/debts/creditor/select" target="_popup">{{debt.collected_for.display_name|default:'Ja'}}<input type="hidden" name="collected_for" value="{{debt.collected_for.key.id}}"></a>
         <br>
         {% endif %}
-        <label>Deze schuld is uitbesteed aan een deurwaarder:</label>
-        <a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'Ja'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a><br>
+        
     </p>
         <table>
+            <!--
             <tr>
                 <td><label>Datum brief</label></td>
                 <td>{{form.response_date}}</td>
                 <td>{{form.response_date.errors}}</td>
             </tr>
+        -->
             <tr>
                 <td><label>Dossiernummer</label></td>
                 <td>{{form.creditor_dossier_number}}</td>
@@ -57,9 +69,9 @@
 
 </form>
 <div class="debts-listing">
-    <table>
+    <table id="tbldebt">
         <tr>
-            <th>ID</th>
+            <th style="display: none;">ID</th>
             <th>Deurwaarder</th>
             <th>Schuldeiser</th>
             <th>Ontstaansdatum</th>
@@ -70,7 +82,7 @@
         </tr>
 {% for debt in creditor.debts %}
         <tr>
-            <td><a href="{{base_url}}/debt/{{debt.key.id}}">{{debt.key.id}}</td>
+            <td style="display:none;"><a id="tautan" href="{{base_url}}/debt/{{debt.key.id}}">{{debt.key.id}}</td>
             <td>{{debt.collector.display_name|default:"--"}}</td>
             <td>{{debt.collected_for.display_name|default:"--"}}</td>
             <td class="date">{{debt.original_date|date:"d-m-Y"}}</td>
@@ -82,4 +94,16 @@
 {% endfor %}
     </table>
 </div>
+
+<script>
+    $("#tbldebt tbody tr").click(function(e){ 
+        var satu = $(this).find('#tautan');
+        var tujuan = satu.attr("href");
+
+        window.location = "#"+tujuan;
+        e.stopPropagation();
+    });
+
+
+</script>
 

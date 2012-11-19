@@ -35,7 +35,7 @@ input[type=text].currency  {
   text-align: right;
 }
 input[type=text].currency:before {
-  content: "ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¬";
+  content: "ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¬";
   color: #003339;
   display: block;
   position: absolute;
@@ -97,13 +97,17 @@ body > .wrapper {
 
 ::-webkit-scrollbar-track {
     background-color: #CAE7E6;
-    border: solid 3px #B5D5D3;
+/*    border: solid 3px #B5D5D3;*/
+    -webkit-box-shadow: inset 0px 0px 10px rgba(0,0,0,0.2); 
+
+    border: solid 1px #bdd3d1;
+ 
 }
 
 ::-webkit-scrollbar-thumb {
     background-color: #F0FBFB;
     border-style: solid;
-    border-width: 2px 3px;
+    border-width: 3px 3px;
     border-color: #B5D5D3;
 }
 /* Header ------------------------------------------------------------------ */
@@ -514,7 +518,8 @@ input.app-control-set {
 
 /* furqon */
 .debts-listing{
-  padding-top: 50px !important;
+  margin-top: 50px !important;
+  padding-top: 10px !important;
 }
 
 
@@ -575,9 +580,9 @@ input.app-control-set {
   border: solid 1px #003339;
   background-color: transparent;
   display: inline-block;
-  width: 1em;
-  height: 1em;
-  border-radius: .5em;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
   margin-left :-8px;
   padding: 0px;
 }
@@ -593,7 +598,7 @@ input.app-control-set {
 
 /* furqon : to make alignment indent on multiline*/
 #creditors ul li {
-margin: 8px 0 8px 0 ;
+margin: 0px 0 0px 0 ;
 }
 #creditors ul li .custom-indicator{
  float: left;
@@ -618,7 +623,7 @@ width: 79%;
 clear: both;}
 
 #selected.selection li{
-  padding: 3px;
+  padding: 0px;
 }
 
 #selected.selection li img{
@@ -691,8 +696,7 @@ clear: both;}
   width: 25px;
   height: 22px;
   background-image: url(/images/ontvangen.png);
-  position: absolute;
-  right: 38px;
+  float: right;
 }
 .file-setup .creditor-details .action.delete {
   width: 22px;
@@ -857,7 +861,7 @@ clear: both;}
 
 /* furqon: decrease font size; */
 .annotations{
-  font-size: 10px;    
+  font-size: 12px;    
 }
 
 
@@ -1053,4 +1057,7 @@ header .print{
   background: -ms-radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
   background: radial-gradient(center, ellipse cover, #8fbb83 0%, #499d38 100%);
 }
+
+
+
 
