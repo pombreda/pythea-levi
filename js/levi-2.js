@@ -209,6 +209,10 @@ $(document).ready(function(){
         var anchor = $(this);
         var url = anchor.attr("href");
         var hidden = anchor.children("input[type=hidden]");
+
+        /*furqon*/
+        var textb = anchor.children("input#tbt");
+
         appLoading(true);
 
         function load_in_popup() {
@@ -230,8 +234,12 @@ $(document).ready(function(){
                 var selection = target.attr("href").split('=')[1];
                 //hidden[0].value = selection
                 hidden.val(selection);
+
+                /*furqon - pass the selection to text box*/
+                textb.val(text);
+
                 // I'd like to use hidden.html() here, but that fails.
-                anchor.html(text + hidden[0].outerHTML);
+               // anchor.html(text + hidden[0].outerHTML);
                 $("#popup").removeClass("active");
             });
             $("#popup a.popup-close").click(function(event) {
