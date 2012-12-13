@@ -213,6 +213,8 @@ $(document).ready(function(){
         /*furqon*/
         var textb = anchor.children("input#tbt");
 
+        var textc = anchor.children("input#tbu");
+
         appLoading(true);
 
         function load_in_popup() {
@@ -237,6 +239,7 @@ $(document).ready(function(){
 
                 /*furqon - pass the selection to text box*/
                 textb.val(text);
+                textc.val(text);
 
                 // I'd like to use hidden.html() here, but that fails.
                // anchor.html(text + hidden[0].outerHTML);

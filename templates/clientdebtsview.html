@@ -27,8 +27,9 @@
         <a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a><br>
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         {% if creditor.creditor.is_collector %}
+
         <label>Oorspronkelijke schuldeiser:</label>
-        <a href="/client/debts/creditor/select" target="_popup">{{debt.collected_for.display_name|default:'Ja'}}<input type="hidden" name="collected_for" value="{{debt.collected_for.key.id}}"></a>
+        <a href="/client/debts/creditor/select" target="_popup">{{debt.collected_for.display_name|default:'<input type="text" id="tbu">'}}<input type="hidden" name="collected_for" value="{{debt.collected_for.key.id}}"></a>
         <br>
         {% endif %}
         
