@@ -666,14 +666,14 @@ clear: both;}
   right: 0;
   top: 10;
   width: 49%;
-  min-height: 350px;
+  min-height: 372px;
   background-color: #f0fbfb;
   border-radius: .5em;
   padding-left: .5em;
   padding-right: 1em;
   margin-top: .3em;
   margin-left: 5px;
-  margin-right: 5px;
+  margin-right: 0px;
 }
 .file-setup .creditor-details .name {
   color: #B5373D;
@@ -755,7 +755,7 @@ clear: both;}
   overflow: auto;
   position: absolute;
   top: 3em;
-  bottom: 1.5em;
+  bottom: .5em;
 }
 .file-setup .creditor-overview {
   padding: 0;
