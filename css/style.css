@@ -518,10 +518,19 @@ input.app-control-set {
 
 /* furqon */
 .debts-listing{
-  margin-top: 50px !important;
+  margin-top: 80px !important;
   padding-top: 10px !important;
 }
 
+/*furqon - on client debts form */
+#stretch label{
+  width: 320px;
+  padding-bottom: 10px;
+}
+.client-debts-form{
+
+  padding-bottom: 20px;
+}
 
 .client-debts-form + .debts-listing table {
   width: 100%;
