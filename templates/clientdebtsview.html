@@ -13,21 +13,21 @@
         {% endif %}
         </a>
     </div>
+<!--
     <p>
          <label id="stc">Datum brief</label>
         {{form.response_date}}
         {{form.response_date.errors}}
-        <br />
-        <br />
+       
 
-
-        <div id="stretch">
-        <label>Deurwaarder:</label>
+        <div>
+        <label id="stc">Deurwaarder:</label>
 
         <a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a><br>
         <!--
         Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
         -->
+<!--
         {% if creditor.creditor.is_collector %}
 
         <label>Vorige schuldeiser:</label>
@@ -36,16 +36,30 @@
         {% endif %}
         </div>
     </p>
+-->
+<br />
+<br />
         <table>
-            <!--
             <tr>
                 <td><label>Datum brief</label></td>
                 <td>{{form.response_date}}</td>
                 <td>{{form.response_date.errors}}</td>
             </tr>
-        -->
             <tr>
-                <td><label id="stc">Dossiernummer</label></td>
+                <td><label>Deurwaarder:</label></td>
+                <td><a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a></td>
+                <td></td>
+            </tr>
+            {% if creditor.creditor.is_collector %}
+                <tr>
+                <td><label>Vorige schuldeiser:</label></td>
+                <td><a href="/client/debts/creditor/select" target="_popup">{{debt.collected_for.display_name|default:'<input type="text" id="tbu">'}}<input type="hidden" name="collected_for" value="{{debt.collected_for.key.id}}"></a></td>
+               
+                <td></td>
+            </tr>{% endif %}
+
+            <tr>
+                <td><label>Dossiernummer</label></td>
                 <td>{{form.creditor_dossier_number}}</td>
                 <td>{{form.creditor_dossier_number.errors}}</td>
             </tr>
