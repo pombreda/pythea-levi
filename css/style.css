@@ -518,21 +518,18 @@ input.app-control-set {
 
 /* furqon */
 .debts-listing{
-  margin-top: 80px !important;
+  margin-top: 30px !important;
   padding-top: 10px !important;
 }
 
 /*furqon - on client debts form */
 #stretch label{
-  width: 320px;
-  padding-bottom: 10px;
+  
 }
 #stc{
-  width: 317px;
+  width: 100px;
 }
 #id_response_date{
-  width: 196px;
-  margin-left:5px;
 }
 
 .client-debts-form{
@@ -964,7 +961,7 @@ ul.contact-list input {
   /* display: none; /* FIXME */
   position: absolute;
   z-index:1000;
-  top: .5em;
+  top: 1.2em;
   right: .5em;
 }
 
