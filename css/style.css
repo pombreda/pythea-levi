@@ -510,10 +510,14 @@ input.app-control-set {
   margin-top: 1em;
   padding-top: 1em;
   width: 100%;
+  /*
   position: absolute;
   top: 14em;
   bottom: 0;
   overflow: auto;
+*/
+position: relative;
+float: left;
 }
 
 /* furqon */
