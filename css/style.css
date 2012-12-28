@@ -762,7 +762,7 @@ span.custom-indicator{
   overflow: auto;
   position: absolute;
   top: 3em;
-  bottom: .5em;
+  bottom: 0em;
 }
 .file-setup .creditor-overview {
   padding: 0;
