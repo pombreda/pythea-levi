@@ -14,6 +14,24 @@
   </div>
   <div id="creditors" class="selector creditors">
       <h2>{{selected}} ></h2>
+      <table>
+        {% for company in creditors %}
+        <tr>
+          <td class="cred" valign="top"><input type="checkbox" class="check" name="selected" id="company_{{company.key.id}}" value="{{company.key.id}}" {% if company.selected %} checked {% endif %}><label for="company_{{company.key.id}}"></label><span class="custom-indicator"></span></td>
+          <td class="cred"><img src="{{company.icon}}" width="16" height="16"></td>
+          <td><span id="text">{{ company.display_name }}</span></td>
+        </tr>
+        {% endfor %}
+       
+        <tr>
+        <td class="cred" valign="top"><label for="company_new">
+          <input type="checkbox" name="selected" class="check" id="company_new" value="new"><span class="custom-indicator"></span></label>
+        </td>
+        <td colspan="2"><img src="" width="16" height="16"> Mijn schuldeiser staat er niet tussen</td>
+      </tr>
+  </table>
+
+<!--
     <ul>
       {% for company in creditors %}
       <li>
@@ -21,7 +39,7 @@
           <input type="checkbox" name="selected" class="check" id="company_{{company.key.id}}" value="{{company.key.id}}" {% if company.selected %} checked {% endif %}>&nbsp;
           <span class="custom-indicator"></span>
           <!-- input type="hidden" name="visible" value="{{company.key.id}}" -->
-          <img src="{{company.icon}}" width="16" height="16"><span id="text">{{ company.display_name }}</span>
+<!--          <img src="{{company.icon}}" width="16" height="16"><span id="text">{{ company.display_name }}</span>
         </label>
       </li>
       {% endfor %}
@@ -30,22 +48,27 @@
           <input type="checkbox" name="selected" class="check" id="company_new" value="new">&nbsp;
           <span class="custom-indicator"></span>
           <!-- input type="hidden" name="visible" value="{{company.key.id}}" -->
-          <img src="" width="16" height="16"> Mijn schuldeiser staat er niet tussen
+<!--          <img src="" width="16" height="16"> Mijn schuldeiser staat er niet tussen
         </label>
       </li>
     </ul>
+-->    
   </div>
+
   <div id="selected" class="selector selection">
     <h2>Overzicht</h2>
     {% include "clientlistselectedcreditors.html" %}
     {% comment %}
-    <ul>
-      {% for creditor in user.creditors %}
-        <li>
-            <img src="{{creditor.creditor.icon}}" width="16" height="16"> {{ creditor.creditor.display_name }}
-        </li>
-      {% endfor %}
-    </ul>
+    <table>
+    {% for creditor in user.creditors %}
+    <tr>
+      <td><img src="{{creditor.creditor.icon}}" width="16" height="16"></td>
+      <td>{{ creditor.creditor.display_name }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+
+    
     {% endcomment %}
   </div>
 </div>
