@@ -59,7 +59,7 @@ button {
   padding: .5em;
 }
 input[readonly] {
-  opacity: .7;
+  opacity: .5;
 }
 /*input {
 	-webkit-appearance: none;
@@ -92,7 +92,9 @@ body > .wrapper {
 
 ::-webkit-scrollbar-track {
     background-color: #CAE7E6;
-    border: solid 3px #B5D5D3;
+    /* border: solid 3px #B5D5D3; */
+    -webkit-box-shadow: inset 0px 0px 10px rgba(0,0,0,0.2); 
+    border: solid 1px #bdd3d1;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -101,6 +103,7 @@ body > .wrapper {
     border-width: 2px 3px;
     border-color: #B5D5D3;
 }
+
 /* Header ------------------------------------------------------------------ */
 header {
   overflow: auto;
@@ -609,7 +612,8 @@ input.app-control-set {
 .file-setup .creditor-details {
   position: absolute;
   right: 0;
-  top: 0;
+  top: 2.7em;
+  bottom: 0;
   width: 50%;
   min-height: 400px;
   background-color: #f0fbfb;
@@ -699,7 +703,7 @@ input.app-control-set {
   overflow: auto;
   position: absolute;
   top: 3em;
-  bottom: 2.5em;
+  bottom: 0em;
 }
 .file-setup .creditor-overview {
   padding: 0;
@@ -752,6 +756,9 @@ input.app-control-set {
   text-decoration: none;
   display: block;
   position: relative;
+  /* make hanging indent */
+  padding-left: 1.5em;
+  text-indent: -1.5em;
 }
 .file-setup .creditor-overview .creditor .status,
 .creditor-legenda .status {
