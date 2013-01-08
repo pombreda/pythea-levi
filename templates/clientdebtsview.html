@@ -1,5 +1,6 @@
 <div id="message">Als u een overzicht heeft ontvangen van uw schuldeiser, kunt u dit hieronder invullen</div>
 <form method="post" action="{{self.request.path}}" class="client-debts-form">
+<!--
     <div style="float:right">
 {% if self.user.class_name == 'Client' %}
   <a href="/client/debts/creditor/{{creditor.key}}/response">
@@ -13,6 +14,7 @@
         {% endif %}
         </a>
     </div>
+-->
 <!--
     <p>
          <label id="stc">Datum brief</label>
@@ -38,6 +40,7 @@
     </p>
 -->
 <br />
+Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
 <br />
         <table>
             <tr>
@@ -46,13 +49,13 @@
                 <td>{{form.response_date.errors}}</td>
             </tr>
             <tr>
-                <td><label>Deurwaarder:</label></td>
+                <td><label>Deurwaarder</label></td>
                 <td><a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a></td>
                 <td></td>
             </tr>
             {% if creditor.creditor.is_collector %}
                 <tr>
-                <td><label>Vorige schuldeiser:</label></td>
+                <td><label>Vorige schuldeiser</label></td>
                 <td><a href="/client/debts/creditor/select" target="_popup">{{debt.collected_for.display_name|default:'<input type="text" id="tbu">'}}<input type="hidden" name="collected_for" value="{{debt.collected_for.key.id}}"></a></td>
                
                 <td></td>
@@ -80,9 +83,10 @@
             </tr>
         </table>
     <p class="submit">
-        <input type="button" value="&lt;&lt; Terug" class="app-control" onclick="$.address.value($.address.value().replace('/view','/creditor'));">
-        <input type="submit" value="Toevoegen &gt;&gt;">
+        <input type="button" value="&laquo; Terug" class="app-control" onclick="$.address.value($.address.value().replace('/view','/creditor'));">
+    <input type="submit" value="Verder &raquo;">
     </p>
+    <input type="submit" value="Toevoegen">
 
 </form>
 <div class="debts-listing">
@@ -120,7 +124,5 @@
         window.location = "#"+tujuan;
         e.stopPropagation();
     });
-
-
 </script>
 

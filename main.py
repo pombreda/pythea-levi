@@ -331,16 +331,12 @@ class ClientPrintCreditorLetters(BaseHandler):
         client = self.user
         letters = []
         for creditor in client.creditors:
-            #if not creditor.last_email_date:
             if True:
-                #method = creditor.creditor.contact_method()
-                #if method == 'POST':
                 if True:
                     logging.info('I have an address')
                     logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                     creditor.contacted_by = method
                     creditor.put()
-                    # FIXME: generate a letter
                     letter = creditor.generate_letter()
                     letters.append(letter)
         html = '<br style="page-break-after:always">'.join(letters)
@@ -423,11 +419,16 @@ class ClientValidate(BaseHandler):
                         #logging.info("Sending letter to %s by %s" % (creditor.creditor.display_name, method))
                         creditor.status = method
                         letters.append(letter)
-            html = '<style type="text/css">div.letter-preview {page-break-after:always;} </style>'
-            self.response.out.write(html)
+
+            path = os.path.join(os.path.dirname(__file__), 'templates', 'admin_plus.html')
+            vars = {'template': templ, 'self': self, 'letters': letters }
+            self.response.out.write(template.render(path, admin_vars))
+
+            #html = '<style type="text/css">div.letter-preview {page-break-after:always;} </style>'
+            #self.response.out.write(html)
             #html = '<br style="page-break-after:always">'.join(letters)
-            html = '\n'.join(letters)
-            self.response.out.write(html)
+            #html = '\n'.join(letters)
+            #self.response.out.write(html)
         else:
             self.redirect('/client/creditors')
 
