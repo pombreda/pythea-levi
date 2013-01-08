@@ -146,7 +146,7 @@ $(document).ready(function(){
     /**
      * Catch all links and pass them through AJAX calls
      */
-    $("#content a:not([target=_popup]), header a:not([target=_top]), .tabs a").live("click",function(event){
+    $("#content a:not([target=_popup], [target=_top]), header a:not([target=_top]), .tabs a").live("click",function(event){
         var $this = $(this),
             state = {
                 url : $this.attr("href"),
