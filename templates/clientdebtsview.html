@@ -50,7 +50,7 @@ Schuld bij: <strong>{{ creditor.creditor.display_name }}</strong><br>
             </tr>
             <tr>
                 <td><label>Deurwaarder</label></td>
-                <td><a href="/client/debts/creditor/select" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a></td>
+                <td><a href="/client/debts/creditor/select/collector" target="_popup">{{debt.collector.display_name|default:'<input type="text" id="tbt">'}}<input type="hidden" name="collector" value="{{debt.collector.key.id}}"></a></td>
                 <td></td>
             </tr>
             {% if creditor.creditor.is_collector %}
