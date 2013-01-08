@@ -9,9 +9,9 @@
 {% endfor %}
 
 </table>
+<p><input type="submit" value="{{submit|default:'Login'}}" /></p>
 
 {% if not form.is_valid %}
-<br>
 Als u een maatschappelijk werker bent is uw gebruikersnaam gelijk aan uw e-mail adres.  <br>
 Als u hulp zoekt met uw schulden, dan is uw gebruikersnaam waarschijnlijk <i>voornaam.achternaam</i>.
 <br>
@@ -20,5 +20,4 @@ Als u uw wachtwoord bent vergeten, kunt u dit <a href="/reset">hier</a> herstell
 
 {% endif %}
 
-<p class="submit"><input type="submit" value="{{submit|default:'opslaan'}}" /></p>
 </form>
