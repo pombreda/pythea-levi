@@ -206,6 +206,7 @@ class ClientSelectCreditors(BaseHandler):
         """
         if not category:
             category = 'Banken'
+        category = urllib.unquote(category)
         user = self.user
         #FIXME: we should memcache this
         creditors = models.Creditor.all()
@@ -1511,6 +1512,7 @@ application = webapp.WSGIApplication([
   (r'/client/debts/print', ClientDebtsPrintDossier),
   (r'/client/debts/close', ClientDebtsCloseDossier),
   (r'/client/debts/annotations/(.*)/delete', ClientDebtsDeleteAnnotation),
+  (r'/client/debts/creditor/(.*)/debt/.*', ClientDebts),
   (r'/client/debts/creditor/select', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/select/(.*)', ClientDebtsSelectCreditor),
   (r'/client/debts/creditor/(.*)/actions', ClientDebtsCreditorActions),
