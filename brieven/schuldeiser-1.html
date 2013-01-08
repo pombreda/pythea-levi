@@ -8,10 +8,20 @@
 <br>
 {% endif %}
 <p>
+Aan:<br>
 {{creditor.display_name}}<br>
 {{creditor.address|default:""}}<br>
 {{creditor.zipcode|default:""}}<br>
 {{creditor.city|default:""}}<br>
+</p>
+
+<p>
+Afzender:<br>
+{{client.first_name}} {{client.last_name}}<br>
+{{client.address}}<br>
+{{client.zipcode}} {{client.city}}<br>
+{{client.birthdate|default:""}} 
+{{client.ssn|default:""}}<br>
 </p>
 
 <p>{{client.city}}, {{today}}</p>
@@ -61,10 +71,6 @@ In afwachting van uw reactie,<br>
 Hoogachtend,
 </p>
 <br>
-<p>
-{{client.first_name}} {{client.last_name}}<br>
-{{client.address}}<br>
-{{client.zipcode}} {{client.city}}<br>
-{{client.birthdate|default:""}} {{client.ssn|default:""}}<br>
-</p>
+{{client.first_name}} {{client.last_name}}
 </div>
+<hr>

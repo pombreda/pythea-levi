@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    background: gray;
+}
+
+div.letter-preview {
+    width: 60%;
+    text-align: left;
+    margin: 0.2em auto;
+    padding: 4em 5em;
+    background: white;
+}
+
+hr {
+    border: 1px dotted DimGray;
+}
+

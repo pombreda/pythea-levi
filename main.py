@@ -420,9 +420,9 @@ class ClientValidate(BaseHandler):
                         creditor.status = method
                         letters.append(letter)
 
-            path = os.path.join(os.path.dirname(__file__), 'templates', 'admin_plus.html')
-            vars = {'template': templ, 'self': self, 'letters': letters }
-            self.response.out.write(template.render(path, admin_vars))
+            path = os.path.join(os.path.dirname(__file__), 'brieven', 'letters.html')
+            vars = {'self': self, 'letters': letters }
+            self.response.out.write(template.render(path, vars))
 
             #html = '<style type="text/css">div.letter-preview {page-break-after:always;} </style>'
             #self.response.out.write(html)

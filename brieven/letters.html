@@ -1,0 +1,14 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--[if IE ]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+    <title>Schuldendossier</title>
+    <link rel="stylesheet" href="/css/print.css" media="print">
+    <link rel="stylesheet" href="/css/print-preview.css">
+</head>
+<body>
+{% for letter in letters %}
+      {{letter}}
+{% endfor %}
+</body>
+</html>
