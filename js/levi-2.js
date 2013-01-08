@@ -468,11 +468,13 @@ function setAppStatus(status) {
                 effect = true;
             }
         }
-           $("#appstatus").html(status);
+        $("#appstatus").html(status);
+        /*
         if (effect) {
             setTimeout(function(){$("#appstatus").addClass("update");},100);
             setTimeout(function(){$("#appstatus").removeClass("update");},1000);
         }
+        */
     } else {
         $("#content").parent().prepend('<p id="appstatus" class="appstatus">'+status+'</p>');
     }

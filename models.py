@@ -469,7 +469,7 @@ class Debt(db.Model):
     collector = db.ReferenceProperty(Creditor, collection_name='debts')
     collected_for = db.ReferenceProperty(Creditor, collection_name='collections')
 
-    original_date = db.DateProperty()
+    original_date = db.StringProperty()
     response_date = db.DateProperty()
     creditor_dossier_number = db.StringProperty()
     collector_dossier_number = db.StringProperty()
